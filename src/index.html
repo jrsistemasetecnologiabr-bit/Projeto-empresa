@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- CSP via <meta> (v1.7.3): o GitHub Pages não permite configurar headers HTTP.
+     Aqui ela bloqueia carregamento de script/estilo/fonte externa e, principalmente,
+     exfiltração: connect-src só aceita a própria origem e o Supabase do projeto —
+     mesmo que um XSS exista, os dados não saem para domínio arbitrário.
+     Limitações honestas: o bundle é single-file com JS/CSS inline → 'unsafe-inline'
+     é obrigatório; frame-ancestors não vale em <meta> (spec) → anti-clickjacking
+     em JS logo abaixo; nonce/subresource-integrity exigem header (ver README). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src {{CSP_CONNECT}}; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<!-- versão canônica do app (build injeta {{APP_VERSION}}; conferir com:
+     curl -s <site>/version.json ) — evita a ambiguidade de grep em comentários -->
+<meta name="app-version" content="{{APP_VERSION}}">
+<script>/* anti-clickjacking: sem X-Frame-Options/frame-ancestors no GH Pages, o bloqueio disponível é em JS — se não conseguir sair do frame, não renderiza */try{if(top!==self){top.location.replace(self.location.href);}}catch(e){document.documentElement.style.display='none';}</script>
+<title>LojaCerta — Gestão comercial para qualquer varejo: PDV, estoque e assinaturas</title>
+<meta name="description" content="PDV com código de barras, estoque em tempo real, relatórios e assinatura mensal para depósitos, supermercados, varejo, pubs e clínicas. Teste 14 dias grátis, sem cartão. A partir de R$ 59/mês.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0B1220">
+<meta name="author" content="JR Sistemas e Tecnologia">
+<link rel="canonical" href="{{SITE_URL}}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LojaCerta">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="LojaCerta — Gestão comercial para qualquer varejo">
+<meta property="og:description" content="PDV, estoque e relatórios para depósitos, supermercados, varejo, pubs e clínicas. 14 dias grátis, sem cartão.">
+<meta property="og:url" content="{{SITE_URL}}/">
+<meta property="og:image" content="{{SITE_URL}}/assets/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LojaCerta — Gestão para depósito de construção">
+<meta name="twitter:description" content="PDV, estoque e relatórios feitos para material de construção. Teste grátis.">
+<meta name="twitter:image" content="{{SITE_URL}}/assets/og-cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B1220'/%3E%3Cpath d='M10 12h12l-1.1 11a2 2 0 0 1-2 1.8h-7.8a2 2 0 0 1-2-1.8L10 12z' fill='%23EA580C'/%3E%3Cpath d='M13 12v-2a3 3 0 0 1 6 0v2' stroke='%23FDBA74' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='m12.6 18.4 2.3 2.3 4.5-4.9' stroke='%23fff' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"LojaCerta","applicationCategory":"BusinessApplication","operatingSystem":"Web (qualquer navegador)","description":"Sistema de gestão comercial (PDV, estoque, relatórios e assinaturas) para qualquer varejo: depósitos de construção, supermercados, lojas, pubs e clínicas.","url":"{{SITE_URL}}/","inLanguage":"pt-BR","offers":{"@type":"AggregateOffer","priceCurrency":"BRL","lowPrice":"59","highPrice":"249","offerCount":"3","availability":"https://schema.org/InStock"},"featureList":["PDV com leitor de código de barras","Controle de estoque em tempo real","Pagamento misto (Pix, cartão, dinheiro)","Comprovante para impressora térmica 80mm","Relatórios de vendas e estoque","Multiusuário com permissões","Central de suporte com tickets"]}
+</script>
+<link rel="stylesheet" href="css/design-system.css">
+<link rel="stylesheet" href="css/landing.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Pular para o conteúdo principal</a>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header" id="site-header" data-header>
+  <div class="container nav-wrap">
+    <a class="brand" href="#/" data-nav="/" aria-label="LojaCerta — página inicial">
+      <svg class="brand-mark" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B1220"/><path d="M10 12h12l-1.1 11a2 2 0 0 1-2 1.8h-7.8a2 2 0 0 1-2-1.8L10 12z" fill="#EA580C"/><path d="M13 12v-2a3 3 0 0 1 6 0v2" stroke="#FDBA74" stroke-width="2" fill="none" stroke-linecap="round"/><path d="m12.6 18.4 2.3 2.3 4.5-4.9" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">Loja<b>Certa</b></span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+      <a href="#recursos" data-scroll>Recursos</a>
+      <a href="#como-funciona" data-scroll>Como funciona</a>
+      <a href="#planos" data-scroll>Planos</a>
+      <a href="#faq" data-scroll>FAQ</a>
+      <div class="nav-mobile-cta">
+        <a class="btn btn-ghost" href="#/entrar" data-nav data-cta="entrar">Entrar</a>
+        <a class="btn btn-primary" href="#/cadastro" data-nav data-cta="comecar">Começar grátis</a>
+      </div>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="#/entrar" data-nav>Entrar</a>
+      <a class="btn btn-primary btn-sm" href="#/cadastro" data-nav>Começar grátis</a>
+            <button class="theme-toggle btn-icon" type="button" data-act="theme-toggle" aria-label="Alternar tema">
+        <svg class="moon-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-toggle btn-icon" type="button" data-act="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menu de navegação">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<!-- ============ LANDING (conteúdo estático — indexável) ============ -->
+<div id="landing">
+
+  <!-- HERO -->
+  <section class="hero" id="inicio" aria-labelledby="hero-title">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="container hero-grid">
+      <div class="hero-copy reveal">
+        <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Gestão comercial para qualquer varejo</span>
+        <h1 id="hero-title">Sua loja sob controle: <span class="grad-text">venda rápida no balcão</span> e estoque em tempo real</h1>
+        <p class="hero-sub">O LojaCerta reúne PDV com código de barras, baixa automática de estoque, pagamento misto e relatórios de verdade — para depósitos, supermercados, varejo, pubs e clínicas, do caixa ao dono.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#/cadastro" data-nav>Começar 14 dias grátis <svg class="btn-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn btn-outline btn-lg" href="#planos" data-scroll>Ver planos e preços</a>
+        </div>
+        <ul class="hero-trust" aria-label="Segmentos atendidos" style="margin-bottom:14px"><li>Depósitos e construção</li><li>Supermercados</li><li>Varejo</li><li>Pubs e restaurantes</li><li>Clínicas e serviços</li></ul>
+        <ul class="hero-trust" aria-label="Garantias">
+          <li><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sem cartão de crédito</li>
+          <li><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Nada para instalar</li>
+          <li><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Cancele quando quiser</li>
+        </ul>
+      </div>
+      <div class="hero-visual reveal" aria-hidden="false">
+        <div class="browser-frame">
+          <div class="browser-bar"><span></span><span></span><span></span><em>app.lojacerta.com.br</em></div>
+          <div class="browser-body">
+            <img id="hero-shot" src="img/app-hero.jpg" alt="Tela do sistema LojaCerta: dashboard com vendas do dia, gráfico de faturamento e alerta de estoque baixo" width="1280" height="800" loading="eager" onerror="this.classList.add('failed')">
+            <!-- Fallback: mini-mock em CSS puro caso a captura ainda não exista -->
+            <div class="hero-mock" id="hero-mock">
+              <div class="hm-top"><i></i><b>Dashboard</b><span class="hm-badge">Hoje</span></div>
+              <div class="hm-kpis">
+                <div><span>Vendido hoje</span><b>R$ 4.382,90</b></div>
+                <div><span>Vendas</span><b>27</b></div>
+                <div><span>Ticket médio</span><b>R$ 162,33</b></div>
+                <div class="warn"><span>Estoque baixo</span><b>3 itens</b></div>
+              </div>
+              <div class="hm-chart"><i style="height:38%"></i><i style="height:55%"></i><i style="height:44%"></i><i style="height:72%"></i><i style="height:60%"></i><i style="height:88%"></i><i style="height:66%"></i></div>
+              <div class="hm-rows">
+                <div><em>VENDA-000128</em><span>Pix</span><b>R$ 389,00</b></div>
+                <div><em>VENDA-000127</em><span>Débito + Dinheiro</span><b>R$ 1.246,50</b></div>
+                <div><em>VENDA-000126</em><span>Crédito</span><b>R$ 95,80</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-float hm-float-1" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5" stroke="#15803D" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Estoque atualizado</div>
+        <div class="hero-float hm-float-2" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#EA580C" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg> +R$ 389,00 via Pix</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-band" aria-label="Números">
+    <div class="container stats-grid">
+      <div class="stat reveal"><b>160 mil+</b><span>lojas de material de construção no Brasil <a href="https://www.revistaanamaco.com.br/raio-x-do-varejo-de-matcon-no-brasil" target="_blank" rel="noopener noreferrer">(Anamaco)<svg class="ico-ext" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6m4-3h6v6m-11 5L21 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></a></span></div>
+      <div class="stat reveal"><b>14 dias</b><span>de teste completo, sem cartão e sem instalar nada</span></div>
+      <div class="stat reveal"><b>R$ 59<small>/mês</small></b><span>no plano inicial — menos de R$ 2 por dia</span></div>
+    </div>
+  </section>
+
+  <!-- DORES -->
+  <section class="section" aria-labelledby="dores-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">O problema</span>
+        <h2 id="dores-title">Reconhece alguma destas cenas?</h2>
+        <p class="section-sub">A maioria dos depósitos ainda perde dinheiro todos os dias sem perceber.</p>
+      </div>
+      <div class="grid-3">
+        <article class="pain-card reveal">
+          <div class="pain-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Estoque no caderno</h3>
+          <p>O cliente pede 20 sacos de cimento, você anota, esquece de dar baixa… e descobre tarde demais que já tinha vendido o mesmo estoque.</p>
+          <p class="pain-fix"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <b>Com o LojaCerta:</b> cada venda dá baixa automática no estoque na hora.</p>
+        </article>
+        <article class="pain-card reveal">
+          <div class="pain-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M12 7.5v5l3.2 2" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+          <h3>Fim do mês às cegas</h3>
+          <p>Quanto entrou no Pix? Qual vendedor vendeu mais? O que está encalhado? Sem relatório, toda decisão é no chute.</p>
+          <p class="pain-fix"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <b>Com o LojaCerta:</b> relatórios por período, vendedor e forma de pagamento em 1 clique.</p>
+        </article>
+        <article class="pain-card reveal">
+          <div class="pain-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+          <h3>Furos no caixa</h3>
+          <p>Desconto dado sem autorização, venda cancelada sem registro, preço alterado sem rastreio — o lucro escorre pelo balcão.</p>
+          <p class="pain-fix"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <b>Com o LojaCerta:</b> permissões por usuário e trilha de auditoria de tudo.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECURSOS -->
+  <section class="section section-alt" id="recursos" aria-labelledby="rec-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Recursos</span>
+        <h2 id="rec-title">Tudo o que o balcão exige. Nada do que atrapalha.</h2>
+        <p class="section-sub">Funcionalidades pensadas com quem opera caixa de depósito — não um ERP genérico com 400 menus.</p>
+      </div>
+      <div class="features-grid">
+        <article class="feature-card reveal"><div class="feature-ico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>PDV ultrarrápido</h3><p>Bipou, entrou. Leitor de código de barras USB, atalhos de teclado (F2/F4) e venda fracionada em m³, kg, barra e saco.</p></article>
+        <article class="feature-card reveal"><div class="feature-ico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg></div><h3>Estoque em tempo real</h3><p>Baixa automática a cada venda, entradas de compra com custo, ajustes com motivo e alerta de estoque mínimo.</p></article>
+        <article class="feature-card reveal"><div class="feature-ico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div><h3>Relatórios que decidem</h3><p>Faturamento por período, por vendedor, por forma de pagamento e ranking de produtos. Exporte em CSV ou imprima.</p></article>
+        <article class="feature-card reveal"><div class="feature-ico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.8"/><path d="M6 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><h3>Pagamento misto</h3><p>Pix, débito, crédito e dinheiro na mesma venda — com cálculo de troco automático e conferência antes de gravar.</p></article>
+        <article class="feature-card reveal"><div class="feature-ico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><rect x="6" y="14" width="12" height="8" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></div><h3>Comprovante térmico</h3><p>Recibo não fiscal numerado, pronto para impressora térmica 80mm ou PDF — com a cara da sua loja.</p></article>
+        <article class="feature-card reveal"><div class="feature-ico"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5M12 15v2.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div><h3>Equipe com permissões</h3><p>Admin, gerente e caixa: cada um vê o que precisa. Desconto do caixa limitado e cancelamento só com autorização.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="section" id="como-funciona" aria-labelledby="how-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Como funciona</span>
+        <h2 id="how-title">Do caderno ao sistema em uma tarde</h2>
+      </div>
+      <ol class="steps">
+        <li class="step reveal"><span class="step-num" aria-hidden="true">1</span><h3>Crie sua conta</h3><p>2 minutos, sem cartão. Sua loja já nasce com 14 dias completos de teste.</p></li>
+        <li class="step reveal"><span class="step-num" aria-hidden="true">2</span><h3>Cadastre os produtos</h3><p>Um a um, pelo leitor de código de barras, ou importe sua planilha CSV de uma vez.</p></li>
+        <li class="step reveal"><span class="step-num" aria-hidden="true">3</span><h3>Venda no balcão</h3><p>O estoque baixa sozinho, o comprovante imprime e o dono acompanha tudo do celular.</p></li>
+      </ol>
+      <div class="steps-cta reveal"><a class="btn btn-primary btn-lg" href="#/cadastro" data-nav>Criar minha conta grátis</a></div>
+    </div>
+  </section>
+
+  <!-- FOTO + CHECKLIST -->
+  <section class="photo-band" aria-labelledby="band-title">
+    <div class="container photo-grid">
+      <figure class="photo-frame reveal">
+        <img src="img/loja.jpg" alt="Interior organizado de uma loja de material de construção com prateleiras de cimento, tintas e ferragens" loading="lazy" width="960" height="640" onerror="this.parentElement.classList.add('no-img')">
+        <figcaption>Feito para a rotina real do depósito</figcaption>
+      </figure>
+      <div class="photo-copy reveal">
+        <span class="eyebrow eyebrow-light">Por que vertical?</span>
+        <h2 id="band-title">ERPs genéricos não entendem o seu balcão</h2>
+        <p>Cada varejo tem sua rotina: venda fracionada por kg, metro ou litro, cliente antigo no fiado, orçamento que vira pedido e pico de movimento em horário nobre. O LojaCerta foi desenhado para o balcão — qualquer balcão.</p>
+        <ul class="check-list">
+          <li>Venda por m³, kg, metro, barra, saco e milheiro — com decimais</li>
+          <li>Funciona no PC do caixa, no tablet e no celular do dono</li>
+          <li>Impressão em térmica 80mm ou comum, direto do navegador</li>
+          <li>Importação de planilha: a gente migra seus produtos grátis</li>
+          <li>Seus dados são seus: exporte tudo quando quiser (LGPD)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANOS -->
+  <section class="section section-alt" id="planos" aria-labelledby="plans-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Planos</span>
+        <h2 id="plans-title">Preço honesto, sem surpresa</h2>
+        <p class="section-sub">Todos os planos incluem 14 dias grátis, suporte por WhatsApp e migração assistida.</p>
+        <div class="billing-toggle" role="group" aria-label="Ciclo de cobrança">
+          <button type="button" class="seg-btn is-on" data-cycle="mensal" aria-pressed="true">Mensal</button>
+          <button type="button" class="seg-btn" data-cycle="anual" aria-pressed="false">Anual <span class="seg-save">−17%</span></button>
+        </div>
+      </div>
+      <div class="plans-grid">
+        <article class="plan-card reveal" data-plan="essencial">
+          <header><h3>Essencial</h3><p class="plan-for">Para o depósito de 1 caixa</p></header>
+          <div class="plan-price"><span class="cur">R$</span><b data-mensal="59" data-anual="49">59</b><span class="per">/mês</span></div>
+          <p class="plan-annual-note" hidden>cobrado R$ 588/ano</p>
+          <ul class="plan-feats">
+            <li>2 usuários · 1 PDV</li><li>Até 3.000 produtos</li><li>Estoque + PDV + comprovante</li><li>Dashboard e relatórios básicos</li><li>Suporte WhatsApp</li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="#/cadastro?plano=essencial" data-nav>Começar grátis</a>
+        </article>
+        <article class="plan-card featured reveal" data-plan="profissional">
+          <span class="plan-tag">Mais escolhido</span>
+          <header><h3>Profissional</h3><p class="plan-for">Para loja com 2–3 caixas</p></header>
+          <div class="plan-price"><span class="cur">R$</span><b data-mensal="129" data-anual="107">129</b><span class="per">/mês</span></div>
+          <p class="plan-annual-note" hidden>cobrado R$ 1.284/ano</p>
+          <ul class="plan-feats">
+            <li>6 usuários · 3 PDVs</li><li>Até 20.000 produtos</li><li>Relatórios completos + exportação</li><li>Clientes, fiado e contas a pagar/receber</li><li>Orçamento que vira venda</li><li>Suporte prioritário</li>
+          </ul>
+          <a class="btn btn-primary btn-block" href="#/cadastro?plano=profissional" data-nav>Começar grátis</a>
+        </article>
+        <article class="plan-card reveal" data-plan="premium">
+          <header><h3>Premium</h3><p class="plan-for">Para quem emite nota e tem 2+ lojas</p></header>
+          <div class="plan-price"><span class="cur">R$</span><b data-mensal="249" data-anual="207">249</b><span class="per">/mês</span></div>
+          <p class="plan-annual-note" hidden>cobrado R$ 2.484/ano</p>
+          <ul class="plan-feats">
+            <li>Usuários e PDVs ilimitados</li><li>Produtos ilimitados</li><li>NFC-e / NF-e (fase 2)</li><li>Multi-loja</li><li>Onboarding ao vivo</li><li>Suporte prioritário</li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="#/cadastro?plano=premium" data-nav>Começar grátis</a>
+        </article>
+      </div>
+      <p class="plans-note reveal">Preços de lançamento para os 10 primeiros clientes fundadores: <b>50% de desconto vitalício</b>. <a href="#/cadastro" data-nav>Garantir minha vaga →</a></p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <div class="container container-narrow">
+      <div class="section-head reveal">
+        <span class="eyebrow">Dúvidas frequentes</span>
+        <h2 id="faq-title">Perguntas que todo lojista faz</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq-item"><summary>Preciso instalar alguma coisa?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Não. O LojaCerta roda 100% no navegador — no PC do caixa, no tablet ou no celular. Atualizações são automáticas, sem técnico e sem pendrive.</p></details>
+        <details class="faq-item"><summary>E se a internet da loja cair?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>O modo offline do PDV está no nosso roadmap (fase 2): as vendas ficam em fila no aparelho e sincronizam quando a conexão volta. Enquanto isso, o sistema avisa claramente qualquer falha de conexão e nunca perde dados já gravados.</p></details>
+        <details class="faq-item"><summary>O sistema emite nota fiscal (NFC-e/NF-e)?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Hoje o comprovante de venda é <b>não fiscal</b> (permitido para controle interno). A emissão de NFC-e/NF-e chega na fase 2, no plano Premium, integrada a um emissor fiscal homologado.</p></details>
+        <details class="faq-item"><summary>Consigo migrar minha planilha de produtos?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Sim: importe um CSV direto no sistema (com pré-visualização e correção de erros linha a linha) ou peça a migração assistida gratuita — nossa equipe cadastra tudo para você.</p></details>
+        <details class="faq-item"><summary>Como funciona a cobrança?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Mensal ou anual (com 2 meses grátis), via Pix Automático, cartão de crédito ou boleto. Sem fidelidade: cancelando, o sistema entra em modo leitura e você ainda exporta todos os seus dados.</p></details>
+        <details class="faq-item"><summary>Meus dados ficam seguros?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Sim: backups diários automáticos, permissões por usuário, trilha de auditoria e conformidade com a LGPD — incluindo exportação e exclusão total dos seus dados quando você pedir.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final" aria-labelledby="cta-title">
+    <div class="container reveal">
+      <h2 id="cta-title">Pronto para tirar seu depósito do caderno?</h2>
+      <p>Junte-se ao teste grátis de 14 dias. Se em uma semana você não perceber a diferença, cancele sem custo — mas a gente duvida.</p>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-primary btn-lg" href="#/cadastro" data-nav>Começar agora — é grátis</a>
+        <a class="btn btn-outline-light btn-lg" href="#/entrar" data-nav>Já tenho conta</a>
+      </div>
+    </div>
+  </section>
+</div><!-- /#landing -->
+
+<!-- ============ VIEWS DINÂMICAS (auth + app) ============ -->
+<div id="view-root" class="hidden"></div>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer" id="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="brand" href="#/" data-nav="/" aria-label="LojaCerta — início">
+        <svg class="brand-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B1220"/><path d="M10 12h12l-1.1 11a2 2 0 0 1-2 1.8h-7.8a2 2 0 0 1-2-1.8L10 12z" fill="#EA580C"/><path d="M13 12v-2a3 3 0 0 1 6 0v2" stroke="#FDBA74" stroke-width="2" fill="none" stroke-linecap="round"/><path d="m12.6 18.4 2.3 2.3 4.5-4.9" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="brand-name light">Loja<b>Certa</b></span>
+      </a>
+      <p>O sistema de gestão feito para o balcão do depósito de construção. Simples de usar, justo de pagar.</p>
+    </div>
+    <nav aria-label="Produto"><h4>Produto</h4>
+      <a href="#recursos" data-scroll>Recursos</a><a href="#planos" data-scroll>Planos</a><a href="#faq" data-scroll>FAQ</a><a href="#/entrar" data-nav>Entrar</a>
+    </nav>
+    <nav aria-label="Soluções"><h4>Soluções</h4>
+      <a href="#recursos" data-scroll>PDV e caixa</a><a href="#recursos" data-scroll>Estoque</a><a href="#recursos" data-scroll>Relatórios</a><a href="#recursos" data-scroll>NFC-e <span class="soon">em breve</span></a>
+    </nav>
+    <nav aria-label="Legal"><h4>Legal</h4>
+      <a href="#" data-act="legal" data-doc="termos">Termos de uso</a><a href="#" data-act="legal" data-doc="privacidade">Privacidade e LGPD</a><a href="#/entrar" data-nav>Suporte ao cliente</a>
+    </nav>
+  </div>
+  <div class="container footer-bottom">
+    <span>© <span id="year">2026</span> JR Sistemas e Tecnologia · Produto LojaCerta</span>
+    <span>Feito no Brasil <span aria-hidden="true">🇧🇷</span> · Sistema de gestão de estoque e vendas</span>
+  </div>
+</footer>
+
+<div class="toast-region" id="toast-region" role="status" aria-live="polite"></div>
+<div id="modal-root"></div>
+<div class="demo-chip" id="demo-chip">
+  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M9 2h6m-7 4h8l4 5-8 11L4 11l4-5z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>
+  Demo interativa · dados fictícios salvos apenas neste navegador
+  <button type="button" data-act="chip-close" aria-label="Ocultar aviso de demonstração"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+</div>
+<p class="sr-only" id="route-announce" aria-live="polite"></p>
+
+<noscript><div class="noscript-banner">O LojaCerta precisa de JavaScript para funcionar. Ative-o no navegador para usar o sistema.</div></noscript>
+
+<script src="js/core.js" defer></script>
+<script src="js/services.js" defer></script>
+<script src="js/adapters.js" defer></script>
+<script src="js/email-templates.js" defer></script>
+<script src="js/auth-core.js" defer></script>
+<script src="js/views-landing.js" defer></script>
+<script src="js/pages-sales.js" defer></script>
+<script src="js/pages-manage.js" defer></script>
+<script src="js/pages-support.js" defer></script>
+<script src="js/pages-auth.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>

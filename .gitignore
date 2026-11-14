@@ -1,0 +1,24 @@
+# dependências
+node_modules/
+
+# segredos — jamais versionar (nem os arquivos de trabalho da máquina local,
+# caso alguém os copie para dentro do repo por engano)
+.env
+.env.*
+!.env.example
+.dev_pin
+.devpw
+.e2e_creds.json
+.sbtoken
+.sb_token
+.srservice
+.sranon
+.qauser
+*.pem
+*.key
+supabase-functions.env
+
+# ruído regenerável
+tests/shots/
+*.log
+.DS_Store

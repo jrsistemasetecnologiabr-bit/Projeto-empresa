@@ -1,0 +1,29 @@
+{
+  "name": "lojacerta",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "optimize": "node tools/optimize-images.js",
+    "build": "node tools/build.js --env=final",
+    "build:prod": "node tools/optimize-images.js && node tools/build.js --env=production",
+    "build:demo": "node tools/build.js --env=demo",
+    "hero": "node tools/shoot.js --hero",
+    "test": "node tests/mobile.test.js && node tests/session.test.js",
+    "test:smoke": "node tests/smoke.test.js",
+    "run-tests": "bash tools/run-tests.sh",
+    "check": "node tools/build.js --env=demo && node tools/build.js --env=production && npm test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "LojaCerta — SaaS de gestão para varejo (PDV, estoque, vendas, suporte) — Supabase + GitHub Pages",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "puppeteer": "^24.43.1",
+    "sharp": "^0.35.4"
+  },
+  "private": true
+}

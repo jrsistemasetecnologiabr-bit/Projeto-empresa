@@ -1,0 +1,36 @@
+name: keep-alive-supabase
+
+# Evita o pause por inatividade do plano Free do Supabase.
+# Criterio oficial (docs/guides/platform/free-project-pausing): "algumas consultas
+# de usuario por dia no banco na ultima semana" impedem o pause.
+# Este workflow faz 4 consultas/dia (SELECT real via PostgREST) + 1 extra semanal.
+# Camada 2 recomendada (independente do GitHub): monitor UptimeRobotgratis
+# apontando para a mesma URL REST a cada 5-30 min.
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # a cada 6h (4 consultas/dia na DB = criterio oficial da doc)
+    - cron: "0 8 * * 1"  # ping extra semanal de seguranca
+  workflow_dispatch:       # botao manual no GitHub, se precisar
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ping Supabase REST
+        run: |
+          curl -sf "https://qmqllssextbxwwphawod.supabase.co/rest/v1/tenants?select=id&limit=1" \
+            -H "apikey: sb_publishable_AzPjRAokhKY4zkll2b_N1g_tZ3Q2CPd" \
+            -H "Authorization: Bearer sb_publishable_AzPjRAokhKY4zkll2b_N1g_tZ3Q2CPd" || true
+
+      - name: Executa exclusões LGPD vencidas (carência 30 dias)
+        # Sweeper da Edge Function: apaga tenants cujo pedido de exclusão venceu.
+        # Protegido por segredo compartilhado (GitHub Secret = secret da função).
+        # O Bearer anônimo é público por design — o gateway exige um JWT; o x-cron-secret é a autenticação real.
+        run: |
+          echo "→ sweep de exclusões LGPD…"
+          curl -sf "https://qmqllssextbxwwphawod.supabase.co/functions/v1/api" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtcWxsc3NleHRieHd3cGhhd29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMTUwMTIsImV4cCI6MjEwNTY5MTAxMn0.0nTDez1iojZS1ojccTFU-v8afATIhcgvqHn-l8pzldg" \
+            -H "x-cron-secret: ${{ secrets.PURGE_SECRET }}" \
+            -d '{"op":"cron.purge_deletions","payload":{}}' && echo "" || echo "(sweep indisponível — segue o keep-alive)"

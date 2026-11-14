@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa/sitemap.xml

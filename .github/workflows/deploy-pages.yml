@@ -1,0 +1,100 @@
+# 🧱 LojaCerta — Deploy automático para GitHub Pages
+# Build do bundle single-file (produção, conectado ao Supabase) e publicação.
+# A anon key do Supabase é PÚBLICA por design (a proteção real é o RLS no banco).
+
+name: deploy-pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:       # botão manual no GitHub
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # teto de segurança: build + smoke com retry (3×30s + backoff 60s) ≈ 5 min no
+    # pior caso legítimo — acima disso é algo pendurado, não lento
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build do bundle (produção)
+        env:
+          # Valores públicos — a segurança dos dados vive no RLS do Supabase
+          ENV: production
+          SITE_URL: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa
+          API_BASE: https://qmqllssextbxwwphawod.supabase.co
+          SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtcWxsc3NleHRieHd3cGhhd29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMTUwMTIsImV4cCI6MjEwNTY5MTAxMn0.0nTDez1iojZS1ojccTFU-v8afATIhcgvqHn-l8pzldg
+          BILLING_PROVIDER: asaas
+        run: |
+          echo "ENV=$ENV" > .env
+          echo "SITE_URL=$SITE_URL" >> .env
+          echo "API_BASE=$API_BASE" >> .env
+          echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env
+          echo "BILLING_PROVIDER=$BILLING_PROVIDER" >> .env
+          node tools/build.js --env=production
+
+      - name: Teste E2E mobile (bloqueia o deploy se o layout quebrar no celular)
+        # Bundle de demo = mesmo CSS/JS da produção, com dados locais.
+        # 5 larguras de celular/tablet: rolagem horizontal, menus, modais, erros JS.
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts playwright@1.63.0
+          npx playwright install --with-deps chromium
+          node tools/build.js --env=demo
+          node tests/mobile.test.js
+
+      - name: Teste de renovação de sessão (rede simulada, bundle de produção)
+        run: node tests/session.test.js
+
+      - name: Smoke test de produção (bloqueia o deploy se falhar)
+        # Gate de qualidade: 15 checagens (CORS estático+ao vivo, RLS anon,
+        # login, badge, isolamento, forja de tenant, guard de cobrança, RPCs).
+        # Credenciais de teste vêm de SECRETS (nunca em claro); sem elas, o
+        # smoke roda os checks anônimos e pula os autenticados.
+        # O wrapper smoke-gate.sh repete apenas falhas TRANSIENTES (429/5xx/rede,
+        # 3 tentativas com backoff) — falha real de asserção reprova na hora.
+        env:
+          TEST_EMAIL: ${{ secrets.SMOKE_TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.SMOKE_TEST_PASSWORD }}
+        run: bash tools/smoke-gate.sh
+
+      - name: Preparar artefato do Pages
+        run: |
+          mkdir -p site
+          cp release/producao/index.html site/
+          cp -r release/producao/assets site/ 2>/dev/null || true
+          cp release/producao/version.json site/
+          cp release/producao/robots.txt release/producao/sitemap.xml site/ 2>/dev/null || true
+          # SPA em hash-routing: uma única página serve todas as rotas
+          cp release/producao/index.html site/404.html
+
+      - name: Upload Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
