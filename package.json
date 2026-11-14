@@ -22,6 +22,7 @@
   "description": "LojaCerta — SaaS de gestão para varejo (PDV, estoque, vendas, suporte) — Supabase + GitHub Pages",
   "devDependencies": {
     "jsdom": "^29.1.1",
+    "playwright": "^1.65.1",
     "puppeteer": "^24.43.1",
     "sharp": "^0.35.4"
   },
