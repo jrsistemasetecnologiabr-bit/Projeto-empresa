@@ -20,10 +20,10 @@
   --brand-50:#FFF4ED; --brand-100:#FFEDD5; --brand-ring:rgba(234,88,12,.22);
   --brand-grad:linear-gradient(135deg,#F97316 0%,#EA580C 100%);
   /* Cores — semânticas */
-  --ok:#15803D; --ok-bg:#F0FDF4; --ok-line:#BBF7D0; --ok-strong:#22C55E;
-  --warn:#B45309; --warn-bg:#FFFBEB; --warn-line:#FDE68A; --warn-strong:#F59E0B;
-  --danger:#B91C1C; --danger-2:#DC2626; --danger-bg:#FEF2F2; --danger-line:#FECACA; --danger-strong:#EF4444;
-  --info:#1D4ED8; --info-bg:#EFF6FF; --info-line:#BFDBFE;
+  --ok:#15803D; --ok-bg:#F0FDF4; --ok-line:#BBF7D0; --ok-strong:#22C55E; --ok-text:#14532D;
+  --warn:#B45309; --warn-bg:#FFFBEB; --warn-line:#FDE68A; --warn-strong:#F59E0B; --warn-text:#92400E;
+  --danger:#B91C1C; --danger-2:#DC2626; --danger-bg:#FEF2F2; --danger-line:#FECACA; --danger-strong:#EF4444; --danger-text:#7F1D1D;
+  --info:#1D4ED8; --info-bg:#EFF6FF; --info-line:#BFDBFE; --info-text:#1E40AF;
   /* Tipografia */
   --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Liberation Sans","Noto Sans","DejaVu Sans",sans-serif;
   --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,"Liberation Mono",monospace;
@@ -56,10 +56,10 @@
   --brand-btn-hover:#FB923C; --brand-btn-active:#FDBA74;
   --brand-50:#3D1F0C; --brand-100:#5C2E0F; --brand-ring:rgba(249,115,22,.32);
   --brand-grad:linear-gradient(135deg,#FB923C 0%,#F97316 100%);
-  --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-strong:#22C55E;
-  --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-strong:#F59E0B;
-  --danger:#F87171; --danger-2:#EF4444; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-strong:#EF4444;
-  --info:#60A5FA; --info-bg:#0F1E3A; --info-line:#1E40AF;
+  --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-strong:#22C55E; --ok-text:#86EFAC;
+  --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-strong:#F59E0B; --warn-text:#FDE68A;
+  --danger:#F87171; --danger-2:#EF4444; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-strong:#EF4444; --danger-text:#FCA5A5;
+  --info:#60A5FA; --info-bg:#0F1E3A; --info-line:#1E40AF; --info-text:#93C5FD;
   --sh-xs:0 1px 2px rgba(0,0,0,.2);
   --sh-sm:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
   --sh-md:0 4px 14px rgba(0,0,0,.35);
@@ -80,10 +80,10 @@
     --brand-btn-hover:#FB923C; --brand-btn-active:#FDBA74;
     --brand-50:#3D1F0C; --brand-100:#5C2E0F; --brand-ring:rgba(249,115,22,.32);
     --brand-grad:linear-gradient(135deg,#FB923C 0%,#F97316 100%);
-    --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-strong:#22C55E;
-    --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-strong:#F59E0B;
-    --danger:#F87171; --danger-2:#EF4444; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-strong:#EF4444;
-    --info:#60A5FA; --info-bg:#0F1E3A; --info-line:#1E40AF;
+    --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-strong:#22C55E; --ok-text:#86EFAC;
+    --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-strong:#F59E0B; --warn-text:#FDE68A;
+    --danger:#F87171; --danger-2:#EF4444; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-strong:#EF4444; --danger-text:#FCA5A5;
+    --info:#60A5FA; --info-bg:#0F1E3A; --info-line:#1E40AF; --info-text:#93C5FD;
     --sh-xs:0 1px 2px rgba(0,0,0,.2);
     --sh-sm:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
     --sh-md:0 4px 14px rgba(0,0,0,.35);
@@ -207,10 +207,16 @@ ul[class],ol[class]{list-style:none;padding:0}
 .btn.is-busy{pointer-events:none;opacity:.75}
 
 /* Theme toggle button - hide/show icons based on theme */
-.theme-toggle .sun-icon { display: none; }
-.theme-toggle .moon-icon { display: block; }
-[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
-[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+.theme-toggle .sun-icon { display: none !important; }
+.theme-toggle .moon-icon { display: block !important; }
+[data-theme="dark"] .theme-toggle .sun-icon { display: block !important; }
+[data-theme="dark"] .theme-toggle .moon-icon { display: none !important; }
+
+/* Ensure theme is applied immediately to prevent flash */
+:root[data-theme="light"] .theme-toggle .sun-icon { display: none !important; }
+:root[data-theme="light"] .theme-toggle .moon-icon { display: block !important; }
+:root[data-theme="dark"] .theme-toggle .sun-icon { display: block !important; }
+:root[data-theme="dark"] .theme-toggle .moon-icon { display: none !important; }
 
 /* Spinner */
 .spinner{width:16px;height:16px;border-radius:50%;border:2.2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;flex-shrink:0}

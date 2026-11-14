@@ -25,5 +25,8 @@
     "puppeteer": "^24.43.1",
     "sharp": "^0.35.4"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
 }
