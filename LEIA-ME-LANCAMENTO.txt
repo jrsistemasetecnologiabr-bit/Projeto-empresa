@@ -1,0 +1,224 @@
+=====================================================================
+ LOJACERTA — ESTADO DO LANÇAMENTO (preparado em 19/11/2026)
+=====================================================================
+
+RESUMO EM 1 MINUTO
+------------------
+O sistema está no ar e funcionando: site, cadastro, login, PDV, estoque,
+relatórios, suporte, cobrança Asaas em PRODUÇÃO (Pix/cartão/boleto) e
+liberação automática do plano quando o cliente paga.
+
+Existem 3 coisas que SÓ VOCÊ pode fazer (dependem de pagamento/compra
+ou de clicar em painel com a sua conta). Estão na seção "O QUE FAZER
+AMANHÃ", em ordem. Sem a de número 2 (domínio), os e-mails para
+clientes ficam limitados — leia com atenção.
+
+
+=====================================================================
+ 1. O QUE FOI CONFERIDO
+=====================================================================
+
+Contas conectadas (todas na conta jrsistemas):
+  [OK] GitHub   — repositório jrsistemasetecnologiabr-bit/Projeto-empresa
+  [OK] Supabase — projeto "Projeto site vendas" (qmqllssextbxwwphawod),
+                  São Paulo, saudável. Plano: FREE (vai pagar amanhã).
+  [OK] Resend   — conta ativa. NENHUM domínio cadastrado ainda.
+  [OK] Asaas    — chave de PRODUÇÃO validada direto na API do Asaas:
+                  conta ativa (MEI, Belo Horizonte).
+
+Saúde do sistema:
+  [OK] Edge Functions "api" e "billing-webhook" no ar e respondendo.
+  [OK] 4 tarefas agendadas no banco rodando com sucesso (suspensão de
+       planos vencidos a cada hora, avisos de vencimento, limpeza).
+  [OK] Keep-alive do GitHub rodando a cada 6h com sucesso.
+  [OK] Testes automáticos: celular (5 tamanhos de tela) e renovação de
+       sessão — todos passando.
+
+
+=====================================================================
+ 2. O QUE FOI FEITO HOJE
+=====================================================================
+
+COBRANÇA ASAAS (PRODUÇÃO) — PRONTO
+  - O Supabase bloqueou a gravação de "Edge Function Secrets" pelo
+    conector ("Storing keys is paused"). Para não depender disso, as
+    chaves foram guardadas no VAULT do banco (cofre criptografado do
+    Supabase) e as Edge Functions passaram a ler de lá:
+        asaas_api_key        -> chave de produção que você enviou
+        asaas_env            -> production
+        asaas_webhook_token  -> token novo (64 caracteres aleatórios)
+  - O sistema reconhece sozinho que a chave é de produção ($aact_prod_).
+  - Webhook no Asaas: o antigo tinha um token desconhecido; foi apagado
+    e recriado ("LojaCerta producao"), mesma URL, mesmos eventos, com o
+    token novo. Testado: token errado = recusado (401); certo = aceito.
+  - Fluxo completo: cliente clica "Assinar" -> escolhe Pix/cartão/boleto
+    -> vai para a fatura do Asaas -> paga -> Asaas avisa o sistema ->
+    plano liberado automaticamente com data de vencimento -> recibo por
+    e-mail. Fatura vencida = 3 dias de carência; estorno = modo leitura.
+  - Exigência do Asaas: a loja precisa ter CNPJ ou CPF preenchido em
+    Configurações -> Loja antes de assinar (o app avisa).
+
+LIMITES DOS PLANOS — AGORA VALEM DE VERDADE
+  - Antes, os limites anunciados (usuários/produtos) não eram aplicados.
+    Agora o banco aplica:
+        Essencial     -> 2 usuários  / 3.000 produtos
+        Profissional  -> 6 usuários  / 20.000 produtos
+        Premium       -> ilimitado
+  - Teste grátis e a CONTA DEV de vocês: sem limite (mantida como está).
+  - Ao estourar, o cliente vê uma mensagem clara pedindo upgrade.
+  - Hoje nenhuma loja está acima do limite.
+
+SEGURANÇA
+  - Funções de venda/estoque/suporte deixaram de aceitar chamadas
+    anônimas (antes já checavam login por dentro; agora nem executam).
+  - Nenhuma chave foi colocada no código nem no GitHub.
+
+E-MAIL (RESEND)
+  - Criada uma chave do Resend (somente envio) e guardada no Vault.
+  - Envio real testado: um e-mail de teste foi enviado para a conta dev.
+  - LIMITE ATUAL: sem domínio próprio, o Resend só entrega para o
+    e-mail dono da conta Resend. Ver "O QUE FAZER AMANHÃ", item 2.
+
+FRONTEND (o que os clientes veem)
+  - Histórico de cobranças mostrava "Cartão •••• 4242" (texto falso de
+    demonstração) e todo status em verde, até fatura vencida. Corrigido.
+  - Tela de Assinatura dizia "nesta demo, simulado" em produção. Corrigido.
+  - "Pix Automático" -> "Pix" (o Asaas gera Pix a cada vencimento; Pix
+    Automático é outro produto).
+  - IMPORTANTE (risco com o Código de Defesa do Consumidor): os planos
+    anunciavam recursos que NÃO EXISTEM no sistema — "Clientes, fiado e
+    contas a pagar/receber", "Orçamento que vira venda", "Multi-loja".
+    Agora aparecem como "em breve" (igual já era com NFC-e).
+  - "Suporte por WhatsApp" era anunciado, mas não há número publicado
+    em lugar nenhum. Trocado por "central de suporte no app" (que existe
+    e funciona). Se quiserem WhatsApp, me passem o número que eu coloco.
+  - Versão 1.9.4.
+
+ARQUIVOS NOVOS NO REPOSITÓRIO
+  supabase/migracao-v17-segredos-vault.sql   (aplicada no banco)
+  supabase/migracao-v18-limites-plano.sql    (aplicada no banco)
+  supabase/migracao-v19-revoga-rpc-anon.sql  (aplicada no banco)
+  LEIA-ME-LANCAMENTO.txt                     (este arquivo)
+
+
+=====================================================================
+ 3. O QUE FAZER AMANHÃ (SÓ VOCÊ PODE FAZER) — EM ORDEM
+=====================================================================
+
+[1] PUBLICAR AS CORREÇÕES DO SITE (2 min)
+    Banco, cobrança e e-mail JÁ ESTÃO valendo. Mas as correções de
+    texto do site estão no branch "claude/vibrant-heisenberg-z5f1bt"
+    e o site só atualiza quando entra na "main".
+    -> GitHub -> Pull requests -> New -> base: main, compare: o branch
+       acima -> Create -> Merge. (Ou me peça e eu abro o PR.)
+    -> O GitHub Actions publica sozinho em ~3 min.
+    -> Confira: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa/version.json
+       deve mostrar "1.9.4".
+
+[2] COMPRAR UM DOMÍNIO — O ÚNICO BLOQUEIO REAL (30–60 min)
+    Por quê: sem domínio próprio,
+      a) o Supabase envia no MÁXIMO ~2 e-mails de cadastro POR HORA
+         (mesmo no plano pago). O 3º cliente que se cadastrar na mesma
+         hora não recebe o código e não consegue entrar;
+      b) o Resend não entrega e-mail para clientes (recibos, respostas
+         de suporte).
+    Como:
+      1. Compre em registro.br (ex.: lojacerta.com.br, ~R$ 40/ano).
+      2. Me diga o domínio. Eu cadastro no Resend e te devolvo os
+         registros DNS (são 3 ou 4 linhas para copiar no registro.br).
+         Ou faça você: resend.com -> Domains -> Add Domain -> região
+         São Paulo (sa-east-1) -> copie os registros no DNS do registro.br
+         -> Verify (leva de minutos a algumas horas).
+      3. Quando o Resend marcar "Verified", rode no Supabase -> SQL Editor:
+           select vault.create_secret('LojaCerta <nao-responda@SEUDOMINIO.com.br>', 'email_from');
+      4. Supabase -> Project Settings -> Authentication -> SMTP Settings
+         -> Enable custom SMTP:
+           Host: smtp.resend.com   Porta: 465   Usuário: resend
+           Senha: uma API key do Resend (gere uma nova em resend.com ->
+                  API Keys, "Sending access")
+           Remetente: nao-responda@SEUDOMINIO.com.br   Nome: LojaCerta
+         Isso tira o limite de 2 e-mails/hora.
+      5. (Opcional) Supabase -> Authentication -> Rate Limits -> subir
+         "emails per hour" para 100.
+    Enquanto o domínio não sai: se um cliente não receber o código,
+    a conta dev pode ativar a loja manualmente pelo Suporte.
+
+[3] PAGAR O SUPABASE PRO E LIGAR 1 OPÇÃO (5 min)
+    - supabase.com -> Organization -> Billing -> Pro (US$ 25/mês).
+      Ganha: sem pausa por inatividade, backup diário de 7 dias, mais
+      e-mails e conexões.
+    - Depois do Pro: Authentication -> Providers -> Email (ou
+      "Attack Protection") -> ligar "Leaked password protection"
+      (bloqueia senhas vazadas na internet).
+    - Resend: o plano grátis (3.000 e-mails/mês, 100/dia) aguenta o
+      começo. Pague o Pro (US$ 20) quando passar disso.
+
+
+=====================================================================
+ 4. RECOMENDADO NO DIA DO LANÇAMENTO
+=====================================================================
+
+TESTE REAL DE PONTA A PONTA (15 min, R$ 59 que voltam)
+  1. Crie uma loja de teste (outro e-mail), preencha CPF/CNPJ em
+     Configurações -> Loja.
+  2. Assinatura -> Essencial mensal -> Pix -> pague o QR Code.
+  3. Em até 1 min o plano deve aparecer ativo, com data de vencimento.
+  4. No painel do Asaas, estorne esse pagamento (a loja de teste vai
+     para modo leitura — é o comportamento certo).
+  Para acompanhar no Supabase -> SQL Editor:
+     select tipo, processed_at from webhook_events order by processed_at desc limit 10;
+
+TROCAR A CHAVE DO ASAAS DEPOIS DO LANÇAMENTO (boa prática)
+  A chave de produção circulou em conversa. Quando der (pode ser na
+  semana), gere uma nova no Asaas (Integrações -> Chave de API) e troque
+  no Supabase -> SQL Editor (não precisa mexer em código nem deploy):
+     select vault.update_secret(
+       (select id from vault.secrets where name = 'asaas_api_key'),
+       'COLE_A_CHAVE_NOVA_AQUI');
+  O sistema passa a usar a nova em até 5 minutos.
+
+SEGREDOS QUE NÃO CONSEGUI CONFERIR (o conector não lista)
+  Confirme no Supabase -> Edge Functions -> Secrets que existem:
+    - DEV_PIN (12+ caracteres) — PIN da equipe para ativar/suspender
+      planos manualmente. Se não existir, a ativação manual funciona só
+      com login dev (menos seguro, mas funciona).
+    - PURGE_SECRET — mesmo valor do GitHub -> Settings -> Secrets ->
+      Actions -> PURGE_SECRET. Usado pela exclusão LGPD automática.
+  E no GitHub -> Settings -> Secrets -> Actions:
+    - SMOKE_TEST_EMAIL / SMOKE_TEST_PASSWORD (usuário comum de uma loja
+      de teste) — sem eles o teste de deploy só roda a parte anônima.
+
+
+=====================================================================
+ 5. COMO ACOMPANHAR (SQL Editor do Supabase)
+=====================================================================
+
+  -- lojas e planos
+  select nome, status, plan_id, plan_expires_at from tenants order by created_at desc;
+  -- pagamentos recebidos
+  select tenant_id, valor, status, metodo, paid_at from invoices order by created_at desc limit 20;
+  -- eventos do Asaas
+  select tipo, processed_at from webhook_events order by processed_at desc limit 20;
+  -- e-mails enviados
+  select to_email, template, status, created_at from email_log order by created_at desc limit 20;
+
+  Painéis: Asaas -> Integrações -> Webhooks (fila do "LojaCerta producao"
+  deve estar ATIVA, sem penalização); Resend -> Emails/Logs.
+
+
+=====================================================================
+ 6. AVISOS HONESTOS
+=====================================================================
+
+  - NFC-e/NF-e, fiado/contas, orçamentos e multi-loja NÃO existem ainda
+    (agora marcados "em breve"). Não prometam na apresentação.
+  - O comprovante de venda é NÃO FISCAL.
+  - GitHub Pages não permite cabeçalhos de segurança avançados. Para
+    o nível máximo, colocar o domínio atrás do Cloudflare (grátis).
+    Não impede o lançamento.
+  - Termos de uso e Política de Privacidade são modelos — o ideal é um
+    advogado revisar.
+  - Ativação manual pelo Suporte (conta dev) continua funcionando como
+    plano B para qualquer cliente que pague por fora.
+
+=====================================================================

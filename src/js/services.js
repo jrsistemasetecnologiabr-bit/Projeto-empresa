@@ -11,7 +11,7 @@
   var Config = {
     env: '{{ENV}}',              // demo | production — preenchido pelo build (tokens {{...}})
     appName: 'LojaCerta',
-    version: '1.9.3',
+    version: '1.9.4',
     latency: 110,                // ms — latência simulada do "backend" (0 em testes)
     siteUrl: '{{SITE_URL}}',     // URL pública do site (canonical, e-mails, redirects de auth)
     api: { baseUrl: '{{API_BASE}}', anonKey: '{{SUPABASE_ANON_KEY}}' }, // build injeta do .env
@@ -564,8 +564,8 @@
   var Billing = {
     PLANS: [
       { id: 'essencial', name: 'Essencial', monthly: 59, annual: 49, annualTotal: 588, users: 2, pdvs: 1, products: 3000, for: 'Para começar com 1 caixa', features: ['2 usuários · 1 PDV', 'Até 3.000 produtos', 'Estoque + PDV + comprovante', 'Dashboard e relatórios básicos', 'Central de suporte no app'] },
-      { id: 'profissional', name: 'Profissional', monthly: 129, annual: 107, annualTotal: 1284, users: 6, pdvs: 3, products: 20000, hot: true, for: 'Para loja com 2–3 caixas', features: ['6 usuários · 3 PDVs', 'Até 20.000 produtos', 'Relatórios completos + exportação', 'Clientes, fiado e contas a pagar', 'Orçamento que vira venda', 'Suporte prioritário'] },
-      { id: 'premium', name: 'Premium', monthly: 249, annual: 207, annualTotal: 2484, users: Infinity, pdvs: Infinity, products: Infinity, for: 'Para quem emite nota e tem 2+ lojas', features: ['Usuários e PDVs ilimitados', 'Produtos ilimitados', 'NFC-e / NF-e (fase 2)', 'Multi-loja (fase 3)', 'Onboarding ao vivo', 'Suporte prioritário'] }
+      { id: 'profissional', name: 'Profissional', monthly: 129, annual: 107, annualTotal: 1284, users: 6, pdvs: 3, products: 20000, hot: true, for: 'Para loja com 2–3 caixas', features: ['6 usuários · 3 PDVs', 'Até 20.000 produtos', 'Relatórios completos + exportação', 'Clientes, fiado e contas a pagar (em breve)', 'Orçamento que vira venda (em breve)', 'Suporte prioritário'] },
+      { id: 'premium', name: 'Premium', monthly: 249, annual: 207, annualTotal: 2484, users: Infinity, pdvs: Infinity, products: Infinity, for: 'Para quem emite nota e tem 2+ lojas', features: ['Usuários e PDVs ilimitados', 'Produtos ilimitados', 'NFC-e / NF-e (em breve)', 'Multi-loja (em breve)', 'Onboarding ao vivo', 'Suporte prioritário'] }
     ],
     planById: function (id) { return this.PLANS.filter(function (p) { return p.id === id; })[0] || null; },
     /* Plano pago com prazo vencido? (guarda do front; o servidor confirma via billing.refresh).

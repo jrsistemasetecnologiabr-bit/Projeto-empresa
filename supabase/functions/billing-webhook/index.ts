@@ -82,8 +82,17 @@ async function tenantBySubscription(subId: string) {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const METODO: Record<string, string> = { PIX: "pix", CREDIT_CARD: "cartao", BOLETO: "boleto", DEBIT_CARD: "debito" };
 
+/* v17: token do Vault (RPC app_secret, só service_role) com fallback na Edge Secret */
+async function asaasWebhookToken(): Promise<string> {
+  try {
+    const r = await sr("/rest/v1/rpc/app_secret", { method: "POST", body: JSON.stringify({ p_name: "asaas_webhook_token" }) });
+    if (r.ok) { const v = await r.json(); if (typeof v === "string" && v) return v; }
+  } catch (_e) { /* cai para a env */ }
+  return Deno.env.get("ASAAS_WEBHOOK_TOKEN") || "";
+}
+
 async function handleAsaas(req: Request, raw: string): Promise<Response> {
-  const expected = Deno.env.get("ASAAS_WEBHOOK_TOKEN") || "";
+  const expected = await asaasWebhookToken();
   const got = req.headers.get("asaas-access-token") || "";
   // sem token configurado = recusa (antes: "" === "" aceitava qualquer requisição)
   if (!expected || !safeEqualHex(got, expected)) return new Response("token inválido", { status: 401 });

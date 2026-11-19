@@ -593,16 +593,16 @@
               <thead><tr><th>Data</th><th>Plano</th><th>Método</th><th class="num">Valor</th><th>Status</th></tr></thead>
               <tbody>${t.invoices.map(function (inv) {
                 return html`<tr><td class="muted small nowrap">${U.date(inv.at)}</td><td class="strong">${inv.planName} <span class="muted small">(${inv.cycle})</span></td>
-                  <td>${inv.metodo === 'pix' ? 'Pix Automático' : inv.metodo === 'cartao' ? 'Cartão •••• 4242' : 'Boleto'}</td>
+                  <td>${({ pix: 'Pix', cartao: 'Cartão de crédito', debito: 'Cartão de débito', boleto: 'Boleto', cortesia: 'Cortesia' })[inv.metodo] || inv.metodo || '—'}</td>
                   <td class="num tabular"><b>${U.money(inv.valor)}</b></td>
-                  <td><span class="badge badge-ok">${inv.status}</span></td></tr>`;
+                  <td><span class="badge ${inv.status === 'pago' ? 'badge-ok' : (inv.status === 'pendente' ? 'badge-warn' : 'badge-danger')}">${inv.status}</span></td></tr>`;
               })}</tbody></table></div>`
             : C.empty('billing', 'Nenhuma cobrança ainda', 'Você está no período de teste — a primeira cobrança só acontece quando escolher um plano.'))}
           ${C.panel('Pagamento e segurança', null, html`
             <ul class="mini-list">
-              <li class="mini-row"><span class="mr-main"><span class="mr-name">Métodos aceitos</span><span class="mr-sub">Pix Automático · Cartão de crédito · Boleto</span></span>${raw(I('pix', 20))}</li>
+              <li class="mini-row"><span class="mr-main"><span class="mr-name">Métodos aceitos</span><span class="mr-sub">Pix · Cartão de crédito · Boleto</span></span>${raw(I('pix', 20))}</li>
               <li class="mini-row"><span class="mr-main"><span class="mr-name">Sem fidelidade</span><span class="mr-sub">Cancele quando quiser; modo leitura garante seus dados</span></span>${raw(I('shield', 20))}</li>
-              <li class="mini-row"><span class="mr-main"><span class="mr-name">Cobrança via gateway</span><span class="mr-sub">Stripe/Asaas em produção — nesta demo, simulado</span></span>${raw(I('lock', 20))}</li>
+              <li class="mini-row"><span class="mr-main"><span class="mr-name">Cobrança segura</span><span class="mr-sub">${Config.env === 'production' ? 'Processada pelo Asaas — liberação automática ao confirmar o pagamento' : 'Demonstração: nenhuma cobrança real é feita'}</span></span>${raw(I('lock', 20))}</li>
             </ul>
             ${canManage && info.status === 'active' && Config.env === 'demo' ? html`<hr class="divider">
               <button type="button" class="btn btn-sm btn-ghost text-warn" data-sim-past>${raw(I('wifi-off', 14))} Demo: simular pagamento pendente</button>` : ''}`)}
@@ -631,7 +631,7 @@
             <label class="pm-opt"><input type="radio" name="pm" value="cartao"><span class="pm-ico">${raw(I('billing', 18))}</span>
               <span><b>Cartão de crédito</b><span>Recorrência com tentativa automática em caso de falha.</span></span></label>
             <label class="pm-opt"><input type="radio" name="pm" value="boleto"><span class="pm-ico">${raw(I('receipt', 18))}</span>
-              <span><b>Boleto mensal</b><span>Enviado por e-mail e WhatsApp todo mês.</span></span></label>
+              <span><b>Boleto mensal</b><span>Enviado por e-mail a cada vencimento.</span></span></label>
           </div>
           ${Config.env === 'production'
             ? html`<div class="auth-note mt-3">${raw(I('info', 15))}<span>Pagamento processado pelo <b>Asaas</b> em ambiente seguro. Você será levado à fatura; o plano é liberado automaticamente assim que o pagamento for confirmado. O CNPJ/CPF da loja (Configurações → Loja) é exigido para emitir a cobrança.</span></div>`

@@ -4,7 +4,7 @@ Produto web completo (landing de marketing + aplicação SaaS multi-vertical) co
 relatórios, central de suporte e multiusuário — **em produção real no Supabase** e publicado
 no GitHub Pages a cada push na `main`.
 
-> Status: **v1.9.3 — produção ativa** (backend Supabase + GitHub Pages + área de suporte).
+> Status: **v1.9.4 — produção ativa** (backend Supabase + GitHub Pages + área de suporte).
 > Site: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa/
 > Suporte dev: `jrsistemasetecnologiabr@gmail.com` (única conta `dev` — ver "Conta dev" abaixo).
 > Segurança e pré-deploy: ver **`SECURITY.md`** (política de segredos, rotação de PIN, checklist de go-live).
@@ -42,7 +42,7 @@ No **Suporte**, o papel define o layout: **usuário** vê os tickets da própria
 - **Banco/Auth Supabase** (projeto `qmqllssextbxwwphawod`, região sa-east-1): schema completo com RLS por empresa, RPCs atômicas (venda/estoque), triggers de signup/convite, área de suporte, conta **dev ilimitada** + trial único com suspensão server-side (`migracao-v5-billing-dev.sql`) e **guarda anti-abuso do teste grátis com confirmação de e-mail** (`migracao-v5-anti-abuso.sql`) — tudo já espelhado em `supabase/schema.sql`.
 - **Edge Function `api`** (`/functions/v1/api`): cadastro público com guarda por IP/dispositivo (`auth.signup` — limites ajustáveis via secrets), convites de equipe com e-mail nativo, ferramentas de billing/suporte (somente papel `dev`), cancelamento persistido e pedido LGPD de exclusão com sweeper cron (`supabase/functions/api/index.ts`).
 - **E-mails**: confirmação de e-mail obrigatória (`mailer_autoconfirm=false`, código com validade de 10 min) + templates tematizados pt-BR prontos em `supabase/configurar-emails-templates.py`. Plano Free sem SMTP: template padrão do Supabase (link de confirmação; o app aceita link **ou** código) e ~2–4 e-mails/hora; com SMTP próprio, o template com código de 6 dígitos é aplicado e o limite sobe para 30/hora.
-- **Cobrança**: arquitetura pronta; InfinitePay na próxima fase (a página Assinatura informa o cliente).
+- **Cobrança**: Asaas em PRODUÇÃO (Pix, cartão, boleto) com webhook ativo — chaves no Vault do banco (migração v17).
 
 ## Documentação por arquivo
 
@@ -59,6 +59,10 @@ No **Suporte**, o papel define o layout: **usuário** vê os tickets da própria
 - `supabase/migracao-v14-revoga-rpc-internas.sql` — funções internas fora da API pública (aplicada)
 - `supabase/migracao-v15-asaas.sql` — faturas idempotentes para o webhook Asaas (aplicada)
 - `supabase/migracao-v16-rls-papeis-e-cobranca.sql` — fecha escalada de papel (caixa→admin), escrita direta em vendas, suspensão de inadimplente (aplicada)
+- `supabase/migracao-v17-segredos-vault.sql` — chaves do Asaas no Vault (aplicada)
+- `supabase/migracao-v18-limites-plano.sql` — limites de usuários/produtos por plano no banco (aplicada)
+- `supabase/migracao-v19-revoga-rpc-anon.sql` — RPCs de negócio fora do alcance anônimo (aplicada)
+- `LEIA-ME-LANCAMENTO.txt` — estado do go-live e o que fazer no dia
 - `tests/mobile.test.js` — E2E mobile (Playwright) que bloqueia o deploy
 - `SECURITY.md` — política de segurança: segredos, rotação de PIN, como reportar vulnerabilidades e checklist de pré-go-live
 - `tests/smoke.test.js` + `tools/run-tests.sh` — suíte reproduzível contra o ambiente publicado

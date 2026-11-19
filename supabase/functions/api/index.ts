@@ -90,10 +90,29 @@ async function caller(req: Request) {
    Secrets: ASAAS_API_KEY (obrigatória p/ checkout) · ASAAS_ENV=production|sandbox
    (padrão sandbox — produção só com ASAAS_ENV=production explícito).
    Preços SEMPRE do servidor (nunca confiar no valor enviado pelo navegador). */
-const ASAAS_KEY = Deno.env.get("ASAAS_API_KEY") || "";
-const ASAAS_BASE = (Deno.env.get("ASAAS_ENV") || "sandbox") === "production"
-  ? "https://api.asaas.com/v3"
-  : "https://api-sandbox.asaas.com/v3";
+/* v17: a configuração vem do Vault (RPC app_secret, só service_role) e cai
+   para as Edge Function Secrets se o Vault não tiver o nome. O ambiente é
+   deduzido do prefixo da chave ($aact_prod_ = produção, $aact_hmlg_ = sandbox). */
+let asaasCache: { key: string; base: string; at: number } | null = null;
+async function vaultSecret(name: string): Promise<string> {
+  try {
+    const r = await sr("/rest/v1/rpc/app_secret", { method: "POST", body: JSON.stringify({ p_name: name }) });
+    if (!r.ok) return "";
+    const v = await r.json();
+    return typeof v === "string" ? v : "";
+  } catch (_e) { return ""; }
+}
+async function asaasCfg(): Promise<{ key: string; base: string }> {
+  if (asaasCache && Date.now() - asaasCache.at < 5 * 60e3) return asaasCache;
+  const key = (await vaultSecret("asaas_api_key")) || Deno.env.get("ASAAS_API_KEY") || "";
+  const envName = key.startsWith("$aact_prod_") ? "production"
+    : key.startsWith("$aact_hmlg_") ? "sandbox"
+    : ((await vaultSecret("asaas_env")) || Deno.env.get("ASAAS_ENV") || "sandbox");
+  const base = envName === "production" ? "https://api.asaas.com/v3" : "https://api-sandbox.asaas.com/v3";
+  asaasCache = { key, base, at: Date.now() };
+  if (!key) asaasCache = null; // sem chave: não guarda em cache (liga assim que gravar no Vault)
+  return { key, base };
+}
 const PLAN_PRICES: Record<string, { nome: string; mensal: number; anual: number }> = {
   essencial: { nome: "Essencial", mensal: 59, anual: 588 },
   profissional: { nome: "Profissional", mensal: 129, anual: 1284 },
@@ -101,9 +120,10 @@ const PLAN_PRICES: Record<string, { nome: string; mensal: number; anual: number 
 };
 const BILLING_TYPE: Record<string, string> = { pix: "PIX", cartao: "CREDIT_CARD", boleto: "BOLETO" };
 async function asaas(path: string, init: RequestInit = {}) {
-  const r = await fetch(`${ASAAS_BASE}${path}`, {
+  const { key, base } = await asaasCfg();
+  const r = await fetch(`${base}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", "User-Agent": "LojaCerta", access_token: ASAAS_KEY, ...(init.headers || {}) },
+    headers: { "Content-Type": "application/json", "User-Agent": "LojaCerta", access_token: key, ...(init.headers || {}) },
   });
   const body = await r.json().catch(() => ({}));
   if (!r.ok) {
@@ -378,7 +398,12 @@ Deno.serve(async (req: Request) => {
           invited_by: me.id, expires_at: new Date(Date.now() + 7 * 864e5).toISOString(),
         }),
       });
-      if (!ins.ok) return fail("VALIDATION", "Não foi possível registrar o convite.");
+      if (!ins.ok) {
+        /* v18: limite de usuários do plano vem do banco com frase pronta em pt-BR */
+        const e = (await ins.json().catch(() => ({}))) as { message?: string };
+        if (e.message && /^Seu plano permite/.test(e.message)) return fail("PLAN_LIMIT", e.message, 403);
+        return fail("VALIDATION", "Não foi possível registrar o convite.");
+      }
 
       // envia o e-mail de convite (template tematizado no Auth)
       const inv = await fetch(`${SB_URL}/auth/v1/admin/invite_user_by_email`, {
@@ -459,7 +484,7 @@ Deno.serve(async (req: Request) => {
        1ª fatura. A ativação acontece SÓ no webhook (pagamento confirmado). */
     case "billing.checkout": {
       if (me.papel !== "admin") return fail("FORBIDDEN", "Somente o administrador da loja assina um plano.", 403);
-      if (!ASAAS_KEY) {
+      if (!(await asaasCfg()).key) {
         return fail("NOT_CONFIGURED",
           "Pagamento online ainda não habilitado. Para ativar hoje: pague via Pix e peça a ativação pelo Suporte — a equipe JR ativa em minutos.", 503);
       }
@@ -531,7 +556,7 @@ Deno.serve(async (req: Request) => {
       if (!isAdminRole) return fail("FORBIDDEN", "Somente o administrador da loja cancela a assinatura.", 403);
       const motivo = String(p.reason || "").slice(0, 200);
       /* encerra a recorrência no gateway ANTES de bloquear (evita cobrar loja cancelada) */
-      if (ASAAS_KEY) {
+      if ((await asaasCfg()).key) {
         const sq = await sr(`/rest/v1/tenants?select=stripe_subscription_id&id=eq.${me.tenant_id}`);
         const subId = ((await sq.json()) as Array<{ stripe_subscription_id: string | null }>)[0]?.stripe_subscription_id;
         if (subId && subId.startsWith("sub_")) {

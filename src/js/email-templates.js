@@ -47,7 +47,7 @@
       return { subject: 'Bem-vindo(a) ao LojaCerta 🎉', html: wrap('Boas-vindas',
         p('Sua conta está confirmada! Aproveite o teste grátis de 14 dias com todos os recursos liberados.') +
         btn(appUrl('#/entrar'), 'Entrar no sistema') +
-        p('Dúvidas? Responda este e-mail ou chame no WhatsApp do suporte.'), 'Sua conta está ativa.') };
+        p('Dúvidas? Abra um chamado em Suporte, dentro do app — nossa equipe responde por lá.'), 'Sua conta está ativa.') };
     },
     password_reset: function (ctx) {
       return { subject: 'Redefina sua senha do LojaCerta', html: wrap('Redefinição de senha',

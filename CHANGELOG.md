@@ -2,6 +2,26 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1./) · versionamento semântico.
 
+## [1.9.4] — 2026-11-19 — Véspera do lançamento: Asaas em produção, e-mail, limites de plano
+
+### Cobrança (Asaas PRODUÇÃO ligado)
+- Chave de produção do Asaas validada (conta ativa) e guardada no **Vault** do banco (`asaas_api_key`), com token do webhook (`asaas_webhook_token`). Migração v17: `app_secret()` (só service_role, allowlist de nomes). As Edge Functions leem o Vault primeiro e caem para as Edge Secrets; o ambiente é deduzido do prefixo da chave (`$aact_prod_`).
+- Webhook do Asaas recriado com o novo token (mesma URL e eventos) e testado: token errado → 401, certo → 200.
+
+### Limites dos planos (migração v18)
+- Essencial (2 usuários / 3.000 produtos) e Profissional (6 / 20.000) agora são aplicados no banco — antes eram só texto. Teste grátis, Premium e conta dev seguem sem limite. Mensagem clara no app e no convite.
+
+### Segurança (migração v19)
+- RPCs de negócio (`commit_sale`, `cancel_sale`, `stock_*`, `support_*`, `admin_audit_list`, `billing_refresh_status`) deixam de ser executáveis por anônimo.
+
+### E-mail
+- Chave do Resend (somente envio) no Vault; envio real testado. Falta só o domínio próprio para enviar a qualquer cliente (ver LEIA-ME-LANCAMENTO.txt).
+
+### Front
+- Histórico de cobranças mostrava "Cartão •••• 4242" fixo e status sempre verde; textos de demo ("nesta demo, simulado") apareciam em produção; "Pix Automático" corrigido para "Pix".
+- Recursos ainda não construídos (fiado/contas, orçamentos, multi-loja, NFC-e) marcados como **em breve** — não vender o que não existe.
+- Suporte anunciado por WhatsApp sem número publicado → "central de suporte no app".
+
 ## [1.9.3] — 2026-11-10 — "JWT expired" ao voltar para uma aba antiga
 
 ### Corrigido
