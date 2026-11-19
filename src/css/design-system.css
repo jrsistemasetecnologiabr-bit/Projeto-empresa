@@ -50,12 +50,12 @@
   --bg:#0B1220; --surface:#111C2E; --surface-2:#1E293B; --surface-3:#27334A;
   --ink:#F1F5F9; --ink-2:#CBD5E1; --muted:#94A3B8; --faint:#64748B;
   --line:#1E293B; --line-2:#27334A; --line-strong:#334155;
-  --dark:#F1F5F9; --dark-2:#E2E8F0; --dark-3:#CBD5E1;
+  --dark:#0B1220; --dark-2:#111C2E; --dark-3:#1E293B;
   --brand:#F97316; --brand-2:#FB923C; --brand-3:#FDBA74; --brand-4:#FFEDD5;
-  --brand-text:#FDBA74; --brand-btn:#F97316;
-  --brand-btn-hover:#FB923C; --brand-btn-active:#FDBA74;
+  --brand-text:#FDBA74; --brand-btn:#C2410C;
+  --brand-btn-hover:#EA580C; --brand-btn-active:#9A3412;
   --brand-50:#3D1F0C; --brand-100:#5C2E0F; --brand-ring:rgba(249,115,22,.32);
-  --brand-grad:linear-gradient(135deg,#FB923C 0%,#F97316 100%);
+  --brand-grad:linear-gradient(135deg,#EA580C 0%,#C2410C 100%);
   --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-strong:#22C55E; --ok-text:#86EFAC;
   --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-strong:#F59E0B; --warn-text:#FDE68A;
   --danger:#F87171; --danger-2:#EF4444; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-strong:#EF4444; --danger-text:#FCA5A5;
@@ -68,18 +68,32 @@
   --sh-brand:0 8px 22px rgba(249,115,22,.4);
 }
 
+/* Blocos sempre escuros (menu lateral, painel do PDV, rodapé, CTA final):
+   paleta local clara-sobre-escuro, independente do tema da página. */
+.app-side,.pay-panel,.site-footer,.cta-final{
+  --surface:#111C2E; --surface-2:#1E293B; --surface-3:#27334A;
+  --ink:#F1F5F9; --ink-2:#CBD5E1; --muted:#94A3B8; --faint:#7C8BA1;
+  --line:#1E293B; --line-2:#27334A; --line-strong:#334155;
+  --brand-50:#3D1F0C; --brand-100:#5C2E0F; --brand-text:#FDBA74; --brand-4:#FFEDD5;
+  --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-text:#86EFAC;
+  --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-text:#FDE68A;
+  --danger:#F87171; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-text:#FCA5A5;
+  --info:#60A5FA; --info-bg:#0F1E3A; --info-line:#1E40AF; --info-text:#93C5FD;
+  color-scheme:dark;
+}
+
 /* Respect system preference when no explicit theme set */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]):not([data-theme="dark"]){
     --bg:#0B1220; --surface:#111C2E; --surface-2:#1E293B; --surface-3:#27334A;
     --ink:#F1F5F9; --ink-2:#CBD5E1; --muted:#94A3B8; --faint:#64748B;
     --line:#1E293B; --line-2:#27334A; --line-strong:#334155;
-    --dark:#F1F5F9; --dark-2:#E2E8F0; --dark-3:#CBD5E1;
+    --dark:#0B1220; --dark-2:#111C2E; --dark-3:#1E293B;
     --brand:#F97316; --brand-2:#FB923C; --brand-3:#FDBA74; --brand-4:#FFEDD5;
-    --brand-text:#FDBA74; --brand-btn:#F97316;
-    --brand-btn-hover:#FB923C; --brand-btn-active:#FDBA74;
+    --brand-text:#FDBA74; --brand-btn:#C2410C;
+    --brand-btn-hover:#EA580C; --brand-btn-active:#9A3412;
     --brand-50:#3D1F0C; --brand-100:#5C2E0F; --brand-ring:rgba(249,115,22,.32);
-    --brand-grad:linear-gradient(135deg,#FB923C 0%,#F97316 100%);
+    --brand-grad:linear-gradient(135deg,#EA580C 0%,#C2410C 100%);
     --ok:#4ADE80; --ok-bg:#0F2E1A; --ok-line:#14532D; --ok-strong:#22C55E; --ok-text:#86EFAC;
     --warn:#FBBF24; --warn-bg:#2E1F00; --warn-line:#78350F; --warn-strong:#F59E0B; --warn-text:#FDE68A;
     --danger:#F87171; --danger-2:#EF4444; --danger-bg:#2E0F0F; --danger-line:#7F1D1D; --danger-strong:#EF4444; --danger-text:#FCA5A5;
@@ -177,6 +191,9 @@ ul[class],ol[class]{list-style:none;padding:0}
   transition:background var(--dur) var(--ease),border-color var(--dur),color var(--dur),box-shadow var(--dur),transform .1s;
 }
 .btn:hover{text-decoration:none}
+/* botão "neutro" (só .btn): sem isto o navegador pinta o fundo padrão (branco) e o texto some no tema escuro */
+.btn:not(.btn-primary):not(.btn-outline):not(.btn-ghost):not(.btn-dark):not(.btn-outline-light):not(.btn-danger):not(.btn-danger-ghost):not(.btn-subtle){background:var(--surface);border-color:var(--line-strong);color:var(--ink)}
+.btn:not(.btn-primary):not(.btn-outline):not(.btn-ghost):not(.btn-dark):not(.btn-outline-light):not(.btn-danger):not(.btn-danger-ghost):not(.btn-subtle):hover{border-color:var(--brand);color:var(--brand-text)}
 .btn:active{transform:translateY(1px)}
 .btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;transform:none;pointer-events:none}
 .btn .btn-ico{flex-shrink:0}
@@ -263,10 +280,10 @@ ul[class],ol[class]{list-style:none;padding:0}
 .switch input:focus-visible+.track{outline:2.5px solid var(--brand);outline-offset:2px}
 
 /* Segmentado */
-.seg{display:inline-flex;background:#E7ECF2;border-radius:var(--r-full);padding:4px;gap:2px}
-.seg-btn{border:none;background:transparent;padding:8px 18px;border-radius:var(--r-full);font-size:var(--fs-sm);font-weight:700;color:#475569;cursor:pointer;transition:all var(--dur) var(--ease);display:inline-flex;align-items:center;gap:6px}
+.seg{display:inline-flex;background:var(--surface-3);border-radius:var(--r-full);padding:4px;gap:2px}
+.seg-btn{border:none;background:transparent;padding:8px 18px;border-radius:var(--r-full);font-size:var(--fs-sm);font-weight:700;color:var(--muted);cursor:pointer;transition:all var(--dur) var(--ease);display:inline-flex;align-items:center;gap:6px}
 .seg-btn:hover{color:var(--ink)}
-.seg-btn.is-on{background:#fff;color:var(--ink);box-shadow:var(--sh-sm)}
+.seg-btn.is-on{background:var(--surface);color:var(--ink);box-shadow:var(--sh-sm)}
 .seg-save{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-line);font-size:.6875rem;font-weight:800;padding:1.5px 7px;border-radius:var(--r-full)}
 
 /* ---------- 7. CARDS / BADGES / MISC ---------- */

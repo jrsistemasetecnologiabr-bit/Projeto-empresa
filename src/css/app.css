@@ -353,7 +353,7 @@ body.is-app{background:var(--bg)}
 .pw-meter[data-s="3"] i:nth-child(-n+3){background:#84CC16}
 .pw-meter[data-s="4"] i{background:var(--ok-strong)}
 .pw-label{font-size:.7rem;color:var(--muted);margin-top:5px}
-.auth-note{background:var(--info-bg);border:1px solid var(--info-line);color:#1E40AF;border-radius:10px;padding:10px 12px;font-size:.75rem;line-height:1.5;margin-bottom:18px;display:flex;gap:8px}
+.auth-note{background:var(--info-bg);border:1px solid var(--info-line);color:var(--info-text);border-radius:10px;padding:10px 12px;font-size:.75rem;line-height:1.5;margin-bottom:18px;display:flex;gap:8px}
 .auth-note svg{flex-shrink:0;margin-top:1px}
 
 /* ---------- MISC APP ---------- */
