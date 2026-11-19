@@ -2,6 +2,24 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1./) · versionamento semântico.
 
+## [2.0.0] — 2026-11-19 — Todos os recursos dos planos funcionando (nada "em breve")
+
+### Adicionado (migração v21, aplicada)
+- **Clientes** (Profissional+): cadastro com CPF/CNPJ, endereço, limite de crédito e saldo em aberto.
+- **Venda no fiado** (Profissional+): forma "Fiado" no PDV, cliente obrigatório, limite de crédito checado no banco, conta a receber criada na mesma transação da venda; cancelar a venda cancela o fiado.
+- **Financeiro** (Profissional+): contas a receber e a pagar, baixa parcial, cancelamento (admin), vencidos em destaque, saldo previsto.
+- **Orçamentos** (Profissional+): numeração ORC-000001, preços do catálogo recalculados no servidor, impressão, conversão em venda com um clique (o orçamento fica "virou venda").
+- **Multi-loja** (Premium): criar filiais, entrar em cada loja, painel consolidado (vendas, faturamento, estoque baixo, a receber); a assinatura da loja principal vale para as filiais.
+- **NFC-e / NF-e** (Premium): integração com o emissor homologado Focus NFe (Edge `api`: fiscal.test/emit/status/cancel), dados fiscais no produto (NCM, CFOP, CSOSN, CEST, origem), emissão no detalhe da venda ou automática a cada venda, DANFE, cancelamento.
+- **PDV offline**: sem internet a venda vai para uma fila no aparelho e é enviada sozinha quando a conexão volta (sem duplicar — idempotência do commit_sale).
+- Liberação por plano no banco (`plan_has`) e no app (`Plans.has`), com tela de upgrade; teste grátis e conta dev com tudo liberado.
+
+### Corrigido
+- v20: criar usuário já confirmado pelo painel do Supabase quebrava o cadastro.
+- Papel "caixa" (nome usado no banco) não existia na tabela de permissões do app: o operador de caixa ficava sem acesso.
+- Vercel publicava o pacote local (sem Supabase); agora publica o de produção, com cabeçalhos de segurança.
+- Temas claro/escuro: textos ilegíveis no menu, PDV, rodapé, faixas e planos.
+
 ## [1.9.4] — 2026-11-19 — Véspera do lançamento: Asaas em produção, e-mail, limites de plano
 
 ### Cobrança (Asaas PRODUÇÃO ligado)

@@ -341,5 +341,98 @@
     'biz.fiscal.cancel': function (p, c) { return edge(c, 'fiscal.cancel', p).then(function (r) { return { ok: true, doc: mapDoc(r.doc) }; }); }
   };
 
+
+  /* =================== PDV offline: fila de vendas sem internet ===================
+     Produção apenas. Se a conexão cair ao finalizar, a venda vai para uma fila no
+     aparelho (localStorage) com o MESMO idempotencyId; o banco (commit_sale) usa
+     esse id como chave, então reenviar nunca duplica. A fila é enviada sozinha ao
+     voltar a conexão, ao abrir o app e a cada 30 s. */
+  var OfflineQueue = {
+    KEY: 'lc_offline_sales', FAIL: 'lc_offline_failed', busy: false,
+    list: function (k) { try { return JSON.parse(localStorage.getItem(k || this.KEY) || '[]'); } catch (e) { return []; } },
+    save: function (l, k) { try { localStorage.setItem(k || this.KEY, JSON.stringify(l)); } catch (e) { } this.banner(); },
+    isNetErr: function (e) {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+      return !!e && (e.name === 'TypeError' || e.code === 'NETWORK' || /Failed to fetch|NetworkError|Load failed|network|ERR_INTERNET|timeout/i.test(String(e.message || '')));
+    },
+    enqueue: function (d) {
+      var st = Store.state, me = Auth.me() || {};
+      var itens = (d.items || []).map(function (it) {
+        var p = st.products.filter(function (x) { return x.id === it.productId; })[0] || {};
+        var q = Number(it.qtd) || 0; var pr = Number(p.preco != null ? p.preco : it.preco) || 0;
+        return { productId: it.productId, nome: p.nome || it.nome, un: p.un || it.un, qtd: q, preco: pr, subtotal: U.round2(pr * q) };
+      });
+      var sub = U.round2(U.sum(itens, function (i) { return i.subtotal; }));
+      var disc = d.discount || { tipo: 'R$', valor: 0 };
+      var dv = U.clamp(U.round2(disc.tipo === '%' ? sub * (Number(disc.valor) || 0) / 100 : (Number(disc.valor) || 0)), 0, sub);
+      var q = this.list(); q.push({ d: d, at: Date.now() });
+      var sale = { id: d.idempotencyId, numero: 'OFFLINE-' + U.pad(q.length, 3), at: Date.now(), userId: me.id, userName: me.nome || '', itens: itens,
+        subtotal: sub, desconto: dv, descontoTipo: disc.tipo, total: U.round2(sub - dv), pagamentos: d.payments || [], status: 'concluida', pending: true,
+        customerId: d.customerId || null, customerNome: d.customerNome || '' };
+      Store.update(function (s) {
+        itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque - it.qtd) * 1000) / 1000; });
+        s.sales.unshift(sale);
+      });
+      this.save(q);
+      return sale;
+    },
+    flush: function () {
+      var self = this;
+      if (self.busy || Config.env !== 'production' || !Auth.me()) return Promise.resolve();
+      var q = self.list(); if (!q.length) { self.banner(); return Promise.resolve(); }
+      self.busy = true;
+      var sent = 0;
+      var step = function () {
+        var cur = self.list(); if (!cur.length) return Promise.resolve();
+        var item = cur[0];
+        return ApiClient.request('sales.commit', item.d).then(function (r) {
+          var sale = r.sale || r;
+          Store.update(function (s) {
+            /* o adapter acabou de inserir a venda do servidor E baixar o estoque de novo:
+               remove a provisória e devolve a baixa duplicada da provisória */
+            var prov = s.sales.filter(function (v) { return v.pending && v.id === item.d.idempotencyId; })[0];
+            if (prov) {
+              prov.itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque + it.qtd) * 1000) / 1000; });
+              s.sales = s.sales.filter(function (v) { return v !== prov; });
+            }
+          });
+          self.save(self.list().slice(1)); sent++;
+          return step();
+        }).catch(function (e) {
+          if (self.isNetErr(e)) return; // continua sem internet: tenta depois
+          /* recusa de regra (ex.: estoque acabou): tira da fila, guarda em "falhas" e avisa */
+          var f = self.list(self.FAIL); f.push({ d: item.d, at: item.at, erro: e.message || String(e) }); self.save(f, self.FAIL);
+          Store.update(function (s) {
+            var prov = s.sales.filter(function (v) { return v.pending && v.id === item.d.idempotencyId; })[0];
+            if (prov) {
+              prov.itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque + it.qtd) * 1000) / 1000; });
+              s.sales = s.sales.filter(function (v) { return v !== prov; });
+            }
+          });
+          self.save(self.list().slice(1));
+          try { UI.toast('Uma venda feita sem internet foi recusada pelo servidor: ' + (e.message || 'erro') + ' Refaça a venda no PDV.', { type: 'err', timeout: 12000 }); } catch (x) { }
+          return step();
+        });
+      };
+      return step().then(function () {
+        self.busy = false; self.banner();
+        if (sent) { try { UI.toast(sent + ' venda(s) feita(s) sem internet foram enviadas ✔', { type: 'ok' }); Bus.emit('sales:changed'); Bus.emit('store:changed', Store.state); } catch (x) { } }
+      }, function () { self.busy = false; self.banner(); });
+    },
+    banner: function () {
+      if (typeof document === 'undefined') return;
+      var n = this.list().length, el = document.getElementById('offline-bar');
+      if (!n) { if (el) el.remove(); return; }
+      if (!el) { el = document.createElement('div'); el.id = 'offline-bar'; el.className = 'offline-bar'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+      el.textContent = (navigator.onLine === false ? 'Sem internet — ' : 'Enviando — ') + n + ' venda(s) aguardando envio ao servidor. Pode continuar vendendo.';
+    }
+  };
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', function () { OfflineQueue.flush(); });
+    window.addEventListener('offline', function () { OfflineQueue.banner(); });
+    setInterval(function () { if (OfflineQueue.list().length) OfflineQueue.flush(); }, 30000);
+    setTimeout(function () { OfflineQueue.flush(); }, 4000);
+  }
+  window.OfflineQueue = OfflineQueue;
   window.Plans = Plans; window.Biz = Biz; window.BizLocal = BizLocal; window.BizRemote = BizRemote;
 })();

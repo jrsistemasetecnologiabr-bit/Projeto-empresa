@@ -420,7 +420,7 @@
               var s = sales[x.saleId];
               return html`<tr><td class="small nowrap">${U.dt(x.createdAt)}</td><td class="mono small">${s ? s.numero : '—'}</td><td>${x.modelo === 'nfe' ? 'NF-e' : 'NFC-e'}${x.ambiente !== 'producao' ? raw(' <span class="badge badge-mut no-dot">teste</span>') : ''}</td>
                 <td class="mono small">${x.numero ? x.numero + '/' + x.serie : '—'}</td><td>${badgeStatus(x.status)}</td><td class="small muted" style="max-width:280px">${x.mensagem}</td>
-                <td class="right nowrap">${x.danfeUrl ? html`<a class="btn btn-sm" href="${x.danfeUrl}" target="_blank" rel="noopener">${raw(I('printer', 14))} DANFE</a>` : ''}
+                <td class="right nowrap">${x.danfeUrl ? raw('<a class="btn btn-sm" href="' + U.esc(x.danfeUrl) + '" target="_blank" rel="noopener">' + I('printer', 14) + ' DANFE</a>') : ''}
                   ${x.status === 'processando' ? html`<button type="button" class="btn btn-sm" data-st="${x.id}">${raw(I('refresh', 14))} Atualizar</button>` : ''}</td></tr>`;
             })}</tbody></table></div>` : C.empty('receipt', 'Nenhuma nota emitida ainda', 'Emita pela tela Vendas (detalhe da venda) ou ligue a emissão automática.'))}`);
         var sv = root.querySelector('[data-save]');
@@ -619,7 +619,7 @@
       Router.go('/app/pdv');
     };
     P.afterSale = function (sale) {
-      if (!Plans.has('fiscal')) return;
+      if (!Plans.has('fiscal') || sale.pending) return;
       FiscalUI.config().then(function (cfg) {
         if (!cfg || !cfg.autoEmitir || !cfg.hasToken) return;
         UI.toast('Emitindo NFC-e da ' + sale.numero + '…', { type: 'info' });

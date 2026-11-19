@@ -14,6 +14,38 @@ AMANHÃ", em ordem. Sem a de número 2 (domínio), os e-mails para
 clientes ficam limitados — leia com atenção.
 
 
+
+=====================================================================
+ 0. ATUALIZAÇÃO v2.0.0 — TODOS OS RECURSOS DOS PLANOS NO AR
+=====================================================================
+
+Não existe mais nada "em breve". Funcionando e testado com o Supabase real:
+  Profissional e Premium:
+   - Clientes (CPF/CNPJ, endereço, limite de crédito)
+   - Venda no FIADO no PDV (limite checado no servidor; vira conta a receber)
+   - Financeiro: contas a receber e a pagar, baixa parcial, vencidos
+   - Orçamentos: imprime para o cliente e vira venda com 1 clique
+  Premium:
+   - Multi-loja: criar filiais, entrar em cada loja, painel consolidado
+   - NFC-e / NF-e via Focus NFe (DANFE, cancelamento, emissão automática)
+  Todos os planos:
+   - PDV OFFLINE: sem internet a venda fica na fila do aparelho e é enviada
+     sozinha quando a conexão volta (testado: chegou 1 vez, sem duplicar)
+
+  Teste grátis e conta dev: tudo liberado. Essencial: só o núcleo.
+  O plano é conferido no banco — não dá para burlar pelo navegador.
+
+  Para a NFC-e emitir de verdade, CADA LOJA Premium precisa (1 vez):
+   1. Conta no Focus NFe (focusnfe.com.br) com o certificado digital A1 e
+      o CSC da NFC-e cadastrados lá;
+   2. Colar o token em LojaCerta → Nota fiscal; testar em homologação;
+   3. NCM nos produtos (o contador informa) e CNPJ em Configurações → Loja.
+  O sistema guia isso na própria tela "Nota fiscal".
+
+  Vercel (alojacerta.vercel.app): agora publica a versão de PRODUÇÃO
+  ligada ao Supabase (antes era uma versão local de demonstração!), com
+  cabeçalhos de segurança. Publica sozinha a cada atualização da main.
+
 =====================================================================
  1. O QUE FOI CONFERIDO
 =====================================================================

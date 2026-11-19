@@ -12,9 +12,9 @@
      em JS logo abaixo; nonce/subresource-integrity exigem header (ver README). -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://qmqllssextbxwwphawod.supabase.co wss://qmqllssextbxwwphawod.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<!-- versão canônica do app (build injeta 1.9.4; conferir com:
+<!-- versão canônica do app (build injeta 2.0.0; conferir com:
      curl -s <site>/version.json ) — evita a ambiguidade de grep em comentários -->
-<meta name="app-version" content="1.9.4">
+<meta name="app-version" content="2.0.0">
 <script>/* anti-clickjacking: sem X-Frame-Options/frame-ancestors no GH Pages, o bloqueio disponível é em JS — se não conseguir sair do frame, não renderiza */try{if(top!==self){top.location.replace(self.location.href);}}catch(e){document.documentElement.style.display='none';}</script>
 <title>LojaCerta — Gestão comercial para qualquer varejo: PDV, estoque e assinaturas</title>
 <meta name="description" content="PDV com código de barras, estoque em tempo real, relatórios e assinatura mensal para depósitos, supermercados, varejo, pubs e clínicas. Teste 14 dias grátis, sem cartão. A partir de R$ 59/mês.">
@@ -1011,8 +1011,29 @@ body.is-app{background:var(--bg)}
 @media (max-width:640px){
   .page-actions .btn{white-space:normal;text-align:center;padding-left:.8em;padding-right:.8em;min-height:44px}
 }
+.upsell-card{max-width:620px;margin:8px auto;text-align:center;padding:36px 28px}
+.upsell-card h2{font-size:1.25rem;margin:14px 0 8px}
+.upsell-card p{color:var(--ink-2);line-height:1.6;margin-bottom:20px}
+.upsell-ico{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;margin:0 auto;background:var(--brand-50);color:var(--brand-text);border:1px solid var(--brand-100)}
+.nav-plan{margin-left:auto;font-size:.58rem;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:999px;background:var(--brand-50);color:var(--brand-text);border:1px solid var(--brand-100)}
+.pdv-cust{display:flex;align-items:center;gap:8px;width:100%;margin:2px 0 12px;padding:10px 12px;border-radius:10px;border:1px dashed var(--line-strong);background:transparent;color:var(--ink-2);font:inherit;font-size:.85rem;cursor:pointer;text-align:left}
+.pdv-cust:hover{border-color:var(--brand);color:var(--ink)}
+.pdv-cust.is-set{border-style:solid;border-color:var(--brand);color:var(--ink);font-weight:700;background:var(--brand-50)}
+.pdv-quote{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ok-text,var(--ok));margin:-4px 0 10px}
+.pick-list{display:grid;gap:6px;max-height:52dvh;overflow:auto}
+.pick-item{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.pick-item:hover,.pick-item:focus-visible{border-color:var(--brand);background:var(--brand-50)}
+.fiscal-box{margin-top:6px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--surface-2)}
+.fiscal-box summary{cursor:pointer;padding:4px 0}
+.fiscal-box[open] summary{margin-bottom:10px}
+.fiscal-sale{display:flex;flex-direction:column;gap:2px}
+.steps-list{padding-left:20px;display:grid;gap:8px;line-height:1.55;color:var(--ink-2)}
+.text-danger{color:var(--danger-text,var(--danger))}
+@media (max-width:640px){.upsell-card{padding:28px 18px}.pick-list{max-height:60dvh}}
+.offline-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:900;max-width:calc(100% - 24px);padding:9px 16px;border-radius:999px;background:#7C2D12;color:#FFEDD5;font-size:.8rem;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center}
+@media (max-width:640px){.offline-bar{bottom:calc(76px + env(safe-area-inset-bottom))}}
 </style>
-<!-- built: 2026-11-19T13:03:28.413Z · mode: production · single-file bundle · src/ → release/ -->
+<!-- built: 2026-11-19T13:48:35.287Z · mode: production · single-file bundle · src/ → release/ -->
 </head>
 <body>
 <a class="skip-link" href="#main">Pular para o conteúdo principal</a>
@@ -1225,7 +1246,7 @@ body.is-app{background:var(--bg)}
           <div class="plan-price"><span class="cur">R$</span><b data-mensal="129" data-anual="107">129</b><span class="per">/mês</span></div>
           <p class="plan-annual-note" hidden>cobrado R$ 1.284/ano</p>
           <ul class="plan-feats">
-            <li>6 usuários · 3 PDVs</li><li>Até 20.000 produtos</li><li>Relatórios completos + exportação</li><li>Clientes, fiado e contas a pagar/receber <span class="soon">em breve</span></li><li>Orçamento que vira venda <span class="soon">em breve</span></li><li>Suporte prioritário</li>
+            <li>6 usuários · 3 PDVs</li><li>Até 20.000 produtos</li><li>Relatórios completos + exportação</li><li>Clientes, fiado e contas a pagar/receber</li><li>Orçamento que vira venda</li><li>Suporte prioritário</li>
           </ul>
           <a class="btn btn-primary btn-block" href="#/cadastro?plano=profissional" data-nav>Começar grátis</a>
         </article>
@@ -1234,7 +1255,7 @@ body.is-app{background:var(--bg)}
           <div class="plan-price"><span class="cur">R$</span><b data-mensal="249" data-anual="207">249</b><span class="per">/mês</span></div>
           <p class="plan-annual-note" hidden>cobrado R$ 2.484/ano</p>
           <ul class="plan-feats">
-            <li>Usuários e PDVs ilimitados</li><li>Produtos ilimitados</li><li>NFC-e / NF-e <span class="soon">em breve</span></li><li>Multi-loja <span class="soon">em breve</span></li><li>Onboarding ao vivo</li><li>Suporte prioritário</li>
+            <li>Usuários e PDVs ilimitados</li><li>Produtos ilimitados</li><li>NFC-e / NF-e</li><li>Multi-loja</li><li>Onboarding ao vivo</li><li>Suporte prioritário</li>
           </ul>
           <a class="btn btn-outline btn-block" href="#/cadastro?plano=premium" data-nav>Começar grátis</a>
         </article>
@@ -1252,8 +1273,8 @@ body.is-app{background:var(--bg)}
       </div>
       <div class="faq-list reveal">
         <details class="faq-item"><summary>Preciso instalar alguma coisa?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Não. O LojaCerta roda 100% no navegador — no PC do caixa, no tablet ou no celular. Atualizações são automáticas, sem técnico e sem pendrive.</p></details>
-        <details class="faq-item"><summary>E se a internet da loja cair?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>O modo offline do PDV está no nosso roadmap (fase 2): as vendas ficam em fila no aparelho e sincronizam quando a conexão volta. Enquanto isso, o sistema avisa claramente qualquer falha de conexão e nunca perde dados já gravados.</p></details>
-        <details class="faq-item"><summary>O sistema emite nota fiscal (NFC-e/NF-e)?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Hoje o comprovante de venda é <b>não fiscal</b> (permitido para controle interno). A emissão de NFC-e/NF-e chega na fase 2, no plano Premium, integrada a um emissor fiscal homologado.</p></details>
+        <details class="faq-item"><summary>E se a internet da loja cair?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>O PDV continua vendendo. Se a conexão cair, a venda é guardada numa fila segura no próprio aparelho e enviada sozinha quando a internet volta — sem duplicar e sem perder nada. Um aviso no topo mostra quantas vendas estão aguardando envio.</p></details>
+        <details class="faq-item"><summary>O sistema emite nota fiscal (NFC-e/NF-e)?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Sim, no plano <b>Premium</b>: NFC-e direto do PDV (inclusive automática a cada venda) e NF-e para empresas, com DANFE e cancelamento, integradas ao emissor homologado Focus NFe usando o certificado digital A1 da sua loja. Nos demais planos o comprovante é <b>não fiscal</b> (permitido para controle interno).</p></details>
         <details class="faq-item"><summary>Consigo migrar minha planilha de produtos?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Sim: importe um CSV direto no sistema (com pré-visualização e correção de erros linha a linha) ou peça a migração assistida gratuita — nossa equipe cadastra tudo para você.</p></details>
         <details class="faq-item"><summary>Como funciona a cobrança?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Mensal ou anual (com 2 meses grátis), via Pix, cartão de crédito ou boleto. Sem fidelidade: cancelando, o sistema entra em modo leitura e você ainda exporta todos os seus dados.</p></details>
         <details class="faq-item"><summary>Meus dados ficam seguros?<svg class="faq-chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p>Sim: backups diários automáticos, permissões por usuário, trilha de auditoria e conformidade com a LGPD — incluindo exportação e exclusão total dos seus dados quando você pedir.</p></details>
@@ -1292,7 +1313,7 @@ body.is-app{background:var(--bg)}
       <a href="#recursos" data-scroll>Recursos</a><a href="#planos" data-scroll>Planos</a><a href="#faq" data-scroll>FAQ</a><a href="#/entrar" data-nav>Entrar</a>
     </nav>
     <nav aria-label="Soluções"><h4>Soluções</h4>
-      <a href="#recursos" data-scroll>PDV e caixa</a><a href="#recursos" data-scroll>Estoque</a><a href="#recursos" data-scroll>Relatórios</a><a href="#recursos" data-scroll>NFC-e <span class="soon">em breve</span></a>
+      <a href="#recursos" data-scroll>PDV e caixa</a><a href="#recursos" data-scroll>Estoque</a><a href="#recursos" data-scroll>Relatórios</a><a href="#recursos" data-scroll>NFC-e / NF-e</a>
     </nav>
     <nav aria-label="Legal"><h4>Legal</h4>
       <a href="#" data-act="legal" data-doc="termos">Termos de uso</a><a href="#" data-act="legal" data-doc="privacidade">Privacidade e LGPD</a><a href="#/entrar" data-nav>Suporte ao cliente</a>
@@ -1843,8 +1864,10 @@ body.is-app{background:var(--bg)}
   /* ---------------- Permissões (RBAC simples) ---------------- */
   var PERM_MATRIX = {
     admin: '*',
-    gerente: ['dashboard', 'pdv', 'produtos', 'estoque', 'vendas', 'relatorios', 'assinatura', 'suporte', 'custo.view', 'discount.unlimited', 'inventory.manage', 'products.manage'],
-    operador: ['dashboard', 'pdv', 'vendas', 'suporte', 'discount.limited'],
+    gerente: ['dashboard', 'pdv', 'produtos', 'estoque', 'vendas', 'relatorios', 'assinatura', 'suporte', 'clientes', 'orcamentos', 'financeiro', 'fiscal', 'lojas', 'custo.view', 'discount.unlimited', 'inventory.manage', 'products.manage'],
+    operador: ['dashboard', 'pdv', 'vendas', 'suporte', 'clientes', 'orcamentos', 'discount.limited'],
+    /* no banco o papel do operador de caixa se chama "caixa" (users_papel_check) */
+    caixa: ['dashboard', 'pdv', 'vendas', 'suporte', 'clientes', 'orcamentos', 'discount.limited'],
     /* Equipe JR Sistemas: conta interna com TUDO liberado (tempo indeterminado).
        No Suporte vê o painel de atendimento (tickets de todas as empresas). */
     dev: '*'
@@ -1857,7 +1880,7 @@ body.is-app{background:var(--bg)}
     can: function (action) {
       var role = this.role();
       if (!role) return false;
-      var list = PERM_MATRIX[role];
+      var list = PERM_MATRIX[role] || [];
       if (list === '*') return true;
       if (list.indexOf(action) > -1) return true;
       return list.indexOf(action.split('.')[0]) > -1; // "assinatura.view" casa com página "assinatura"? não — páginas listadas explicitamente
@@ -1865,7 +1888,7 @@ body.is-app{background:var(--bg)}
     pageAllowed: function (page) {
       var role = this.role();
       if (!role) return false;
-      var list = PERM_MATRIX[role];
+      var list = PERM_MATRIX[role] || [];
       return list === '*' || list.indexOf(page) > -1;
     }
   };
@@ -1978,7 +2001,7 @@ body.is-app{background:var(--bg)}
   var Config = {
     env: 'production',              // demo | production — preenchido pelo build (tokens {{...}})
     appName: 'LojaCerta',
-    version: '1.9.4',
+    version: '2.0.0',
     latency: 110,                // ms — latência simulada do "backend" (0 em testes)
     siteUrl: 'https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa',     // URL pública do site (canonical, e-mails, redirects de auth)
     api: { baseUrl: 'https://qmqllssextbxwwphawod.supabase.co', anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtcWxsc3NleHRieHd3cGhhd29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMTUwMTIsImV4cCI6MjEwNTY5MTAxMn0.0nTDez1iojZS1ojccTFU-v8afATIhcgvqHn-l8pzldg' }, // build injeta do .env
@@ -1996,8 +2019,8 @@ body.is-app{background:var(--bg)}
       { id: 'suporte', name: 'Central de Suporte', status: 'ready', desc: 'Tickets com conversa por mensagem — clientes abrem, a equipe JR Sistemas atende.' },
       { id: 'billing', name: 'Cobrança (Asaas)', status: 'ready', desc: 'Assinatura recorrente via Asaas — Pix, cartão e boleto, com liberação automática por webhook.' },
       { id: 'analytics', name: 'Analytics (GA4/Meta)', status: 'ready', desc: 'Analytics.track() já emite eventos; basta plugar o provider.' },
-      { id: 'fiscal', name: 'Emissor NFC-e/NF-e', status: 'soon', desc: 'Fase 2 — integração via API parceira (Focus NFe/TecnoSpeed).' },
-      { id: 'storage', name: 'Armazenamento (logos/PDF)', status: 'soon', desc: 'Upload de arquivos via Supabase Storage/S3.' }
+      { id: 'fiscal', name: 'Emissor NFC-e/NF-e (Focus NFe)', status: 'ready', desc: 'Plano Premium — configure o token da loja em Nota fiscal.' },
+      { id: 'email', name: 'E-mail transacional (Resend)', status: 'ready', desc: 'Recibos de pagamento, respostas do suporte e avisos de vencimento.' }
     ]
   };
   /* Tokens {{...}} não substituídos (uso do source sem build) viram defaults seguros */
@@ -2044,7 +2067,7 @@ body.is-app{background:var(--bg)}
         if (Config.simulateFailures || (Config.failOps && Config.failOps[op])) {
           throw ApiError('NETWORK', 'Falha de conexão ao executar "' + op + '". Verifique sua internet e tente novamente.');
         }
-        if (!OPS[op]) throw ApiError('NOT_FOUND', 'Operação desconhecida: ' + op);
+        if (!OPS[op] && !(window.BizLocal && window.BizLocal[op])) throw ApiError('NOT_FOUND', 'Operação desconhecida: ' + op);
 
         /* ---- Test mode: simulate session refresh (for session.test.js) ---- */
         if (forceMock) {
@@ -2119,7 +2142,7 @@ body.is-app{background:var(--bg)}
 
         /* Toda operação do mock é uma mutação: persiste e notifica ao final.
            (Em produção, o adapter remoto persiste no servidor e re-sincroniza o store local.) */
-        return Promise.resolve(OPS[op](payload || {})).then(function (res) {
+        return Promise.resolve((OPS[op] || window.BizLocal[op])(payload || {})).then(function (res) {
           if (Store.state) { Store.persist(); Bus.emit('store:changed', Store.state); }
           return res;
         });
@@ -2170,7 +2193,8 @@ body.is-app{background:var(--bg)}
         id: 'p' + s.seq.prod++, codigo: codigo, nome: String(d.nome).trim(), catId: d.catId, un: d.un || 'un',
         custo: U.round2(U.parseNum(d.custo) || 0), preco: U.round2(U.parseNum(d.preco) || 0),
         estoque: U.parseNum(d.estoque) || 0, min: U.parseNum(d.min) || 0,
-        fornecedor: String(d.fornecedor || '').trim(), ativo: true, createdAt: Date.now()
+        fornecedor: String(d.fornecedor || '').trim(), ativo: true, createdAt: Date.now(),
+        ncm: String(d.ncm || '').replace(/\D/g, ''), cfop: d.cfop || '5102', cest: String(d.cest || '').replace(/\D/g, ''), csosn: d.csosn || '102', origem: Number(d.origem) || 0
       };
       if (!(p.preco > 0)) throw ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.');
       s.products.push(p);
@@ -2185,7 +2209,7 @@ body.is-app{background:var(--bg)}
       if (d.codigo && String(d.codigo).trim() && String(d.codigo).trim().toLowerCase() !== p.codigo.toLowerCase() &&
         s.products.some(function (x) { return x.codigo.toLowerCase() === String(d.codigo).trim().toLowerCase(); }))
         throw ApiError('DUP_CODE', 'Código já usado por outro produto.');
-      ['nome', 'catId', 'un', 'fornecedor'].forEach(function (k) { if (d[k] !== undefined) p[k] = d[k]; });
+      ['nome', 'catId', 'un', 'fornecedor', 'ncm', 'cfop', 'cest', 'csosn', 'origem'].forEach(function (k) { if (d[k] !== undefined) p[k] = d[k]; });
       ['custo', 'preco'].forEach(function (k) { if (d[k] !== undefined) p[k] = U.round2(U.parseNum(d[k]) || 0); });
       ['estoque', 'min'].forEach(function (k) { if (d[k] !== undefined) p[k] = U.parseNum(d[k]) || 0; });
       if (p.preco <= 0) throw ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.');
@@ -2262,6 +2286,7 @@ body.is-app{background:var(--bg)}
       var pago = U.round2(U.sum(pays, function (p) { return p.valor; }));
       if (Math.abs(pago - total) > 0.011) throw ApiError('PAY_MISMATCH', 'A soma dos pagamentos (' + U.money(pago) + ') não fecha com o total (' + U.money(total) + ').');
       var troco = 0;
+      var fiadoVal = window.BizLocal ? BizLocal._beforeSale(d, total) : 0;
       pays.forEach(function (p) { if (p.forma === 'dinheiro') { /* troco exibido no front; gravado aqui p/ relatório */ } });
       var sale = {
         id: 's' + s.seq.sale, numero: 'VENDA-' + U.pad(s.seq.sale++), at: Date.now(),
@@ -2278,6 +2303,7 @@ body.is-app{background:var(--bg)}
         p.estoque = U.round2((p.estoque - it.qtd) * 1000) / 1000;
         s.movements.unshift({ id: 'm' + s.seq.mov++, at: sale.at, productId: p.id, tipo: 'saida', qtd: it.qtd, userId: sale.userId, origem: sale.numero, obs: '' });
       });
+      if (window.BizLocal) BizLocal._afterSale(sale, d, fiadoVal);
       s.sales.unshift(sale);
       pushAudit('venda.concluida', 'sale', sale.id, sale.numero + ' · ' + U.money(sale.total));
       Analytics.track('sale_commit', { total: sale.total, itens: sale.itens.length });
@@ -2292,6 +2318,7 @@ body.is-app{background:var(--bg)}
       if (sale.status === 'cancelada') throw ApiError('ALREADY', 'Venda já cancelada.');
       if (!d.reason) throw ApiError('VALIDATION', 'Informe o motivo do cancelamento.');
       sale.status = 'cancelada'; sale.motivoCancelamento = d.reason; sale.canceledAt = Date.now();
+      if (window.BizLocal) BizLocal._afterCancel(sale.id);
       sale.itens.forEach(function (it) {
         var p = findProduct(it.productId);
         if (p) {
@@ -2531,8 +2558,8 @@ body.is-app{background:var(--bg)}
   var Billing = {
     PLANS: [
       { id: 'essencial', name: 'Essencial', monthly: 59, annual: 49, annualTotal: 588, users: 2, pdvs: 1, products: 3000, for: 'Para começar com 1 caixa', features: ['2 usuários · 1 PDV', 'Até 3.000 produtos', 'Estoque + PDV + comprovante', 'Dashboard e relatórios básicos', 'Central de suporte no app'] },
-      { id: 'profissional', name: 'Profissional', monthly: 129, annual: 107, annualTotal: 1284, users: 6, pdvs: 3, products: 20000, hot: true, for: 'Para loja com 2–3 caixas', features: ['6 usuários · 3 PDVs', 'Até 20.000 produtos', 'Relatórios completos + exportação', 'Clientes, fiado e contas a pagar (em breve)', 'Orçamento que vira venda (em breve)', 'Suporte prioritário'] },
-      { id: 'premium', name: 'Premium', monthly: 249, annual: 207, annualTotal: 2484, users: Infinity, pdvs: Infinity, products: Infinity, for: 'Para quem emite nota e tem 2+ lojas', features: ['Usuários e PDVs ilimitados', 'Produtos ilimitados', 'NFC-e / NF-e (em breve)', 'Multi-loja (em breve)', 'Onboarding ao vivo', 'Suporte prioritário'] }
+      { id: 'profissional', name: 'Profissional', monthly: 129, annual: 107, annualTotal: 1284, users: 6, pdvs: 3, products: 20000, hot: true, for: 'Para loja com 2–3 caixas', features: ['6 usuários · 3 PDVs', 'Até 20.000 produtos', 'Relatórios completos + exportação', 'Clientes, fiado e contas a pagar', 'Orçamento que vira venda', 'Suporte prioritário'] },
+      { id: 'premium', name: 'Premium', monthly: 249, annual: 207, annualTotal: 2484, users: Infinity, pdvs: Infinity, products: Infinity, for: 'Para quem emite nota e tem 2+ lojas', features: ['Usuários e PDVs ilimitados', 'Produtos ilimitados', 'NFC-e / NF-e', 'Multi-loja', 'Onboarding ao vivo', 'Suporte prioritário'] }
     ],
     planById: function (id) { return this.PLANS.filter(function (p) { return p.id === id; })[0] || null; },
     /* Plano pago com prazo vencido? (guarda do front; o servidor confirma via billing.refresh).
@@ -2872,7 +2899,19 @@ body.is-app{background:var(--bg)}
   };
 
   var Sales = {
-    commit: function (d) { return ApiClient.request('sales.commit', d).then(function (r) { Bus.emit('sales:changed'); return r.sale; }); },
+    commit: function (d) {
+      return ApiClient.request('sales.commit', d).then(function (r) { Bus.emit('sales:changed'); return r.sale; }).catch(function (e) {
+        /* PDV offline (produção): conexão caiu → fila local com o mesmo idempotencyId */
+        var fiado = (d.payments || []).some(function (p) { return p.forma === 'fiado' && Number(p.valor) > 0; });
+        if (window.OfflineQueue && Config.env === 'production' && d.idempotencyId && OfflineQueue.isNetErr(e)) {
+          if (fiado) throw ApiError('NETWORK', 'Sem internet: venda no fiado precisa de conexão para conferir o limite do cliente. Use outra forma de pagamento ou aguarde a conexão.');
+          var sale = OfflineQueue.enqueue(d); Bus.emit('sales:changed');
+          try { UI.toast('Sem internet: venda guardada no aparelho e será enviada sozinha quando a conexão voltar.', { type: 'warn', timeout: 7000 }); } catch (x) { }
+          return sale;
+        }
+        throw e;
+      });
+    },
     cancel: function (id, reason) { return ApiClient.request('sales.cancel', { id: id, reason: reason }).then(function () { Bus.emit('sales:changed'); }); },
     get: function (id) { var s = st().sales.filter(function (x) { return x.id === id; })[0]; return s ? U.clone(s) : null; },
     list: function (f) {
@@ -3713,13 +3752,13 @@ body.is-app{background:var(--bg)}
             q('categories?select=*&tenant_id=eq.' + s2 + '&order=nome'),
             qAll('products?select=*&tenant_id=eq.' + s2 + '&order=nome,id'),
             q('users?select=*&tenant_id=eq.' + s2 + '&order=nome'),
-            qAll('sales?select=*,users(nome),sale_items(*),sale_payments(*)&tenant_id=eq.' + s2 + '&created_at=gte.' + encodeURIComponent(since) + '&order=created_at.desc,id'),
+            qAll('sales?select=*,users(nome),customers(nome),sale_items(*),sale_payments(*)&tenant_id=eq.' + s2 + '&created_at=gte.' + encodeURIComponent(since) + '&order=created_at.desc,id'),
             qAll('stock_movements?select=*,users(nome)&tenant_id=eq.' + s2 + '&created_at=gte.' + encodeURIComponent(since) + '&order=created_at.desc,id'),
             q('tenants?select=*&id=eq.' + s2)
           ]).then(function (d) {
             Store.update(function (s) {
               s.categories = (d[0] || []).map(function (c) { return { id: c.id, nome: c.nome }; });
-              s.products = (d[1] || []).map(function (x) { return { id: x.id, codigo: x.codigo, nome: x.nome, catId: x.category_id, un: x.unidade, custo: Number(x.preco_custo), preco: Number(x.preco_venda), estoque: Number(x.estoque_atual), min: Number(x.estoque_minimo), fornecedor: x.fornecedor || '', ativo: x.ativo }; });
+              s.products = (d[1] || []).map(function (x) { return { id: x.id, codigo: x.codigo, nome: x.nome, catId: x.category_id, un: x.unidade, custo: Number(x.preco_custo), preco: Number(x.preco_venda), estoque: Number(x.estoque_atual), min: Number(x.estoque_minimo), fornecedor: x.fornecedor || '', ativo: x.ativo, ncm: x.ncm || '', cfop: x.cfop || '5102', cest: x.cest || '', csosn: x.csosn || '102', origem: x.origem || 0 }; });
               s.users = (d[2] || []).map(function (x) { return { id: x.id, nome: x.nome, email: x.email, papel: x.papel, ativo: x.ativo, createdAt: new Date(x.created_at).getTime() }; });
               /* auto-correção de papel/nome do perfil logado (ex.: conta promovida a dev
                  pela equipe JR — sem isso o navegador continuaria com papel antigo) */
@@ -3735,7 +3774,7 @@ body.is-app{background:var(--bg)}
                   itens: (v.sale_items || []).map(function (i) { return { productId: i.product_id, nome: i.nome_snapshot, un: i.unidade, qtd: Number(i.qtd), preco: Number(i.preco_unitario), subtotal: Number(i.subtotal) }; }),
                   subtotal: Number(v.subtotal), desconto: Number(v.desconto), descontoTipo: v.desconto_tipo, total: Number(v.total),
                   pagamentos: (v.sale_payments || []).map(function (x) { return { forma: x.forma, valor: Number(x.valor) }; }),
-                  status: v.status, motivoCancelamento: v.motivo_cancelamento || '' };
+                  status: v.status, motivoCancelamento: v.motivo_cancelamento || '', customerId: v.customer_id || null, customerNome: (v.customers && v.customers.nome) || '' };
               });
               s.movements = (d[4] || []).map(function (m) { return { id: m.id, at: new Date(m.created_at).getTime(), productId: m.product_id, tipo: m.tipo, qtd: Number(m.qtd), userId: m.user_id, userName: (m.users && m.users.nome) || '', origem: m.origem || '', obs: m.obs || '' }; });
               if (d[5] && d[5][0]) {
@@ -3762,10 +3801,10 @@ body.is-app{background:var(--bg)}
           var codigo = String(p.codigo || '').trim() || ('INT-' + String(Date.now()).slice(-6));
           return fetch(B + '/rest/v1/products', { method: 'POST', headers: Object.assign({ Prefer: 'return=representation' }, H),
             body: JSON.stringify({ tenant_id: sid, codigo: codigo, nome: p.nome, category_id: p.catId || null, unidade: p.un || 'un',
-              preco_custo: p.custo || 0, preco_venda: p.preco, estoque_atual: p.estoque || 0, estoque_minimo: p.min || 0, fornecedor: p.fornecedor || '' }) }).then(this.j).then(function (rows) {
+              preco_custo: p.custo || 0, preco_venda: p.preco, estoque_atual: p.estoque || 0, estoque_minimo: p.min || 0, fornecedor: p.fornecedor || '', ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
             var row = rows[0];
             if ((p.estoque || 0) > 0) fetch(B + '/rest/v1/stock_movements', { method: 'POST', headers: H, body: JSON.stringify({ tenant_id: sid, product_id: row.id, tipo: 'entrada', qtd: p.estoque, user_id: (Store.state.session || {}).userId, origem: 'Cadastro inicial' }) });
-            Store.update(function (s) { s.products.push({ id: row.id, codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ativo: row.ativo });
+            Store.update(function (s) { s.products.push({ id: row.id, codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ncm: row.ncm || '', cfop: row.cfop || '5102', cest: row.cest || '', csosn: row.csosn || '102', origem: row.origem || 0, ativo: row.ativo });
               /* mantém o cache local coerente com o banco: a entrada inicial também aparece na lista de movimentos na MESMA sessão */
               if (!s.movements) s.movements = [];
               if ((p.estoque || 0) > 0) s.movements.unshift({ id: 'mv' + Date.now(), at: Date.now(), productId: row.id, tipo: 'entrada', qtd: Number(p.estoque), userId: (Store.state.session || {}).userId, userName: (((Store.state.session || {}).profile) || {}).nome || '', origem: 'Cadastro inicial', obs: (p.nome || '') }); });
@@ -3774,9 +3813,9 @@ body.is-app{background:var(--bg)}
         }
         case 'products.update': {
           return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H),
-            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_atual: p.estoque, estoque_minimo: p.min, fornecedor: p.fornecedor }) }).then(this.j).then(function (rows) {
+            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_atual: p.estoque, estoque_minimo: p.min, fornecedor: p.fornecedor, ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
             var row = rows[0];
-            Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === row.id; })[0]; if (x) Object.assign(x, { codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '' }); });
+            Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === row.id; })[0]; if (x) Object.assign(x, { codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ncm: row.ncm || '', cfop: row.cfop || '5102', cest: row.cest || '', csosn: row.csosn || '102', origem: row.origem || 0 }); });
             return { id: row.id };
           });
         }
@@ -3796,10 +3835,10 @@ body.is-app{background:var(--bg)}
           Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === p.productId; })[0]; if (x) x.estoque = Number(r.estoque); s.movements.unshift({ id: 'mv' + Date.now(), at: Date.now(), productId: p.productId, tipo: 'ajuste', qtd: Number(p.delta), userId: (s.session || {}).userId, userName: ((s.session || {}).profile || {}).nome || '', origem: p.reason, obs: p.note || '' }); });
           return r;
         });
-        case 'sales.commit': return fetch(B + '/rest/v1/rpc/commit_sale', { method: 'POST', headers: H, body: JSON.stringify({ p: { items: p.items, discount: p.discount, payments: p.payments, idempotencyId: p.idempotencyId || null } }) }).then(this.j).then(function (sale) {
+        case 'sales.commit': return fetch(B + '/rest/v1/rpc/commit_sale', { method: 'POST', headers: H, body: JSON.stringify({ p: { items: p.items, discount: p.discount, payments: p.payments, idempotencyId: p.idempotencyId || null, customerId: p.customerId || null, quoteId: p.quoteId || null, fiadoVencimento: p.fiadoVencimento || null } }) }).then(this.j).then(function (sale) {
           Store.update(function (s) {
             sale.itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque - it.qtd) * 1000) / 1000; });
-            s.sales.unshift({ id: sale.id, numero: sale.numero, at: new Date(sale.at).getTime(), userId: (s.session || {}).userId, userName: sale.userName || '', itens: sale.itens, subtotal: Number(sale.subtotal), desconto: Number(sale.desconto), descontoTipo: (p.discount || {}).tipo || 'R$', total: Number(sale.total), pagamentos: sale.pagamentos, status: 'concluida' });
+            s.sales.unshift({ id: sale.id, numero: sale.numero, at: new Date(sale.at).getTime(), userId: (s.session || {}).userId, userName: sale.userName || '', itens: sale.itens, subtotal: Number(sale.subtotal), desconto: Number(sale.desconto), descontoTipo: (p.discount || {}).tipo || 'R$', total: Number(sale.total), pagamentos: sale.pagamentos, status: 'concluida', customerId: p.customerId || null, customerNome: p.customerNome || '' });
             sale.itens.forEach(function (it) { s.movements.unshift({ id: 'mv' + Date.now() + it.productId, at: Date.now(), productId: it.productId, tipo: 'saida', qtd: it.qtd, userId: (s.session || {}).userId, userName: sale.userName || '', origem: sale.numero, obs: '' }); });
           });
           return { sale: sale };
@@ -3947,7 +3986,9 @@ body.is-app{background:var(--bg)}
         case 'billing.suspend_tenant':
           return fetch(B + '/functions/v1/api', { method: 'POST', headers: Object.assign({}, H, self.devPinHeader()), body: JSON.stringify({ op: 'billing.suspend_tenant', payload: { tenantId: p.tenantId, reason: p.reason || '' } }) }).then(self.j);
         case 'billing.setPastDue': return Promise.reject(ApiError('NOT_IMPLEMENTED', 'Simulações existem apenas no modo demo.'));
-        default: return Promise.reject(ApiError('NOT_IMPLEMENTED', 'Operação "' + op + '" aguardando integração.'));
+        default:
+          if (window.BizRemote && window.BizRemote[op]) return window.BizRemote[op](p, { B: B, H: H, sid: sid, j: this.j.bind(this) });
+          return Promise.reject(ApiError('NOT_IMPLEMENTED', 'Operação "' + op + '" não existe.'));
       }
     }
   };
@@ -3987,6 +4028,446 @@ body.is-app{background:var(--bg)}
   window.SupabaseAdapter = SupabaseAdapter;
   window.HttpAdapter = HttpAdapter;
   window.selectAdapter = selectAdapter;
+})();
+</script>
+<script>
+/* ==========================================================================
+   LojaCerta · Recursos dos planos (v2.0)
+   Plans  → o que cada plano libera (espelho de public.plan_has no banco)
+   Biz    → serviços: clientes, contas a receber/pagar, orçamentos, lojas,
+            nota fiscal. As telas só falam com o Biz.
+   BizLocal  → implementação local (modo demonstração / testes)
+   BizRemote → implementação Supabase (PostgREST + RPCs + Edge "api")
+   ========================================================================== */
+;(function () {
+  'use strict';
+
+  /* ---------------- Planos ---------------- */
+  var FEATURES = {
+    clientes: { label: 'Clientes', plan: 'profissional' },
+    fiado: { label: 'Venda no fiado', plan: 'profissional' },
+    financeiro: { label: 'Contas a pagar e receber', plan: 'profissional' },
+    orcamentos: { label: 'Orçamentos', plan: 'profissional' },
+    multiloja: { label: 'Multi-loja', plan: 'premium' },
+    fiscal: { label: 'NFC-e / NF-e', plan: 'premium' }
+  };
+  var Plans = {
+    FEATURES: FEATURES,
+    has: function (f) {
+      var s = window.Store && Store.state;
+      var t = (s && s.tenant) || {};
+      var u = window.Auth && Auth.me ? Auth.me() : null;
+      if ((u && u.papel === 'dev') || t.planId === 'dev') return true;
+      if (t.status === 'trialing') return true;
+      var need = (FEATURES[f] || {}).plan;
+      if (need === 'profissional') return t.planId === 'profissional' || t.planId === 'premium';
+      if (need === 'premium') return t.planId === 'premium';
+      return true;
+    },
+    planName: function (f) { return (FEATURES[f] || {}).plan === 'premium' ? 'Premium' : 'Profissional'; },
+    /* painel de upgrade usado quando o plano atual não inclui o recurso */
+    upsell: function (f, desc) {
+      var feat = FEATURES[f] || { label: f };
+      return html`<div class="card upsell-card">
+        <div class="upsell-ico">${raw(I('lock', 26))}</div>
+        <h2>${feat.label} faz parte do plano ${Plans.planName(f)}</h2>
+        <p>${desc || 'Faça upgrade para liberar este recurso agora mesmo — sem perder nenhum dado.'}</p>
+        <a class="btn btn-primary btn-lg" href="#/app/assinatura">${raw(I('billing', 17))} Ver planos e fazer upgrade</a>
+      </div>`;
+    }
+  };
+
+  function req(op, p) { return ApiClient.request('biz.' + op, p || {}); }
+  var Biz = {
+    customers: {
+      list: function () { return req('customers.list'); },
+      save: function (c) { return req('customers.save', c); },
+      toggle: function (id, ativo) { return req('customers.toggle', { id: id, ativo: ativo }); }
+    },
+    receivables: {
+      list: function () { return req('receivables.list'); },
+      create: function (r) { return req('receivables.create', r); },
+      settle: function (id, valor, forma) { return req('fin.settle', { kind: 'receber', id: id, valor: valor, forma: forma, acao: 'pagar' }); },
+      cancel: function (id) { return req('fin.settle', { kind: 'receber', id: id, acao: 'cancelar' }); }
+    },
+    payables: {
+      list: function () { return req('payables.list'); },
+      create: function (r) { return req('payables.create', r); },
+      settle: function (id, valor, forma) { return req('fin.settle', { kind: 'pagar', id: id, valor: valor, forma: forma, acao: 'pagar' }); },
+      cancel: function (id) { return req('fin.settle', { kind: 'pagar', id: id, acao: 'cancelar' }); }
+    },
+    quotes: {
+      list: function () { return req('quotes.list'); },
+      create: function (q) { return req('quotes.create', q); },
+      cancel: function (id) { return req('quotes.cancel', { id: id }); }
+    },
+    stores: {
+      list: function () { return req('stores.list'); },
+      create: function (s) { return req('stores.create', s); },
+      switchTo: function (id) { return req('stores.switch', { id: id }); },
+      summary: function (days) { return req('stores.summary', { days: days || 30 }); }
+    },
+    fiscal: {
+      config: function () { return req('fiscal.config'); },
+      saveConfig: function (c) { return req('fiscal.saveConfig', c); },
+      test: function () { return req('fiscal.test'); },
+      docs: function (saleId) { return req('fiscal.docs', { saleId: saleId || null }); },
+      emit: function (saleId, modelo, cpf) { return req('fiscal.emit', { saleId: saleId, modelo: modelo || 'nfce', cpf: cpf || '' }); },
+      status: function (docId) { return req('fiscal.status', { docId: docId }); },
+      cancel: function (docId, justificativa) { return req('fiscal.cancel', { docId: docId, justificativa: justificativa }); }
+    },
+    /* helpers de apresentação */
+    today: function () { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); },
+    addDays: function (iso, n) { var d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); },
+    fmtDate: function (iso) { if (!iso) return '—'; var p = String(iso).slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; },
+    overdue: function (r) { return r.status === 'aberto' && r.vencimento < Biz.today(); },
+    saldo: function (r) { return U.round2(r.valor - (r.valorPago || 0)); }
+  };
+
+  /* =================== Implementação LOCAL (demonstração) =================== */
+  function uid(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function bz() {
+    var s = Store.state;
+    if (!s.biz) s.biz = { customers: [], receivables: [], payables: [], quotes: [], fiscalDocs: [], fiscal: { ambiente: 'homologacao', autoEmitir: false, regime: 1, hasToken: false }, stores: [], seeded: false };
+    var b = s.biz;
+    if (!b.seeded) {
+      b.seeded = true;
+      var hoje = Biz.today();
+      b.customers.push(
+        { id: 'c1', nome: 'Construtora Horizonte Ltda', documento: '12345678000190', ie: '', telefone: '(31) 98888-1111', email: 'compras@horizonte.demo', logradouro: 'Av. Amazonas', numero: '1500', bairro: 'Centro', municipio: 'Belo Horizonte', uf: 'MG', cep: '30180001', limite: 5000, obs: 'Paga sempre no dia 10', ativo: true },
+        { id: 'c2', nome: 'José Pedreiro', documento: '52998224725', ie: '', telefone: '(31) 97777-2222', email: '', logradouro: 'Rua das Flores', numero: '45', bairro: 'Barreiro', municipio: 'Belo Horizonte', uf: 'MG', cep: '30640000', limite: 800, obs: '', ativo: true },
+        { id: 'c3', nome: 'Maria Reformas', documento: '', ie: '', telefone: '(31) 96666-3333', email: '', logradouro: '', numero: '', bairro: '', municipio: '', uf: '', cep: '', limite: 0, obs: '', ativo: true }
+      );
+      b.receivables.push(
+        { id: 'r1', customerId: 'c2', saleId: null, descricao: 'Fiado · compra de cimento', valor: 320, valorPago: 0, vencimento: Biz.addDays(hoje, -3), status: 'aberto', forma: '', createdAt: Date.now() - 20 * 864e5 },
+        { id: 'r2', customerId: 'c1', saleId: null, descricao: 'Fiado · pedido de obra', valor: 1850, valorPago: 500, vencimento: Biz.addDays(hoje, 12), status: 'aberto', forma: 'pix', createdAt: Date.now() - 5 * 864e5 }
+      );
+      b.payables.push(
+        { id: 'pg1', fornecedor: 'Votoran Cimentos', descricao: 'Compra de cimento (NF 4521)', categoria: 'Fornecedores', valor: 4200, valorPago: 0, vencimento: Biz.addDays(hoje, 5), status: 'aberto', forma: '', createdAt: Date.now() - 2 * 864e5 },
+        { id: 'pg2', fornecedor: 'Imobiliária Central', descricao: 'Aluguel do depósito', categoria: 'Aluguel', valor: 3500, valorPago: 0, vencimento: Biz.addDays(hoje, -1), status: 'aberto', forma: '', createdAt: Date.now() - 25 * 864e5 }
+      );
+    }
+    return b;
+  }
+  function custName(id) { var c = bz().customers.filter(function (x) { return x.id === id; })[0]; return c ? c.nome : ''; }
+  function abertoDe(cid) { return U.round2(U.sum(bz().receivables.filter(function (r) { return r.customerId === cid && r.status === 'aberto'; }), function (r) { return r.valor - r.valorPago; })); }
+  function need(f) { if (!Plans.has(f)) throw ApiError('PLAN', (FEATURES[f] || {}).label + ' faz parte do plano ' + Plans.planName(f) + '. Faça upgrade em Assinatura.'); }
+  function isStaff() { var u = Auth.me(); return !!(u && ['admin', 'gerente', 'dev'].indexOf(u.papel) > -1); }
+
+  var BizLocal = {
+    'biz.customers.list': function () {
+      return bz().customers.map(function (c) { return Object.assign({}, c, { aberto: abertoDe(c.id) }); })
+        .sort(function (a, b) { return a.nome.localeCompare(b.nome); });
+    },
+    'biz.customers.save': function (d) {
+      need('clientes');
+      if (!d.nome || String(d.nome).trim().length < 2) throw ApiError('VALIDATION', 'Informe o nome do cliente.');
+      var b = bz(), c = d.id ? b.customers.filter(function (x) { return x.id === d.id; })[0] : null;
+      var row = { nome: String(d.nome).trim(), documento: String(d.documento || '').replace(/\D/g, ''), ie: d.ie || '', telefone: d.telefone || '', email: d.email || '',
+        logradouro: d.logradouro || '', numero: d.numero || '', bairro: d.bairro || '', municipio: d.municipio || '', uf: String(d.uf || '').toUpperCase(), cep: String(d.cep || '').replace(/\D/g, ''),
+        limite: U.round2(Number(d.limite) || 0), obs: d.obs || '' };
+      if (c) Object.assign(c, row); else { c = Object.assign({ id: uid('c'), ativo: true }, row); b.customers.push(c); }
+      return { id: c.id };
+    },
+    'biz.customers.toggle': function (d) { need('clientes'); var c = bz().customers.filter(function (x) { return x.id === d.id; })[0]; if (c) c.ativo = !!d.ativo; return { ok: true }; },
+    'biz.receivables.list': function () {
+      return bz().receivables.map(function (r) { return Object.assign({}, r, { customerNome: custName(r.customerId) }); })
+        .sort(function (a, b) { return a.vencimento < b.vencimento ? -1 : 1; });
+    },
+    'biz.receivables.create': function (d) {
+      need('financeiro'); if (!isStaff()) throw ApiError('FORBIDDEN', 'Somente gerente ou administrador.');
+      if (!(Number(d.valor) > 0)) throw ApiError('VALIDATION', 'Informe um valor maior que zero.');
+      var r = { id: uid('r'), customerId: d.customerId || null, saleId: null, descricao: d.descricao || 'Conta a receber', valor: U.round2(Number(d.valor)), valorPago: 0, vencimento: d.vencimento || Biz.addDays(Biz.today(), 30), status: 'aberto', forma: '', createdAt: Date.now() };
+      bz().receivables.push(r); return { id: r.id };
+    },
+    'biz.payables.list': function () {
+      if (!isStaff()) return [];
+      return bz().payables.slice().sort(function (a, b) { return a.vencimento < b.vencimento ? -1 : 1; });
+    },
+    'biz.payables.create': function (d) {
+      need('financeiro'); if (!isStaff()) throw ApiError('FORBIDDEN', 'Somente gerente ou administrador.');
+      if (!(Number(d.valor) > 0)) throw ApiError('VALIDATION', 'Informe um valor maior que zero.');
+      if (!d.descricao || String(d.descricao).trim().length < 2) throw ApiError('VALIDATION', 'Descreva a conta.');
+      if (!d.vencimento) throw ApiError('VALIDATION', 'Informe o vencimento.');
+      var r = { id: uid('pg'), fornecedor: d.fornecedor || '', descricao: String(d.descricao).trim(), categoria: d.categoria || 'Outros', valor: U.round2(Number(d.valor)), valorPago: 0, vencimento: d.vencimento, status: 'aberto', forma: '', createdAt: Date.now() };
+      bz().payables.push(r); return { id: r.id };
+    },
+    'biz.fin.settle': function (d) {
+      need('financeiro'); if (!isStaff()) throw ApiError('FORBIDDEN', 'Somente gerente ou administrador.');
+      var list = d.kind === 'pagar' ? bz().payables : bz().receivables;
+      var r = list.filter(function (x) { return x.id === d.id; })[0];
+      if (!r) throw ApiError('NOT_FOUND', 'Conta não encontrada.');
+      if (r.status !== 'aberto') throw ApiError('VALIDATION', 'Esta conta já está ' + r.status + '.');
+      if (d.acao === 'cancelar') { if (Auth.me().papel !== 'admin' && Auth.me().papel !== 'dev') throw ApiError('FORBIDDEN', 'Somente o administrador cancela contas.'); r.status = 'cancelado'; return { ok: true }; }
+      var v = U.round2(Number(d.valor) || 0), saldo = U.round2(r.valor - r.valorPago);
+      if (v <= 0) v = saldo;
+      if (v > saldo + 0.001) throw ApiError('VALIDATION', 'O valor informado é maior que o saldo em aberto (' + U.money(saldo) + ').');
+      r.valorPago = U.round2(r.valorPago + v); r.forma = d.forma || '';
+      if (r.valorPago >= r.valor - 0.001) { r.status = 'pago'; r.pagoEm = Date.now(); }
+      return { ok: true };
+    },
+    'biz.quotes.list': function () {
+      return bz().quotes.map(function (q) { return Object.assign({}, q, { clienteNome: q.clienteNome || custName(q.customerId) }); })
+        .sort(function (a, b) { return b.createdAt - a.createdAt; });
+    },
+    'biz.quotes.create': function (d) {
+      need('orcamentos');
+      var b = bz();
+      var itens = (d.itens || []).map(function (it) {
+        var p = Store.state.products.filter(function (x) { return x.id === it.productId; })[0];
+        if (!p) return null; var q = Number(it.qtd) || 0; if (q <= 0) return null;
+        return { productId: p.id, nome: p.nome, un: p.un, qtd: q, preco: p.preco, subtotal: U.round2(p.preco * q) };
+      }).filter(Boolean);
+      if (!itens.length) throw ApiError('VALIDATION', 'Adicione ao menos um produto ao orçamento.');
+      var sub = U.round2(U.sum(itens, function (i) { return i.subtotal; })), desc = U.clamp(U.round2(Number(d.desconto) || 0), 0, sub);
+      var n = b.quotes.length + 1;
+      var q = { id: uid('q'), numero: 'ORC-' + U.pad(n), customerId: d.customerId || null, clienteNome: d.clienteNome || '', itens: itens, subtotal: sub, desconto: desc, total: U.round2(sub - desc),
+        validade: d.validade || Biz.addDays(Biz.today(), 7), status: 'aberto', saleId: null, obs: d.obs || '', createdAt: Date.now() };
+      b.quotes.push(q); return { id: q.id, numero: q.numero };
+    },
+    'biz.quotes.cancel': function (d) { need('orcamentos'); var q = bz().quotes.filter(function (x) { return x.id === d.id; })[0]; if (q && q.status === 'aberto') q.status = 'cancelado'; return { ok: true }; },
+    'biz.stores.list': function () {
+      var b = bz(), t = Store.state.tenant;
+      return [{ id: 'local', nome: t.nome, papel: 'admin', principal: true, atual: !b.storeAtual }].concat(b.stores.map(function (x) { return { id: x.id, nome: x.nome, papel: 'admin', principal: false, atual: b.storeAtual === x.id }; }));
+    },
+    'biz.stores.create': function (d) {
+      need('multiloja');
+      if (!d.nome || String(d.nome).trim().length < 2) throw ApiError('VALIDATION', 'Informe o nome da nova loja.');
+      var x = { id: uid('lj'), nome: String(d.nome).trim() }; bz().stores.push(x); return x;
+    },
+    'biz.stores.switch': function (d) { bz().storeAtual = d.id === 'local' ? null : d.id; return { ok: true, local: true }; },
+    'biz.stores.summary': function () {
+      var vendas = Store.state.sales.filter(function (s) { return s.status === 'concluida' && s.at > Date.now() - 30 * 864e5; });
+      var base = { id: 'local', nome: Store.state.tenant.nome, vendas: vendas.length, faturamento: U.round2(U.sum(vendas, function (v) { return v.total; })),
+        abaixoMinimo: Store.state.products.filter(function (p) { return p.ativo && p.estoque <= p.min; }).length, receberAberto: U.round2(U.sum(bz().receivables.filter(function (r) { return r.status === 'aberto'; }), function (r) { return r.valor - r.valorPago; })) };
+      return [base].concat(bz().stores.map(function (x) { return { id: x.id, nome: x.nome, vendas: 0, faturamento: 0, abaixoMinimo: 0, receberAberto: 0 }; }));
+    },
+    'biz.fiscal.config': function () { return Object.assign({ liberado: Plans.has('fiscal') }, bz().fiscal); },
+    'biz.fiscal.saveConfig': function (d) {
+      need('fiscal');
+      var f = bz().fiscal; f.ambiente = d.ambiente === 'producao' ? 'producao' : 'homologacao'; f.autoEmitir = !!d.autoEmitir; f.regime = Number(d.regime) || 1;
+      if (d.token) f.hasToken = true;
+      return Object.assign({ liberado: true }, f);
+    },
+    'biz.fiscal.test': function () { need('fiscal'); if (!bz().fiscal.hasToken) throw ApiError('NOT_CONFIGURED', 'Informe o token do Focus NFe e salve antes de testar.'); return { ok: true, message: 'Demonstração: conexão simulada com o emissor fiscal.' }; },
+    'biz.fiscal.docs': function (d) { return bz().fiscalDocs.filter(function (x) { return !d.saleId || x.saleId === d.saleId; }).sort(function (a, b) { return b.createdAt - a.createdAt; }); },
+    'biz.fiscal.emit': function (d) {
+      need('fiscal');
+      if (!bz().fiscal.hasToken) throw ApiError('NOT_CONFIGURED', 'Nota fiscal ainda não configurada: informe o token do Focus NFe em Nota fiscal.');
+      var sale = Store.state.sales.filter(function (s) { return s.id === d.saleId; })[0];
+      if (!sale) throw ApiError('NOT_FOUND', 'Venda não encontrada.');
+      var ex = bz().fiscalDocs.filter(function (x) { return x.saleId === d.saleId && x.modelo === (d.modelo || 'nfce') && x.status === 'autorizado'; })[0];
+      if (ex) return { ok: true, doc: ex, existing: true };
+      var n = bz().fiscalDocs.length + 1;
+      var doc = { id: uid('fd'), saleId: d.saleId, modelo: d.modelo || 'nfce', ref: uid('ref'), status: 'autorizado', numero: String(n), serie: '1', chave: String(Date.now()) + '0000000000000000000000000000000', danfeUrl: '', xmlUrl: '',
+        mensagem: 'Demonstração — nota simulada, sem valor fiscal', ambiente: bz().fiscal.ambiente, createdAt: Date.now() };
+      bz().fiscalDocs.push(doc); return { ok: true, doc: doc };
+    },
+    'biz.fiscal.status': function (d) { return { ok: true, doc: bz().fiscalDocs.filter(function (x) { return x.id === d.docId; })[0] }; },
+    'biz.fiscal.cancel': function (d) {
+      var doc = bz().fiscalDocs.filter(function (x) { return x.id === d.docId; })[0];
+      if (!doc) throw ApiError('NOT_FOUND', 'Nota não encontrada.');
+      if (String(d.justificativa || '').trim().length < 15) throw ApiError('VALIDATION', 'A justificativa do cancelamento deve ter entre 15 e 255 caracteres.');
+      doc.status = 'cancelado'; doc.mensagem = 'Cancelamento homologado (demonstração)'; return { ok: true, doc: doc };
+    },
+    /* ganchos da venda local (mesma regra do banco: sale_post_hook) */
+    _beforeSale: function (d, total) {
+      var fiado = U.round2(U.sum((d.payments || []).filter(function (p) { return p.forma === 'fiado'; }), function (p) { return Number(p.valor) || 0; }));
+      var c = d.customerId ? bz().customers.filter(function (x) { return x.id === d.customerId; })[0] : null;
+      if (d.customerId && (!c || !c.ativo)) throw ApiError('VALIDATION', 'Cliente não encontrado ou inativo.');
+      if (fiado > 0) {
+        need('fiado');
+        if (!c) throw ApiError('VALIDATION', 'Selecione o cliente para vender no fiado.');
+        if (c.limite > 0 && abertoDe(c.id) + fiado > c.limite + 0.001)
+          throw ApiError('CREDIT_LIMIT', 'Limite de crédito de ' + c.nome + ' excedido: em aberto ' + U.money(abertoDe(c.id)) + ', limite ' + U.money(c.limite) + '.');
+      }
+      return fiado;
+    },
+    _afterSale: function (sale, d, fiado) {
+      if (d.customerId) { sale.customerId = d.customerId; sale.customerNome = custName(d.customerId); }
+      if (fiado > 0) bz().receivables.push({ id: uid('r'), customerId: d.customerId, saleId: sale.id, descricao: 'Fiado · ' + sale.numero, valor: fiado, valorPago: 0,
+        vencimento: d.fiadoVencimento || Biz.addDays(Biz.today(), 30), status: 'aberto', forma: '', createdAt: Date.now() });
+      if (d.quoteId) { var q = bz().quotes.filter(function (x) { return x.id === d.quoteId; })[0]; if (q && q.status === 'aberto') { q.status = 'convertido'; q.saleId = sale.id; } }
+    },
+    _afterCancel: function (saleId) {
+      bz().receivables.forEach(function (r) { if (r.saleId === saleId && r.status === 'aberto') r.status = 'cancelado'; });
+      bz().quotes.forEach(function (q) { if (q.saleId === saleId && q.status === 'convertido') { q.status = 'aberto'; q.saleId = null; } });
+    }
+  };
+
+  /* =================== Implementação SUPABASE =================== */
+  function rpc(c, fn, body) { return fetch(c.B + '/rest/v1/rpc/' + fn, { method: 'POST', headers: c.H, body: JSON.stringify(body || {}) }).then(c.j); }
+  function get(c, path) { return fetch(c.B + '/rest/v1/' + path, { headers: c.H }).then(c.j); }
+  function send(c, method, path, body) {
+    return fetch(c.B + '/rest/v1/' + path, { method: method, headers: Object.assign({ Prefer: 'return=representation' }, c.H), body: JSON.stringify(body) }).then(c.j)
+      .then(function (rows) {
+        if (method !== 'POST' && Array.isArray(rows) && !rows.length) throw ApiError('FORBIDDEN', 'Sem permissão para alterar este registro (plano ou papel).');
+        return rows;
+      });
+  }
+  function edge(c, op, payload) { return fetch(c.B + '/functions/v1/api', { method: 'POST', headers: c.H, body: JSON.stringify({ op: op, payload: payload || {} }) }).then(c.j); }
+  function mapCust(x) {
+    return { id: x.id, nome: x.nome, documento: x.documento, ie: x.ie, telefone: x.telefone, email: x.email, logradouro: x.logradouro, numero: x.numero, bairro: x.bairro,
+      municipio: x.municipio, uf: x.uf, cep: x.cep, limite: Number(x.limite_credito), obs: x.obs, ativo: x.ativo };
+  }
+  function mapFin(x) {
+    return { id: x.id, customerId: x.customer_id || null, customerNome: (x.customers && x.customers.nome) || '', saleId: x.sale_id || null, fornecedor: x.fornecedor || '', categoria: x.categoria || '',
+      descricao: x.descricao, valor: Number(x.valor), valorPago: Number(x.valor_pago), vencimento: x.vencimento, status: x.status, forma: x.forma_pagamento || '',
+      pagoEm: x.pago_em ? new Date(x.pago_em).getTime() : null, createdAt: new Date(x.created_at).getTime() };
+  }
+  function mapDoc(x) {
+    return { id: x.id, saleId: x.sale_id, modelo: x.modelo, ref: x.ref, status: x.status, numero: x.numero, serie: x.serie, chave: x.chave, danfeUrl: x.danfe_url, xmlUrl: x.xml_url,
+      mensagem: x.mensagem, ambiente: x.ambiente, createdAt: new Date(x.created_at).getTime() };
+  }
+  var BizRemote = {
+    'biz.customers.list': function (p, c) {
+      return Promise.all([get(c, 'customers?select=*&tenant_id=eq.' + c.sid + '&order=nome&limit=5000'),
+        get(c, 'receivables?select=customer_id,valor,valor_pago&status=eq.aberto&tenant_id=eq.' + c.sid + '&limit=10000')]).then(function (d) {
+        var ab = {}; (d[1] || []).forEach(function (r) { if (r.customer_id) ab[r.customer_id] = U.round2((ab[r.customer_id] || 0) + Number(r.valor) - Number(r.valor_pago)); });
+        return (d[0] || []).map(function (x) { return Object.assign(mapCust(x), { aberto: ab[x.id] || 0 }); });
+      });
+    },
+    'biz.customers.save': function (p, c) {
+      var row = { nome: String(p.nome || '').trim(), documento: String(p.documento || '').replace(/\D/g, ''), ie: p.ie || '', telefone: p.telefone || '', email: p.email || '',
+        logradouro: p.logradouro || '', numero: p.numero || '', bairro: p.bairro || '', municipio: p.municipio || '', uf: String(p.uf || '').toUpperCase(),
+        cep: String(p.cep || '').replace(/\D/g, ''), limite_credito: Number(p.limite) || 0, obs: p.obs || '' };
+      var op = p.id ? send(c, 'PATCH', 'customers?id=eq.' + p.id, row) : send(c, 'POST', 'customers', Object.assign({ tenant_id: c.sid }, row));
+      return op.then(function (rows) { return { id: rows[0].id }; });
+    },
+    'biz.customers.toggle': function (p, c) { return send(c, 'PATCH', 'customers?id=eq.' + p.id, { ativo: !!p.ativo }).then(function () { return { ok: true }; }); },
+    'biz.receivables.list': function (p, c) { return get(c, 'receivables?select=*,customers(nome)&tenant_id=eq.' + c.sid + '&order=vencimento.asc&limit=5000').then(function (r) { return (r || []).map(mapFin); }); },
+    'biz.receivables.create': function (p, c) {
+      return send(c, 'POST', 'receivables', { tenant_id: c.sid, customer_id: p.customerId || null, descricao: p.descricao || 'Conta a receber', valor: Number(p.valor),
+        vencimento: p.vencimento, created_by: (Store.state.session || {}).userId }).then(function (r) { return { id: r[0].id }; });
+    },
+    'biz.payables.list': function (p, c) { return get(c, 'payables?select=*&tenant_id=eq.' + c.sid + '&order=vencimento.asc&limit=5000').then(function (r) { return (r || []).map(mapFin); }); },
+    'biz.payables.create': function (p, c) {
+      return send(c, 'POST', 'payables', { tenant_id: c.sid, fornecedor: p.fornecedor || '', descricao: p.descricao, categoria: p.categoria || 'Outros', valor: Number(p.valor),
+        vencimento: p.vencimento, created_by: (Store.state.session || {}).userId }).then(function (r) { return { id: r[0].id }; });
+    },
+    'biz.fin.settle': function (p, c) { return rpc(c, 'fin_settle', { p: p }); },
+    'biz.quotes.list': function (p, c) {
+      return get(c, 'quotes?select=*,customers(nome)&tenant_id=eq.' + c.sid + '&order=created_at.desc&limit=1000').then(function (r) {
+        return (r || []).map(function (x) {
+          return { id: x.id, numero: x.numero, customerId: x.customer_id, clienteNome: x.cliente_nome || (x.customers && x.customers.nome) || '', itens: (x.itens || []).map(function (i) { return { productId: i.productId, nome: i.nome, un: i.un, qtd: Number(i.qtd), preco: Number(i.preco), subtotal: Number(i.subtotal) }; }),
+            subtotal: Number(x.subtotal), desconto: Number(x.desconto), total: Number(x.total), validade: x.validade, status: x.status, saleId: x.sale_id, obs: x.obs, createdAt: new Date(x.created_at).getTime() };
+        });
+      });
+    },
+    'biz.quotes.create': function (p, c) {
+      return send(c, 'POST', 'quotes', { tenant_id: c.sid, customer_id: p.customerId || null, cliente_nome: p.clienteNome || '', desconto: Number(p.desconto) || 0,
+        validade: p.validade, obs: p.obs || '', itens: (p.itens || []).map(function (i) { return { productId: i.productId, qtd: Number(i.qtd) }; }) }).then(function (r) { return { id: r[0].id, numero: r[0].numero }; });
+    },
+    'biz.quotes.cancel': function (p, c) { return send(c, 'PATCH', 'quotes?id=eq.' + p.id, { status: 'cancelado' }).then(function () { return { ok: true }; }); },
+    'biz.stores.list': function (p, c) { return rpc(c, 'store_list'); },
+    'biz.stores.create': function (p, c) { return rpc(c, 'store_create', { p: { nome: p.nome, cnpj: p.cnpj || '', telefone: p.telefone || '', endereco: p.endereco || '' } }); },
+    'biz.stores.switch': function (p, c) { return rpc(c, 'store_switch', { p: { id: p.id } }); },
+    'biz.stores.summary': function (p, c) { return rpc(c, 'group_summary', { p_days: p.days || 30 }); },
+    'biz.fiscal.config': function (p, c) { return rpc(c, 'fiscal_config_get'); },
+    'biz.fiscal.saveConfig': function (p, c) { return rpc(c, 'fiscal_config_set', { p: p }); },
+    'biz.fiscal.test': function (p, c) { return edge(c, 'fiscal.test'); },
+    'biz.fiscal.docs': function (p, c) {
+      return get(c, 'fiscal_docs?select=*&tenant_id=eq.' + c.sid + (p.saleId ? '&sale_id=eq.' + p.saleId : '') + '&order=created_at.desc&limit=500').then(function (r) { return (r || []).map(mapDoc); });
+    },
+    'biz.fiscal.emit': function (p, c) { return edge(c, 'fiscal.emit', p).then(function (r) { return { ok: true, doc: mapDoc(r.doc), existing: r.existing }; }); },
+    'biz.fiscal.status': function (p, c) { return edge(c, 'fiscal.status', p).then(function (r) { return { ok: true, doc: mapDoc(r.doc) }; }); },
+    'biz.fiscal.cancel': function (p, c) { return edge(c, 'fiscal.cancel', p).then(function (r) { return { ok: true, doc: mapDoc(r.doc) }; }); }
+  };
+
+
+  /* =================== PDV offline: fila de vendas sem internet ===================
+     Produção apenas. Se a conexão cair ao finalizar, a venda vai para uma fila no
+     aparelho (localStorage) com o MESMO idempotencyId; o banco (commit_sale) usa
+     esse id como chave, então reenviar nunca duplica. A fila é enviada sozinha ao
+     voltar a conexão, ao abrir o app e a cada 30 s. */
+  var OfflineQueue = {
+    KEY: 'lc_offline_sales', FAIL: 'lc_offline_failed', busy: false,
+    list: function (k) { try { return JSON.parse(localStorage.getItem(k || this.KEY) || '[]'); } catch (e) { return []; } },
+    save: function (l, k) { try { localStorage.setItem(k || this.KEY, JSON.stringify(l)); } catch (e) { } this.banner(); },
+    isNetErr: function (e) {
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+      return !!e && (e.name === 'TypeError' || e.code === 'NETWORK' || /Failed to fetch|NetworkError|Load failed|network|ERR_INTERNET|timeout/i.test(String(e.message || '')));
+    },
+    enqueue: function (d) {
+      var st = Store.state, me = Auth.me() || {};
+      var itens = (d.items || []).map(function (it) {
+        var p = st.products.filter(function (x) { return x.id === it.productId; })[0] || {};
+        var q = Number(it.qtd) || 0; var pr = Number(p.preco != null ? p.preco : it.preco) || 0;
+        return { productId: it.productId, nome: p.nome || it.nome, un: p.un || it.un, qtd: q, preco: pr, subtotal: U.round2(pr * q) };
+      });
+      var sub = U.round2(U.sum(itens, function (i) { return i.subtotal; }));
+      var disc = d.discount || { tipo: 'R$', valor: 0 };
+      var dv = U.clamp(U.round2(disc.tipo === '%' ? sub * (Number(disc.valor) || 0) / 100 : (Number(disc.valor) || 0)), 0, sub);
+      var q = this.list(); q.push({ d: d, at: Date.now() });
+      var sale = { id: d.idempotencyId, numero: 'OFFLINE-' + U.pad(q.length, 3), at: Date.now(), userId: me.id, userName: me.nome || '', itens: itens,
+        subtotal: sub, desconto: dv, descontoTipo: disc.tipo, total: U.round2(sub - dv), pagamentos: d.payments || [], status: 'concluida', pending: true,
+        customerId: d.customerId || null, customerNome: d.customerNome || '' };
+      Store.update(function (s) {
+        itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque - it.qtd) * 1000) / 1000; });
+        s.sales.unshift(sale);
+      });
+      this.save(q);
+      return sale;
+    },
+    flush: function () {
+      var self = this;
+      if (self.busy || Config.env !== 'production' || !Auth.me()) return Promise.resolve();
+      var q = self.list(); if (!q.length) { self.banner(); return Promise.resolve(); }
+      self.busy = true;
+      var sent = 0;
+      var step = function () {
+        var cur = self.list(); if (!cur.length) return Promise.resolve();
+        var item = cur[0];
+        return ApiClient.request('sales.commit', item.d).then(function (r) {
+          var sale = r.sale || r;
+          Store.update(function (s) {
+            /* o adapter acabou de inserir a venda do servidor E baixar o estoque de novo:
+               remove a provisória e devolve a baixa duplicada da provisória */
+            var prov = s.sales.filter(function (v) { return v.pending && v.id === item.d.idempotencyId; })[0];
+            if (prov) {
+              prov.itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque + it.qtd) * 1000) / 1000; });
+              s.sales = s.sales.filter(function (v) { return v !== prov; });
+            }
+          });
+          self.save(self.list().slice(1)); sent++;
+          return step();
+        }).catch(function (e) {
+          if (self.isNetErr(e)) return; // continua sem internet: tenta depois
+          /* recusa de regra (ex.: estoque acabou): tira da fila, guarda em "falhas" e avisa */
+          var f = self.list(self.FAIL); f.push({ d: item.d, at: item.at, erro: e.message || String(e) }); self.save(f, self.FAIL);
+          Store.update(function (s) {
+            var prov = s.sales.filter(function (v) { return v.pending && v.id === item.d.idempotencyId; })[0];
+            if (prov) {
+              prov.itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque + it.qtd) * 1000) / 1000; });
+              s.sales = s.sales.filter(function (v) { return v !== prov; });
+            }
+          });
+          self.save(self.list().slice(1));
+          try { UI.toast('Uma venda feita sem internet foi recusada pelo servidor: ' + (e.message || 'erro') + ' Refaça a venda no PDV.', { type: 'err', timeout: 12000 }); } catch (x) { }
+          return step();
+        });
+      };
+      return step().then(function () {
+        self.busy = false; self.banner();
+        if (sent) { try { UI.toast(sent + ' venda(s) feita(s) sem internet foram enviadas ✔', { type: 'ok' }); Bus.emit('sales:changed'); Bus.emit('store:changed', Store.state); } catch (x) { } }
+      }, function () { self.busy = false; self.banner(); });
+    },
+    banner: function () {
+      if (typeof document === 'undefined') return;
+      var n = this.list().length, el = document.getElementById('offline-bar');
+      if (!n) { if (el) el.remove(); return; }
+      if (!el) { el = document.createElement('div'); el.id = 'offline-bar'; el.className = 'offline-bar'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+      el.textContent = (navigator.onLine === false ? 'Sem internet — ' : 'Enviando — ') + n + ' venda(s) aguardando envio ao servidor. Pode continuar vendendo.';
+    }
+  };
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', function () { OfflineQueue.flush(); });
+    window.addEventListener('offline', function () { OfflineQueue.banner(); });
+    setInterval(function () { if (OfflineQueue.list().length) OfflineQueue.flush(); }, 30000);
+    setTimeout(function () { OfflineQueue.flush(); }, 4000);
+  }
+  window.OfflineQueue = OfflineQueue;
+  window.Plans = Plans; window.Biz = Biz; window.BizLocal = BizLocal; window.BizRemote = BizRemote;
 })();
 </script>
 <script>
@@ -4709,8 +5190,10 @@ body.is-app{background:var(--bg)}
   window.Pages = window.Pages || {};
 
   /* =================== COMPONENTES COMPARTILHADOS =================== */
-  var PAY_COLORS = { pix: '#0D9488', credito: '#6366F1', debito: '#F59E0B', dinheiro: '#22C55E' };
-  var PAY_LABEL = { pix: 'Pix', credito: 'Crédito', debito: 'Débito', dinheiro: 'Dinheiro' };
+  var PAY_COLORS = { pix: '#0D9488', credito: '#6366F1', debito: '#F59E0B', dinheiro: '#22C55E', fiado: '#E11D48' };
+  var PAY_LABEL = { pix: 'Pix', credito: 'Crédito', debito: 'Débito', dinheiro: 'Dinheiro', fiado: 'Fiado' };
+  /* formas exibidas no PDV: fiado só nos planos que o incluem (Profissional+) */
+  function PAY_FORMS() { return ['pix', 'credito', 'debito', 'dinheiro'].concat(window.Plans && Plans.has('fiado') ? ['fiado'] : []); }
 
   var C = {
     payColors: PAY_COLORS, payLabel: PAY_LABEL,
@@ -4915,7 +5398,7 @@ body.is-app{background:var(--bg)}
     title: 'PDV — Vender',
     st: null,
     freshState: function () {
-      return { cart: [], disc: { tipo: 'R$', valor: 0 }, pays: { pix: 0, debito: 0, credito: 0, dinheiro: 0 }, ac: [], acSel: -1, discApproved: false };
+      return { cart: [], disc: { tipo: 'R$', valor: 0 }, pays: { pix: 0, debito: 0, credito: 0, dinheiro: 0, fiado: 0 }, ac: [], acSel: -1, discApproved: false, customerId: null, customerNome: '', quoteId: null, quoteNumero: '' };
     },
     render: function () {
       this.st = this.st || this.freshState();
@@ -4970,6 +5453,8 @@ body.is-app{background:var(--bg)}
         </div>
         <aside class="pay-panel" aria-label="Pagamento e totais">
           <h3>${raw(I('billing', 16))} Pagamento</h3>
+          ${window.Plans && Plans.has('clientes') ? html`<button type="button" class="pdv-cust" id="pdv-cust">${raw(I('users', 15))} <span id="pdv-cust-lbl">${this.st.customerNome || 'Identificar cliente (opcional)'}</span></button>` : ''}
+          ${this.st.quoteId ? html`<div class="pdv-quote">${raw(I('receipt', 14))} Orçamento <b>${this.st.quoteNumero}</b> carregado</div>` : ''}
           <div class="pay-rows">
             <div class="prow"><span>Subtotal</span><b id="t-sub">R$ 0,00</b></div>
             <div class="disc-row">
@@ -4984,9 +5469,10 @@ body.is-app{background:var(--bg)}
             <button type="button" data-pay="debito">Débito total</button>
             <button type="button" data-pay="credito">Crédito total</button>
             <button type="button" data-pay="dinheiro">Dinheiro total</button>
+            ${PAY_FORMS().indexOf('fiado') > -1 ? raw('<button type="button" data-pay="fiado">Fiado total</button>') : ''}
           </div>
           <div class="pay-methods">
-            ${['pix', 'credito', 'debito', 'dinheiro'].map(function (f) {
+            ${PAY_FORMS().map(function (f) {
               return html`<div class="pay-cell"><label for="pay-${f}">${f === 'pix' ? raw(I('pix', 12)) : raw(I('billing', 12))} ${PAY_LABEL[f]}</label>
                 <input id="pay-${f}" type="text" inputmode="decimal" value="0" data-payf="${f}" aria-label="Valor pago em ${PAY_LABEL[f]}"></div>`;
             })}
@@ -5014,7 +5500,7 @@ body.is-app{background:var(--bg)}
         err: root.querySelector('#pay-error'), fin: root.querySelector('#btn-fin'), finM: root.querySelector('#btn-fin-m'),
         pays: {}
       };
-      ['pix', 'credito', 'debito', 'dinheiro'].forEach(function (f) { self.el.pays[f] = root.querySelector('#pay-' + f); });
+      PAY_FORMS().forEach(function (f) { self.el.pays[f] = root.querySelector('#pay-' + f); });
       if (!this.el.form) return; // tela bloqueada
 
       this.el.form.addEventListener('submit', function (e) { e.preventDefault(); self.addByQuery(self.el.code.value); });
@@ -5054,6 +5540,7 @@ body.is-app{background:var(--bg)}
       });
       this.el.discTipo.addEventListener('change', function () { self.st.disc.tipo = self.el.discTipo.value; self.updateTotals(); });
       this.el.discVal.addEventListener('input', function () { self.st.disc.valor = Math.max(0, U.parseNum(self.el.discVal.value) || 0); self.updateTotals(); });
+      var cb = root.querySelector('#pdv-cust'); if (cb) cb.addEventListener('click', function () { self.pickCustomer(); });
       this.el.fin.addEventListener('click', function () { self.finalize(this); });
       if (this.el.finM) this.el.finM.addEventListener('click', function () { self.finalize(self.el.fin); });
 
@@ -5175,7 +5662,7 @@ body.is-app{background:var(--bg)}
     },
     payAll: function (forma) {
       var c = this.calc(), self = this;
-      Object.keys(this.st.pays).forEach(function (f) { self.st.pays[f] = f === forma ? c.total : 0; self.el.pays[f].value = f === forma ? c.total.toFixed(2) : '0'; });
+      Object.keys(this.st.pays).forEach(function (f) { self.st.pays[f] = f === forma ? c.total : 0; if (self.el.pays[f]) self.el.pays[f].value = f === forma ? c.total.toFixed(2) : '0'; });
       this.updateTotals();
     },
     approveDiscount: function () {
@@ -5206,6 +5693,7 @@ body.is-app{background:var(--bg)}
       /* v13 · id de idempotência: gerado UMA vez por ciclo do carrinho e
          reenviado em todas as tentativas da mesma venda — duplo clique ou
          retry de rede nunca grava duas vendas (o banco devolve a primeira). */
+      if ((this.st.pays.fiado || 0) > 0.009 && !this.st.customerId) { UI.toast('Venda no fiado: identifique o cliente primeiro.', { type: 'warn' }); this.pickCustomer(); return; }
       if (!this.st.idem) this.st.idem = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
       var pays = Object.keys(this.st.pays).filter(function (f) { return self.st.pays[f] > 0.009; }).map(function (f) { return { forma: f, valor: self.st.pays[f] }; });
       UI.modal({
@@ -5219,6 +5707,8 @@ body.is-app{background:var(--bg)}
           ${c.discVal > 0 ? html`<li class="mini-row"><span>Desconto (${this.st.disc.tipo === '%' ? U.num(this.st.disc.valor) + '%' : U.money(this.st.disc.valor)})</span><b class="tabular text-ok">− ${U.money(c.discVal)}</b></li>` : ''}
           <li class="mini-row" style="font-size:1.05rem"><span><b>Total</b></span><b class="tabular">${U.money(c.total)}</b></li>
           <li class="mini-row"><span>Pagamento</span><span>${C.payBadges(pays)}</span></li>
+          ${this.st.customerNome ? html`<li class="mini-row"><span>Cliente</span><b>${this.st.customerNome}</b></li>` : ''}
+          ${(this.st.pays.fiado || 0) > 0.009 ? html`<li class="mini-row"><span>Fiado vence em</span><span><input class="input input-sm" type="date" id="fiado-venc" value="${Biz.addDays(Biz.today(), 30)}" style="max-width:170px"></span></li>` : ''}
           ${c.troco > 0 ? html`<li class="mini-row"><span>Troco</span><b class="tabular text-ok">${U.money(c.troco)}</b></li>` : ''}
         </ul>`,
         foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Voltar (Esc)</button><button type="button" class="btn btn-primary" data-ok>' + I('check', 16) + ' Confirmar e gravar</button>'),
@@ -5226,14 +5716,17 @@ body.is-app{background:var(--bg)}
           panel.querySelector('[data-ok]').addEventListener('click', function () {
             var okBtn = this;
             UI.busy(okBtn, true);
-            Sales.commit({ items: self.st.cart, discount: { tipo: self.st.disc.tipo, valor: self.st.disc.valor }, payments: pays, idempotencyId: self.st.idem })
+            var fv = panel.querySelector('#fiado-venc');
+            Sales.commit({ items: self.st.cart, discount: { tipo: self.st.disc.tipo, valor: self.st.disc.valor }, payments: pays, idempotencyId: self.st.idem,
+              customerId: self.st.customerId, customerNome: self.st.customerNome, quoteId: self.st.quoteId, fiadoVencimento: fv ? fv.value : null })
               .then(function (sale) {
                 UI.busy(okBtn, false); close('ok');
                 self.st = self.freshState();
                 self.renderCart();
-                ['pix', 'credito', 'debito', 'dinheiro'].forEach(function (f) { self.el.pays[f].value = '0'; });
+                Object.keys(self.el.pays).forEach(function (f) { self.el.pays[f].value = '0'; });
                 self.el.discVal.value = '0'; self.el.discTipo.value = 'R$';
                 C.receiptModal(sale);
+                if (self.afterSale) self.afterSale(sale);
                 UI.toast('Venda ' + sale.numero + ' registrada: ' + U.money(sale.total), { type: 'ok' });
                 try { self.el.code.focus(); } catch (e) { }
               })
@@ -5307,12 +5800,15 @@ body.is-app{background:var(--bg)}
           <li class="mini-row" style="font-size:1.05rem"><span><b>Total</b></span><b class="tabular">${U.money(s.total)}</b></li>
           ${s.pagamentos.map(function (p) { return html`<li class="mini-row"><span>${C.payLabel[p.forma] || p.forma}</span><b class="tabular">${U.money(p.valor)}</b></li>`; })}
           ${s.troco > 0 ? html`<li class="mini-row"><span>Troco</span><b class="tabular">${U.money(s.troco)}</b></li>` : ''}
-        </ul>`,
+          ${s.customerNome ? html`<li class="mini-row"><span>Cliente</span><b>${s.customerNome}</b></li>` : ''}
+        </ul>
+        <div id="fiscal-box"></div>`,
         foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Fechar</button>' +
           '<button type="button" class="btn" data-receipt>' + I('printer', 15) + ' Comprovante</button>' +
           (canCancel ? '<button type="button" class="btn btn-danger" data-cancel>' + I('x-circle', 15) + ' Cancelar venda</button>' : '')),
         onMount: function (panel, close) {
           panel.querySelector('[data-receipt]').addEventListener('click', function () { close('r'); C.receiptModal(s); });
+          if (window.FiscalUI) FiscalUI.saleBox(panel.querySelector('#fiscal-box'), s);
           var cb = panel.querySelector('[data-cancel]');
           if (cb) cb.addEventListener('click', function () { close('c'); self.askCancel(s); });
         }
@@ -5473,6 +5969,20 @@ body.is-app{background:var(--bg)}
           </div>
           <div class="field"><label for="f-forn">Fornecedor <span class="muted" style="font-weight:400">(opcional)</span></label>
             <input class="input" id="f-forn" name="fornecedor" value="${p ? p.fornecedor : ''}"></div>
+          ${window.Plans && Plans.has('fiscal') ? html`<details class="fiscal-box" ${p && p.ncm ? '' : raw('open')}><summary><b>Dados fiscais</b> <span class="muted small">(para emitir NFC-e/NF-e)</span></summary>
+            <div class="field-row-3">
+              <div class="field"><label for="f-ncm">NCM <span class="muted" style="font-weight:400">(8 dígitos)</span></label><input class="input mono" id="f-ncm" name="ncm" inputmode="numeric" maxlength="10" value="${p ? (p.ncm || '') : ''}" placeholder="Ex.: 25232910"></div>
+              <div class="field"><label for="f-cfop">CFOP</label><input class="input mono" id="f-cfop" name="cfop" inputmode="numeric" maxlength="4" value="${p ? (p.cfop || '5102') : '5102'}"></div>
+              <div class="field"><label for="f-csosn">CSOSN / CST</label><select class="select" id="f-csosn" name="csosn">
+                ${['102', '103', '300', '400', '500', '101', '201', '202', '900'].map(function (c) { return html`<option ${(p ? (p.csosn || '102') : '102') === c ? raw('selected') : ''}>${c}</option>`; })}</select></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="f-cest">CEST <span class="muted" style="font-weight:400">(se houver ST)</span></label><input class="input mono" id="f-cest" name="cest" inputmode="numeric" maxlength="9" value="${p ? (p.cest || '') : ''}"></div>
+              <div class="field"><label for="f-orig">Origem da mercadoria</label><select class="select" id="f-orig" name="origem">
+                ${[['0', '0 — Nacional'], ['1', '1 — Estrangeira (importação direta)'], ['2', '2 — Estrangeira (mercado interno)']].map(function (o) { return html`<option value="${o[0]}" ${String(p ? (p.origem || 0) : 0) === o[0] ? raw('selected') : ''}>${o[1]}</option>`; })}</select></div>
+            </div>
+            <p class="field-hint">Dúvidas sobre NCM/CSOSN? Seu contador informa. Padrão para Simples Nacional: CFOP 5102 e CSOSN 102.</p>
+          </details>` : ''}
         </form>`,
         foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button>' +
           '<button type="button" class="btn btn-primary" data-save>' + I('save', 16) + ' ' + (p ? 'Salvar alterações' : 'Cadastrar produto') + '</button>'),
@@ -5500,6 +6010,11 @@ body.is-app{background:var(--bg)}
             data.catId = form.elements.catId.value;
             data.un = form.elements.un.value;
             data.fornecedor = form.elements.fornecedor.value;
+            if (form.elements.ncm) {
+              data.ncm = form.elements.ncm.value.replace(/\D/g, ''); data.cfop = form.elements.cfop.value.replace(/\D/g, '') || '5102';
+              data.cest = form.elements.cest.value.replace(/\D/g, ''); data.csosn = form.elements.csosn.value; data.origem = form.elements.origem.value;
+              if (data.ncm && data.ncm.length !== 8) { UI.busy(btn, false); UI.toast('O NCM deve ter 8 dígitos.', { type: 'err' }); return; }
+            }
             var op = p ? Catalog.update(Object.assign({ id: p.id }, data)) : Catalog.create(data);
             op.then(function () {
               UI.busy(btn, false); close('ok');
@@ -6400,7 +6915,7 @@ body.is-app{background:var(--bg)}
             ${Config.integrations.map(function (ig) {
               return html`<div class="int-item"><span class="int-dot ${ig.status === 'ready' ? 'on' : ig.status === 'soon' ? 'soon' : ''}"></span>
                 <span><b>${ig.name}</b><span>${ig.desc}</span>
-                <span class="badge ${ig.status === 'ready' ? 'badge-ok' : 'badge-warn'} no-dot mt-2">${ig.status === 'ready' ? 'pronto p/ conectar' : 'fase 2'}</span></span></div>`;
+                <span class="badge ${ig.status === 'ready' ? 'badge-ok' : 'badge-warn'} no-dot mt-2">${ig.status === 'ready' ? 'ativo' : 'configurar'}</span></span></div>`;
             })}
           </div>
         </div>
@@ -7669,6 +8184,646 @@ body.is-app{background:var(--bg)}
 </script>
 <script>
 /* ==========================================================================
+   LojaCerta · Telas dos recursos dos planos (v2.0)
+   Clientes · Orçamentos · Financeiro (pagar/receber) · Nota fiscal · Lojas
+   + extensões do PDV (cliente, fiado, orçamento) e bloco fiscal da venda.
+   ========================================================================== */
+;(function () {
+  'use strict';
+  window.Pages = window.Pages || {};
+  function pageRoot() { return document.getElementById('page-root'); }
+  function errBox(root, e) { mount(root, C.errorPanel(e && e.code ? e : ApiError('NETWORK', (e && e.message) || 'Falha ao carregar.'))); }
+  function badgeStatus(st, overdue) {
+    if (st === 'pago') return raw('<span class="badge badge-ok">pago</span>');
+    if (st === 'cancelado') return raw('<span class="badge badge-mut">cancelado</span>');
+    if (st === 'convertido') return raw('<span class="badge badge-ok">virou venda</span>');
+    if (st === 'autorizado') return raw('<span class="badge badge-ok">autorizada</span>');
+    if (st === 'processando') return raw('<span class="badge badge-warn">processando</span>');
+    if (st === 'erro') return raw('<span class="badge badge-danger">rejeitada</span>');
+    if (overdue) return raw('<span class="badge badge-danger">vencido</span>');
+    return raw('<span class="badge badge-warn">em aberto</span>');
+  }
+  function fmtDoc(d) {
+    d = String(d || '').replace(/\D/g, '');
+    if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    return d;
+  }
+  function gate(root, feat, desc) {
+    if (window.Plans && Plans.has(feat)) return false;
+    mount(root, html`${C.pageHead(Plans.FEATURES[feat].label, 'Recurso do plano ' + Plans.planName(feat))}${Plans.upsell(feat, desc)}`);
+    return true;
+  }
+  function money(v) { return U.money(Number(v) || 0); }
+
+  /* =================== CLIENTES =================== */
+  Pages.clientes = {
+    title: 'Clientes', q: '', showOff: false,
+    render: function () { return C.skeleton('table'); },
+    mounted: function (root) { var self = this; this.rerender = function () { self.fill(pageRoot()); }; this.fill(root); },
+    fill: function (root) {
+      var self = this;
+      if (gate(root, 'clientes', 'Cadastre seus clientes, venda no fiado com limite de crédito e emita NF-e com os dados completos do comprador.')) return;
+      Biz.customers.list().then(function (list) {
+        self.list = list;
+        var q = self.q.toLowerCase();
+        var rows = list.filter(function (c) { return (self.showOff || c.ativo) && (!q || (c.nome + ' ' + c.documento + ' ' + c.telefone).toLowerCase().indexOf(q) > -1); });
+        var totalAberto = U.round2(U.sum(list, function (c) { return c.aberto || 0; }));
+        mount(root, html`
+          ${C.pageHead('Clientes', list.filter(function (c) { return c.ativo; }).length + ' ativos · ' + money(totalAberto) + ' em aberto no fiado',
+            raw('<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Novo cliente</button>'))}
+          <div class="toolbar">
+            <span class="search-box">${raw(I('search', 16))}<input class="input" id="c-q" type="search" placeholder="Buscar por nome, CPF/CNPJ ou telefone…" value="${self.q}" aria-label="Buscar cliente"></span>
+            <label class="chk"><input type="checkbox" id="c-off" ${self.showOff ? raw('checked') : ''}> Incluir inativos</label>
+          </div>
+          ${rows.length ? html`<div class="table-wrap"><table class="table">
+            <thead><tr><th>Cliente</th><th>Contato</th><th class="num">Limite</th><th class="num">Em aberto</th><th>Status</th><th style="width:120px"></th></tr></thead>
+            <tbody>${rows.map(function (c) {
+              return html`<tr class="${c.ativo ? '' : 'row-off'}">
+                <td><span class="strong">${c.nome}</span><br><span class="small muted mono">${fmtDoc(c.documento) || 'sem CPF/CNPJ'}</span></td>
+                <td class="small">${c.telefone || '—'}${c.municipio ? html`<br><span class="muted">${c.municipio}/${c.uf}</span>` : ''}</td>
+                <td class="num tabular">${c.limite > 0 ? money(c.limite) : raw('<span class="muted">sem limite</span>')}</td>
+                <td class="num tabular">${c.aberto > 0 ? html`<b class="text-danger">${money(c.aberto)}</b>` : raw('<span class="muted">—</span>')}</td>
+                <td>${c.ativo ? raw('<span class="badge badge-ok">ativo</span>') : raw('<span class="badge badge-mut">inativo</span>')}</td>
+                <td class="right nowrap">
+                  <button type="button" class="btn-icon sm" data-edit="${c.id}" title="Editar" aria-label="Editar ${c.nome}">${raw(I('edit', 15))}</button>
+                  ${c.aberto > 0 && Perms.pageAllowed('financeiro') ? html`<a class="btn-icon sm" href="#/app/financeiro" title="Ver contas a receber" aria-label="Contas de ${c.nome}">${raw(I('dollar', 15))}</a>` : ''}
+                  <button type="button" class="btn-icon sm on-danger" data-tog="${c.id}" title="${c.ativo ? 'Inativar' : 'Reativar'}" aria-label="${c.ativo ? 'Inativar' : 'Reativar'} ${c.nome}">${raw(I(c.ativo ? 'lock' : 'refresh', 15))}</button>
+                </td></tr>`;
+            })}</tbody></table></div>`
+          : C.empty('users', list.length ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado', list.length ? 'Ajuste a busca.' : 'Cadastre clientes para vender no fiado, montar orçamentos e emitir NF-e.',
+              raw('<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Cadastrar cliente</button>'))}`);
+        var qi = root.querySelector('#c-q');
+        qi.addEventListener('input', U.debounce ? U.debounce(function () { self.q = qi.value; self.fill(root); }, 250) : function () { self.q = qi.value; self.fill(root); });
+        root.querySelector('#c-off').addEventListener('change', function () { self.showOff = this.checked; self.fill(root); });
+        root.querySelectorAll('[data-new]').forEach(function (b) { b.addEventListener('click', function () { self.form(null); }); });
+        root.querySelectorAll('[data-edit]').forEach(function (b) { b.addEventListener('click', function () { self.form(self.list.filter(function (c) { return c.id === b.dataset.edit; })[0]); }); });
+        root.querySelectorAll('[data-tog]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var c = self.list.filter(function (x) { return x.id === b.dataset.tog; })[0];
+            Biz.customers.toggle(c.id, !c.ativo).then(function () { UI.toast(c.ativo ? 'Cliente inativado.' : 'Cliente reativado ✔', { type: 'ok' }); self.fill(root); })
+              .catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+          });
+        });
+        try { if (document.activeElement !== qi && self.q) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); } } catch (e) { }
+      }).catch(function (e) { errBox(root, e); });
+    },
+    form: function (c, onSaved) {
+      var self = this;
+      UI.modal({
+        title: c ? 'Editar cliente' : 'Novo cliente', size: 'lg',
+        body: html`<form id="cli-form" novalidate>
+          <div class="field"><label for="cl-nome">Nome / razão social <span class="req">*</span></label><input class="input" id="cl-nome" name="nome" value="${c ? c.nome : ''}" data-autofocus></div>
+          <div class="field-row-3">
+            <div class="field"><label for="cl-doc">CPF ou CNPJ</label><input class="input mono" id="cl-doc" name="documento" inputmode="numeric" value="${c ? fmtDoc(c.documento) : ''}"></div>
+            <div class="field"><label for="cl-ie">Inscrição estadual</label><input class="input mono" id="cl-ie" name="ie" value="${c ? c.ie : ''}" placeholder="se contribuinte"></div>
+            <div class="field"><label for="cl-tel">Telefone</label><input class="input" id="cl-tel" name="telefone" inputmode="tel" value="${c ? c.telefone : ''}"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="cl-mail">E-mail</label><input class="input" id="cl-mail" name="email" type="email" value="${c ? c.email : ''}"></div>
+            <div class="field"><label for="cl-lim">Limite de crédito no fiado (R$)</label><input class="input input-money" id="cl-lim" name="limite" inputmode="decimal" value="${c ? U.num(c.limite, 2) : '0'}"><span class="field-hint">0 = sem limite</span></div>
+          </div>
+          <div class="field-row-3">
+            <div class="field" style="grid-column:span 2"><label for="cl-log">Endereço (rua/avenida)</label><input class="input" id="cl-log" name="logradouro" value="${c ? c.logradouro : ''}"></div>
+            <div class="field"><label for="cl-num">Número</label><input class="input" id="cl-num" name="numero" value="${c ? c.numero : ''}"></div>
+          </div>
+          <div class="field-row-3">
+            <div class="field"><label for="cl-bai">Bairro</label><input class="input" id="cl-bai" name="bairro" value="${c ? c.bairro : ''}"></div>
+            <div class="field"><label for="cl-mun">Município</label><input class="input" id="cl-mun" name="municipio" value="${c ? c.municipio : ''}"></div>
+            <div class="field-row" style="gap:8px"><div class="field"><label for="cl-uf">UF</label><input class="input" id="cl-uf" name="uf" maxlength="2" value="${c ? c.uf : ''}"></div>
+              <div class="field"><label for="cl-cep">CEP</label><input class="input mono" id="cl-cep" name="cep" inputmode="numeric" maxlength="9" value="${c ? c.cep : ''}"></div></div>
+          </div>
+          <div class="field"><label for="cl-obs">Observações</label><input class="input" id="cl-obs" name="obs" value="${c ? c.obs : ''}"></div>
+          <p class="field-hint">Endereço completo + CPF/CNPJ são exigidos apenas para emitir NF-e (nota modelo 55) para este cliente.</p>
+        </form>`,
+        foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button><button type="button" class="btn btn-primary" data-save>' + I('save', 16) + ' Salvar cliente</button>'),
+        onMount: function (panel, close) {
+          var form = panel.querySelector('#cli-form');
+          panel.querySelector('[data-save]').addEventListener('click', function () {
+            var f = form.elements, btn = this;
+            var doc = f.documento.value.replace(/\D/g, '');
+            if (f.nome.value.trim().length < 2) { UI.toast('Informe o nome do cliente.', { type: 'err' }); f.nome.focus(); return; }
+            if (doc && doc.length !== 11 && doc.length !== 14) { UI.toast('CPF deve ter 11 dígitos e CNPJ 14.', { type: 'err' }); f.documento.focus(); return; }
+            var lim = U.parseNum(f.limite.value); if (!isFinite(lim) || lim < 0) lim = 0;
+            UI.busy(btn, true);
+            Biz.customers.save({ id: c ? c.id : null, nome: f.nome.value, documento: doc, ie: f.ie.value, telefone: f.telefone.value, email: f.email.value, limite: lim,
+              logradouro: f.logradouro.value, numero: f.numero.value, bairro: f.bairro.value, municipio: f.municipio.value, uf: f.uf.value, cep: f.cep.value, obs: f.obs.value })
+              .then(function (r) {
+                UI.busy(btn, false); close('ok'); UI.toast(c ? 'Cliente atualizado ✔' : 'Cliente cadastrado ✔', { type: 'ok' });
+                if (onSaved) onSaved({ id: r.id, nome: f.nome.value.trim() }); else if (self.rerender) self.rerender();
+              }).catch(function (e) { UI.busy(btn, false); UI.toast(e.message || 'Erro ao salvar.', { type: 'err' }); });
+          });
+        }
+      });
+    }
+  };
+
+  /* =================== FINANCEIRO (contas a receber / a pagar) =================== */
+  var FORMAS = [['pix', 'Pix'], ['dinheiro', 'Dinheiro'], ['debito', 'Débito'], ['credito', 'Crédito'], ['boleto', 'Boleto'], ['transferencia', 'Transferência']];
+  var CATS_PAGAR = ['Fornecedores', 'Aluguel', 'Salários', 'Energia/Água/Internet', 'Impostos', 'Frete', 'Manutenção', 'Outros'];
+  Pages.financeiro = {
+    title: 'Financeiro', tab: 'receber', status: 'aberto',
+    render: function () { return C.skeleton('kpis'); },
+    mounted: function (root, params, query) { var self = this; if (query && query.tab) this.tab = query.tab; this.rerender = function () { self.fill(pageRoot()); }; this.fill(root); },
+    fill: function (root) {
+      var self = this;
+      if (gate(root, 'financeiro', 'Controle o que você tem a receber (inclusive o fiado) e a pagar, com vencimentos, baixas parciais e alerta de atraso.')) return;
+      Promise.all([Biz.receivables.list(), Biz.payables.list()]).then(function (d) {
+        var rec = d[0] || [], pag = d[1] || [];
+        var openR = rec.filter(function (r) { return r.status === 'aberto'; }), openP = pag.filter(function (r) { return r.status === 'aberto'; });
+        var sum = function (l) { return U.round2(U.sum(l, Biz.saldo)); };
+        var hoje = Biz.today(), em7 = Biz.addDays(hoje, 7);
+        var list = (self.tab === 'pagar' ? pag : rec).filter(function (r) { return self.status === 'todos' || r.status === self.status; });
+        var isAdmin = ['admin', 'dev'].indexOf((Auth.me() || {}).papel) > -1;
+        mount(root, html`
+          ${C.pageHead('Financeiro', 'Contas a receber e a pagar',
+            raw('<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + (self.tab === 'pagar' ? ' Nova conta a pagar' : ' Nova conta a receber') + '</button>'))}
+          <div class="kpi-grid">
+            ${C.kpi({ lbl: 'A receber (aberto)', val: money(sum(openR)), icon: 'dollar', tone: 'ok', sub: openR.length + ' conta(s)' })}
+            ${C.kpi({ lbl: 'Recebimentos vencidos', val: money(sum(openR.filter(Biz.overdue))), icon: 'alert', tone: 'danger', sub: openR.filter(Biz.overdue).length + ' em atraso' })}
+            ${C.kpi({ lbl: 'A pagar (aberto)', val: money(sum(openP)), icon: 'billing', tone: 'warn', sub: openP.filter(function (r) { return r.vencimento <= em7; }).length + ' vencem em 7 dias' })}
+            ${C.kpi({ lbl: 'Saldo previsto', val: money(U.round2(sum(openR) - sum(openP))), icon: 'trending', sub: 'a receber − a pagar' })}
+          </div>
+          <div class="toolbar mt-3">
+            <div class="seg" role="tablist" aria-label="Tipo de conta">
+              <button type="button" class="seg-btn ${self.tab === 'receber' ? 'is-on' : ''}" data-tab="receber">A receber</button>
+              <button type="button" class="seg-btn ${self.tab === 'pagar' ? 'is-on' : ''}" data-tab="pagar">A pagar</button>
+            </div>
+            <select class="select" id="f-st" aria-label="Situação" style="max-width:180px">
+              ${[['aberto', 'Em aberto'], ['pago', 'Pagas'], ['cancelado', 'Canceladas'], ['todos', 'Todas']].map(function (o) { return html`<option value="${o[0]}" ${self.status === o[0] ? raw('selected') : ''}>${o[1]}</option>`; })}
+            </select>
+          </div>
+          ${list.length ? html`<div class="table-wrap"><table class="table">
+            <thead><tr><th>Vencimento</th><th>${self.tab === 'pagar' ? 'Fornecedor / descrição' : 'Cliente / descrição'}</th><th class="num">Valor</th><th class="num">Pago</th><th class="num">Saldo</th><th>Situação</th><th style="width:150px"></th></tr></thead>
+            <tbody>${list.map(function (r) {
+              var od = Biz.overdue(r);
+              return html`<tr class="${od ? 'row-danger' : ''} ${r.status === 'cancelado' ? 'row-off' : ''}">
+                <td class="nowrap ${od ? 'text-danger strong' : ''}">${Biz.fmtDate(r.vencimento)}</td>
+                <td><span class="strong">${self.tab === 'pagar' ? (r.fornecedor || r.categoria) : (r.customerNome || 'Sem cliente')}</span><br><span class="small muted">${r.descricao}</span></td>
+                <td class="num tabular">${money(r.valor)}</td>
+                <td class="num tabular muted">${r.valorPago > 0 ? money(r.valorPago) : '—'}</td>
+                <td class="num tabular"><b>${money(Biz.saldo(r))}</b></td>
+                <td>${badgeStatus(r.status, od)}</td>
+                <td class="right nowrap">${r.status === 'aberto' ? html`
+                  <button type="button" class="btn btn-sm btn-primary" data-pay="${r.id}">${raw(I('check', 14))} ${self.tab === 'pagar' ? 'Pagar' : 'Receber'}</button>
+                  ${isAdmin ? html`<button type="button" class="btn-icon sm on-danger" data-cancel="${r.id}" title="Cancelar conta" aria-label="Cancelar conta">${raw(I('x-circle', 15))}</button>` : ''}` : ''}</td></tr>`;
+            })}</tbody></table></div>`
+          : C.empty('dollar', 'Nenhuma conta ' + (self.status === 'aberto' ? 'em aberto' : 'neste filtro'), self.tab === 'pagar' ? 'Lance aluguel, fornecedores e despesas para nunca perder um vencimento.' : 'As vendas no fiado entram aqui automaticamente. Você também pode lançar contas manualmente.')}`);
+        root.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { self.tab = b.dataset.tab; self.fill(root); }); });
+        root.querySelector('#f-st').addEventListener('change', function () { self.status = this.value; self.fill(root); });
+        root.querySelector('[data-new]').addEventListener('click', function () { self.newForm(); });
+        root.querySelectorAll('[data-pay]').forEach(function (b) { b.addEventListener('click', function () { self.payForm(list.filter(function (x) { return x.id === b.dataset.pay; })[0]); }); });
+        root.querySelectorAll('[data-cancel]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            UI.confirm({ title: 'Cancelar esta conta?', text: 'Ela deixa de contar nos totais. A ação fica registrada na auditoria.', danger: true, okText: 'Cancelar conta' }).then(function (ok) {
+              if (!ok) return;
+              (self.tab === 'pagar' ? Biz.payables : Biz.receivables).cancel(b.dataset.cancel).then(function () { UI.toast('Conta cancelada.', { type: 'warn' }); self.fill(root); })
+                .catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+            });
+          });
+        });
+      }).catch(function (e) { errBox(root, e); });
+    },
+    payForm: function (r) {
+      var self = this, pagar = this.tab === 'pagar';
+      UI.modal({
+        title: (pagar ? 'Pagar: ' : 'Receber: ') + r.descricao, sub: 'Saldo em aberto ' + money(Biz.saldo(r)) + ' · vence ' + Biz.fmtDate(r.vencimento), size: 'sm',
+        body: html`<div class="field"><label for="py-v">Valor ${pagar ? 'pago' : 'recebido'} (R$)</label><input class="input input-money" id="py-v" inputmode="decimal" value="${U.num(Biz.saldo(r), 2)}" data-autofocus>
+            <span class="field-hint">Pode ser parcial — o restante continua em aberto.</span></div>
+          <div class="field"><label for="py-f">Forma</label><select class="select" id="py-f">${FORMAS.map(function (f) { return html`<option value="${f[0]}">${f[1]}</option>`; })}</select></div>`,
+        foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Voltar</button><button type="button" class="btn btn-primary" data-ok>' + I('check', 15) + ' Confirmar</button>'),
+        onMount: function (panel, close) {
+          panel.querySelector('[data-ok]').addEventListener('click', function () {
+            var v = U.parseNum(panel.querySelector('#py-v').value), btn = this;
+            if (!(v > 0)) { UI.toast('Informe um valor maior que zero.', { type: 'err' }); return; }
+            UI.busy(btn, true);
+            (pagar ? Biz.payables : Biz.receivables).settle(r.id, v, panel.querySelector('#py-f').value).then(function () {
+              UI.busy(btn, false); close('ok'); UI.toast((pagar ? 'Pagamento' : 'Recebimento') + ' de ' + money(v) + ' registrado ✔', { type: 'ok' }); self.rerender();
+            }).catch(function (e) { UI.busy(btn, false); UI.toast(e.message, { type: 'err' }); });
+          });
+        }
+      });
+    },
+    newForm: function () {
+      var self = this, pagar = this.tab === 'pagar';
+      var go = function (custs) {
+        UI.modal({
+          title: pagar ? 'Nova conta a pagar' : 'Nova conta a receber',
+          body: html`<form id="fin-form" novalidate>
+            ${pagar ? html`<div class="field-row"><div class="field"><label for="fn-forn">Fornecedor / favorecido</label><input class="input" id="fn-forn" name="fornecedor" data-autofocus></div>
+              <div class="field"><label for="fn-cat">Categoria</label><select class="select" id="fn-cat" name="categoria">${CATS_PAGAR.map(function (c) { return html`<option>${c}</option>`; })}</select></div></div>`
+            : html`<div class="field"><label for="fn-cli">Cliente</label><select class="select" id="fn-cli" name="customerId"><option value="">— sem cliente —</option>${custs.filter(function (c) { return c.ativo; }).map(function (c) { return html`<option value="${c.id}">${c.nome}</option>`; })}</select></div>`}
+            <div class="field"><label for="fn-desc">Descrição <span class="req">*</span></label><input class="input" id="fn-desc" name="descricao" placeholder="${pagar ? 'Ex.: Compra de cimento NF 1234' : 'Ex.: Serviço de entrega'}"></div>
+            <div class="field-row"><div class="field"><label for="fn-val">Valor (R$) <span class="req">*</span></label><input class="input input-money" id="fn-val" name="valor" inputmode="decimal"></div>
+              <div class="field"><label for="fn-venc">Vencimento <span class="req">*</span></label><input class="input" type="date" id="fn-venc" name="vencimento" value="${Biz.addDays(Biz.today(), pagar ? 7 : 30)}"></div></div>
+          </form>`,
+          foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button><button type="button" class="btn btn-primary" data-save>' + I('save', 15) + ' Lançar conta</button>'),
+          onMount: function (panel, close) {
+            panel.querySelector('[data-save]').addEventListener('click', function () {
+              var f = panel.querySelector('#fin-form').elements, btn = this, v = U.parseNum(f.valor.value);
+              if (f.descricao.value.trim().length < 2) { UI.toast('Descreva a conta.', { type: 'err' }); return; }
+              if (!(v > 0)) { UI.toast('Informe um valor maior que zero.', { type: 'err' }); return; }
+              if (!f.vencimento.value) { UI.toast('Informe o vencimento.', { type: 'err' }); return; }
+              UI.busy(btn, true);
+              var op = pagar ? Biz.payables.create({ fornecedor: f.fornecedor.value, categoria: f.categoria.value, descricao: f.descricao.value, valor: v, vencimento: f.vencimento.value })
+                : Biz.receivables.create({ customerId: f.customerId.value || null, descricao: f.descricao.value, valor: v, vencimento: f.vencimento.value });
+              op.then(function () { UI.busy(btn, false); close('ok'); UI.toast('Conta lançada ✔', { type: 'ok' }); self.rerender(); })
+                .catch(function (e) { UI.busy(btn, false); UI.toast(e.message, { type: 'err' }); });
+            });
+          }
+        });
+      };
+      if (pagar) go([]); else Biz.customers.list().then(go).catch(function () { go([]); });
+    }
+  };
+
+  /* =================== ORÇAMENTOS =================== */
+  Pages.orcamentos = {
+    title: 'Orçamentos', status: 'aberto',
+    render: function () { return C.skeleton('table'); },
+    mounted: function (root) { var self = this; this.rerender = function () { self.fill(pageRoot()); }; this.fill(root); },
+    fill: function (root) {
+      var self = this;
+      if (gate(root, 'orcamentos', 'Monte orçamentos com os preços do seu catálogo, imprima para o cliente e transforme em venda com um clique.')) return;
+      Biz.quotes.list().then(function (all) {
+        self.all = all;
+        var hoje = Biz.today();
+        var list = all.filter(function (q) { return self.status === 'todos' || q.status === self.status; });
+        mount(root, html`
+          ${C.pageHead('Orçamentos', all.filter(function (q) { return q.status === 'aberto'; }).length + ' em aberto · ' + all.filter(function (q) { return q.status === 'convertido'; }).length + ' viraram venda',
+            raw('<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Novo orçamento</button>'))}
+          <div class="toolbar"><select class="select" id="q-st" aria-label="Situação" style="max-width:200px">
+            ${[['aberto', 'Em aberto'], ['convertido', 'Viraram venda'], ['cancelado', 'Cancelados'], ['todos', 'Todos']].map(function (o) { return html`<option value="${o[0]}" ${self.status === o[0] ? raw('selected') : ''}>${o[1]}</option>`; })}
+          </select></div>
+          ${list.length ? html`<div class="table-wrap"><table class="table">
+            <thead><tr><th>Número</th><th>Cliente</th><th>Itens</th><th class="num">Total</th><th>Validade</th><th>Situação</th><th style="width:210px"></th></tr></thead>
+            <tbody>${list.map(function (q) {
+              var vencido = q.status === 'aberto' && q.validade < hoje;
+              return html`<tr class="${q.status !== 'aberto' ? 'row-off' : ''}">
+                <td class="mono small">${q.numero}<br><span class="muted">${U.date(q.createdAt)}</span></td>
+                <td class="strong">${q.clienteNome || 'Consumidor'}</td>
+                <td class="small muted">${q.itens.length} item(ns)</td>
+                <td class="num tabular"><b>${money(q.total)}</b></td>
+                <td class="${vencido ? 'text-danger strong' : ''}">${Biz.fmtDate(q.validade)}${vencido ? raw(' <span class="badge badge-danger no-dot">vencido</span>') : ''}</td>
+                <td>${badgeStatus(q.status)}</td>
+                <td class="right nowrap">
+                  <button type="button" class="btn-icon sm" data-print="${q.id}" title="Imprimir" aria-label="Imprimir ${q.numero}">${raw(I('printer', 15))}</button>
+                  ${q.status === 'aberto' ? html`<button type="button" class="btn btn-sm btn-primary" data-sell="${q.id}">${raw(I('cart', 14))} Virar venda</button>
+                  <button type="button" class="btn-icon sm on-danger" data-cancel="${q.id}" title="Cancelar" aria-label="Cancelar ${q.numero}">${raw(I('x-circle', 15))}</button>` : ''}
+                </td></tr>`;
+            })}</tbody></table></div>`
+          : C.empty('tag', 'Nenhum orçamento ' + (self.status === 'aberto' ? 'em aberto' : 'neste filtro'), 'Crie um orçamento, imprima para o cliente e converta em venda quando ele aprovar.',
+              raw('<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Novo orçamento</button>'))}`);
+        root.querySelector('#q-st').addEventListener('change', function () { self.status = this.value; self.fill(root); });
+        root.querySelectorAll('[data-new]').forEach(function (b) { b.addEventListener('click', function () { self.form(); }); });
+        var byId = function (id) { return all.filter(function (q) { return q.id === id; })[0]; };
+        root.querySelectorAll('[data-print]').forEach(function (b) { b.addEventListener('click', function () { self.print(byId(b.dataset.print)); }); });
+        root.querySelectorAll('[data-sell]').forEach(function (b) { b.addEventListener('click', function () { Pages.pdv.loadQuote(byId(b.dataset.sell)); }); });
+        root.querySelectorAll('[data-cancel]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            UI.confirm({ title: 'Cancelar este orçamento?', text: 'Ele não poderá mais virar venda.', danger: true, okText: 'Cancelar orçamento' }).then(function (ok) {
+              if (ok) Biz.quotes.cancel(b.dataset.cancel).then(function () { UI.toast('Orçamento cancelado.', { type: 'warn' }); self.fill(root); }).catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+            });
+          });
+        });
+      }).catch(function (e) { errBox(root, e); });
+    },
+    form: function () {
+      var self = this, lines = [];
+      var prods = Store.state.products.filter(function (p) { return p.ativo; }).sort(function (a, b) { return a.nome.localeCompare(b.nome); });
+      var open = function (custs) {
+        UI.modal({
+          title: 'Novo orçamento', size: 'lg',
+          body: html`<div class="field-row">
+              <div class="field"><label for="qo-cli">Cliente cadastrado</label><select class="select" id="qo-cli"><option value="">— consumidor / digitar nome —</option>
+                ${custs.filter(function (c) { return c.ativo; }).map(function (c) { return html`<option value="${c.id}">${c.nome}</option>`; })}</select></div>
+              <div class="field"><label for="qo-nome">Nome do cliente (se não cadastrado)</label><input class="input" id="qo-nome"></div>
+            </div>
+            <div class="field-row-3">
+              <div class="field" style="grid-column:span 2"><label for="qo-prod">Produto</label><select class="select" id="qo-prod">
+                ${prods.map(function (p) { return html`<option value="${p.id}">${p.nome} — ${U.money(p.preco)}/${p.un}</option>`; })}</select></div>
+              <div class="field"><label for="qo-qtd">Quantidade</label><div class="flex gap-2"><input class="input" id="qo-qtd" inputmode="decimal" value="1"><button type="button" class="btn btn-dark" id="qo-add">${raw(I('plus', 15))}</button></div></div>
+            </div>
+            <div id="qo-lines"></div>
+            <div class="field-row mt-3">
+              <div class="field"><label for="qo-desc">Desconto (R$)</label><input class="input input-money" id="qo-desc" inputmode="decimal" value="0"></div>
+              <div class="field"><label for="qo-val">Válido até</label><input class="input" type="date" id="qo-val" value="${Biz.addDays(Biz.today(), 7)}"></div>
+            </div>
+            <div class="field"><label for="qo-obs">Observações (aparecem na impressão)</label><input class="input" id="qo-obs" placeholder="Ex.: entrega inclusa, pagamento à vista"></div>`,
+          foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button><button type="button" class="btn btn-primary" data-save>' + I('save', 15) + ' Salvar orçamento</button>'),
+          onMount: function (panel, close) {
+            var box = panel.querySelector('#qo-lines');
+            var draw = function () {
+              var sub = U.round2(U.sum(lines, function (l) { return l.preco * l.qtd; }));
+              var desc = Math.min(sub, Math.max(0, U.parseNum(panel.querySelector('#qo-desc').value) || 0));
+              box.innerHTML = lines.length ? '<ul class="mini-list">' + lines.map(function (l, i) {
+                return '<li class="mini-row"><span class="mr-main"><span class="mr-name">' + U.esc(U.num(l.qtd) + ' ' + l.un + ' × ' + l.nome) + '</span></span><b class="tabular">' + U.money(l.preco * l.qtd) +
+                  '</b><button type="button" class="btn-icon sm on-danger" data-rm="' + i + '" aria-label="Remover">' + I('trash', 14) + '</button></li>';
+              }).join('') + '<li class="mini-row" style="font-size:1.05rem"><span><b>Total</b></span><b class="tabular">' + U.money(sub - desc) + '</b></li></ul>'
+                : '<p class="small muted">Adicione produtos ao orçamento.</p>';
+              box.querySelectorAll('[data-rm]').forEach(function (b) { b.addEventListener('click', function () { lines.splice(Number(b.dataset.rm), 1); draw(); }); });
+            };
+            draw();
+            panel.querySelector('#qo-desc').addEventListener('input', draw);
+            panel.querySelector('#qo-add').addEventListener('click', function () {
+              var p = prods.filter(function (x) { return x.id === panel.querySelector('#qo-prod').value; })[0];
+              var q = U.parseNum(panel.querySelector('#qo-qtd').value);
+              if (!p || !(q > 0)) { UI.toast('Escolha o produto e uma quantidade maior que zero.', { type: 'err' }); return; }
+              var ex = lines.filter(function (l) { return l.productId === p.id; })[0];
+              if (ex) ex.qtd = U.round2((ex.qtd + q) * 1000) / 1000; else lines.push({ productId: p.id, nome: p.nome, un: p.un, preco: p.preco, qtd: q });
+              panel.querySelector('#qo-qtd').value = '1'; draw();
+            });
+            panel.querySelector('[data-save]').addEventListener('click', function () {
+              if (!lines.length) { UI.toast('Adicione ao menos um produto.', { type: 'err' }); return; }
+              var btn = this, cid = panel.querySelector('#qo-cli').value;
+              UI.busy(btn, true);
+              Biz.quotes.create({ customerId: cid || null, clienteNome: cid ? '' : panel.querySelector('#qo-nome').value.trim(), itens: lines,
+                desconto: U.parseNum(panel.querySelector('#qo-desc').value) || 0, validade: panel.querySelector('#qo-val').value, obs: panel.querySelector('#qo-obs').value })
+                .then(function (r) { UI.busy(btn, false); close('ok'); UI.toast('Orçamento ' + (r.numero || '') + ' salvo ✔', { type: 'ok' }); self.status = 'aberto'; self.rerender(); })
+                .catch(function (e) { UI.busy(btn, false); UI.toast(e.message, { type: 'err' }); });
+            });
+          }
+        });
+      };
+      if (!prods.length) { UI.toast('Cadastre produtos antes de montar orçamentos.', { type: 'warn' }); return; }
+      Biz.customers.list().then(open).catch(function () { open([]); });
+    },
+    print: function (q) {
+      var t = Store.state.tenant || {};
+      var rows = q.itens.map(function (i) { return '<tr><td>' + U.esc(i.nome) + '</td><td style="text-align:right">' + U.esc(U.num(i.qtd) + ' ' + i.un) + '</td><td style="text-align:right">' + U.money(i.preco) + '</td><td style="text-align:right">' + U.money(i.subtotal) + '</td></tr>'; }).join('');
+      var doc = '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>' + U.esc(q.numero) + '</title><style>body{font-family:Arial,sans-serif;color:#111;max-width:760px;margin:24px auto;padding:0 16px}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border-bottom:1px solid #ddd;padding:8px;font-size:13px;text-align:left}.tot{font-size:18px;text-align:right;margin-top:12px}.muted{color:#666;font-size:12px}</style></head><body>' +
+        '<h1>' + U.esc(t.nome || 'Orçamento') + '</h1><div class="muted">' + U.esc([t.cnpj ? 'CNPJ ' + fmtDoc(t.cnpj) : '', t.endereco, t.telefone].filter(Boolean).join(' · ')) + '</div>' +
+        '<h2 style="font-size:16px;margin-top:20px">Orçamento ' + U.esc(q.numero) + '</h2><div class="muted">Emitido em ' + U.date(q.createdAt) + ' · válido até ' + Biz.fmtDate(q.validade) + '</div>' +
+        '<p><b>Cliente:</b> ' + U.esc(q.clienteNome || 'Consumidor') + '</p>' +
+        '<table><thead><tr><th>Produto</th><th style="text-align:right">Qtd</th><th style="text-align:right">Unitário</th><th style="text-align:right">Total</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        (q.desconto > 0 ? '<div class="tot" style="font-size:14px">Desconto: − ' + U.money(q.desconto) + '</div>' : '') +
+        '<div class="tot"><b>Total: ' + U.money(q.total) + '</b></div>' + (q.obs ? '<p class="muted">' + U.esc(q.obs) + '</p>' : '') +
+        '<p class="muted" style="margin-top:28px">Orçamento sem valor fiscal. Preços sujeitos a alteração após a validade.</p><script>window.print()<\/script></body></html>';
+      var w = window.open('', '_blank');
+      if (!w) { UI.toast('Permita pop-ups para imprimir o orçamento.', { type: 'warn' }); return; }
+      w.document.open(); w.document.write(doc); w.document.close();
+    }
+  };
+
+  /* =================== NOTA FISCAL (NFC-e / NF-e) =================== */
+  Pages.fiscal = {
+    title: 'Nota fiscal',
+    render: function () { return C.skeleton('table'); },
+    mounted: function (root) { var self = this; this.rerender = function () { self.fill(pageRoot()); }; this.fill(root); },
+    fill: function (root) {
+      var self = this;
+      if (gate(root, 'fiscal', 'Emita NFC-e no PDV e NF-e para empresas, com cancelamento e DANFE, integrados a um emissor homologado pela SEFAZ.')) return;
+      var isAdmin = ['admin', 'dev'].indexOf((Auth.me() || {}).papel) > -1;
+      Promise.all([Biz.fiscal.config(), Biz.fiscal.docs()]).then(function (d) {
+        var cfg = d[0] || {}, docs = d[1] || [];
+        var sales = {}; Store.state.sales.forEach(function (s) { sales[s.id] = s; });
+        mount(root, html`
+          ${C.pageHead('Nota fiscal', 'NFC-e (consumidor) e NF-e (empresas) · emissor Focus NFe')}
+          <div class="grid-2e">
+            ${C.panel('Configuração', cfg.hasToken ? 'Token configurado · ambiente de ' + (cfg.ambiente === 'producao' ? 'PRODUÇÃO' : 'homologação (testes)') : 'Ainda não configurado', isAdmin ? html`
+              <form id="fc-form" novalidate>
+                <div class="field"><label for="fc-amb">Ambiente</label><select class="select" id="fc-amb" name="ambiente">
+                  <option value="homologacao" ${cfg.ambiente !== 'producao' ? raw('selected') : ''}>Homologação (testes, sem valor fiscal)</option>
+                  <option value="producao" ${cfg.ambiente === 'producao' ? raw('selected') : ''}>Produção (notas com valor fiscal)</option></select></div>
+                <div class="field"><label for="fc-tok">Token da empresa no Focus NFe</label><input class="input mono" id="fc-tok" name="token" type="password" autocomplete="off" placeholder="${cfg.hasToken ? '•••••••• (configurado — preencha só para trocar)' : 'Cole aqui o token do Focus NFe'}"></div>
+                <label class="chk"><input type="checkbox" id="fc-auto" ${cfg.autoEmitir ? raw('checked') : ''}> Emitir NFC-e automaticamente ao finalizar cada venda no PDV</label>
+                <div class="flex gap-2 mt-3" style="flex-wrap:wrap">
+                  <button type="button" class="btn btn-primary" data-save>${raw(I('save', 15))} Salvar</button>
+                  <button type="button" class="btn" data-test ${cfg.hasToken ? '' : raw('disabled')}>${raw(I('zap', 15))} Testar conexão</button>
+                </div>
+              </form>` : html`<p class="small muted">Somente o administrador altera a configuração fiscal.</p>`)}
+            ${C.panel('Como ativar (uma vez por loja)', null, html`<ol class="steps-list small">
+              <li>Crie a conta da sua empresa no <b>Focus NFe</b> (focusnfe.com.br) — é o emissor homologado que transmite para a SEFAZ.</li>
+              <li>No painel do Focus NFe, cadastre a empresa com o <b>certificado digital A1</b> e o <b>CSC</b> da NFC-e (obtido no site da SEFAZ do seu estado).</li>
+              <li>Copie o <b>token</b> da empresa e cole ao lado. Teste em <b>homologação</b> e, quando aprovado, mude para <b>produção</b>.</li>
+              <li>Em <b>Produtos</b>, preencha o <b>NCM</b> de cada item (seu contador informa). Em <b>Configurações → Loja</b>, confira o <b>CNPJ</b>.</li>
+              <li>Pronto: emita pelo detalhe da venda (Vendas) ou deixe a emissão automática ligada.</li></ol>`)}
+          </div>
+          ${C.panel('Notas emitidas', docs.length + ' documento(s)', docs.length ? html`<div class="table-wrap" style="border:none"><table class="table">
+            <thead><tr><th>Data</th><th>Venda</th><th>Modelo</th><th>Número</th><th>Situação</th><th>Mensagem</th><th style="width:170px"></th></tr></thead>
+            <tbody>${docs.map(function (x) {
+              var s = sales[x.saleId];
+              return html`<tr><td class="small nowrap">${U.dt(x.createdAt)}</td><td class="mono small">${s ? s.numero : '—'}</td><td>${x.modelo === 'nfe' ? 'NF-e' : 'NFC-e'}${x.ambiente !== 'producao' ? raw(' <span class="badge badge-mut no-dot">teste</span>') : ''}</td>
+                <td class="mono small">${x.numero ? x.numero + '/' + x.serie : '—'}</td><td>${badgeStatus(x.status)}</td><td class="small muted" style="max-width:280px">${x.mensagem}</td>
+                <td class="right nowrap">${x.danfeUrl ? raw('<a class="btn btn-sm" href="' + U.esc(x.danfeUrl) + '" target="_blank" rel="noopener">' + I('printer', 14) + ' DANFE</a>') : ''}
+                  ${x.status === 'processando' ? html`<button type="button" class="btn btn-sm" data-st="${x.id}">${raw(I('refresh', 14))} Atualizar</button>` : ''}</td></tr>`;
+            })}</tbody></table></div>` : C.empty('receipt', 'Nenhuma nota emitida ainda', 'Emita pela tela Vendas (detalhe da venda) ou ligue a emissão automática.'))}`);
+        var sv = root.querySelector('[data-save]');
+        if (sv) sv.addEventListener('click', function () {
+          var btn = this; UI.busy(btn, true);
+          Biz.fiscal.saveConfig({ ambiente: root.querySelector('#fc-amb').value, token: root.querySelector('#fc-tok').value.trim(), autoEmitir: root.querySelector('#fc-auto').checked })
+            .then(function () { UI.busy(btn, false); FiscalUI.cfg = null; UI.toast('Configuração fiscal salva ✔', { type: 'ok' }); self.fill(root); })
+            .catch(function (e) { UI.busy(btn, false); UI.toast(e.message, { type: 'err' }); });
+        });
+        var ts = root.querySelector('[data-test]');
+        if (ts) ts.addEventListener('click', function () {
+          var btn = this; UI.busy(btn, true);
+          Biz.fiscal.test().then(function (r) { UI.busy(btn, false); UI.toast(r.message || 'Conexão OK ✔', { type: 'ok', timeout: 6000 }); })
+            .catch(function (e) { UI.busy(btn, false); UI.toast(e.message, { type: 'err', timeout: 8000 }); });
+        });
+        root.querySelectorAll('[data-st]').forEach(function (b) { b.addEventListener('click', function () { Biz.fiscal.status(b.dataset.st).then(function () { self.fill(root); }); }); });
+      }).catch(function (e) { errBox(root, e); });
+    }
+  };
+
+  var FiscalUI = {
+    cfg: null, cfgAt: 0,
+    config: function () {
+      if (this.cfg && Date.now() - this.cfgAt < 300000) return Promise.resolve(this.cfg);
+      var self = this;
+      return Biz.fiscal.config().then(function (c) { self.cfg = c; self.cfgAt = Date.now(); return c; });
+    },
+    /* bloco "Nota fiscal" dentro do detalhe da venda */
+    saleBox: function (el, sale) {
+      if (!el || !window.Plans || !Plans.has('fiscal') || sale.status !== 'concluida') return;
+      var isAdmin = ['admin', 'dev'].indexOf((Auth.me() || {}).papel) > -1;
+      var draw = function () {
+        el.innerHTML = '<p class="small muted mt-3">Carregando nota fiscal…</p>';
+        Biz.fiscal.docs(sale.id).then(function (docs) {
+          var ok = docs.filter(function (d) { return d.status === 'autorizado' || d.status === 'processando'; })[0];
+          var last = docs[0];
+          var h = '<hr class="divider"><div class="fiscal-sale"><b>' + I('receipt', 15) + ' Nota fiscal</b> ';
+          if (ok) {
+            h += '<span>' + (ok.modelo === 'nfe' ? 'NF-e' : 'NFC-e') + ' nº ' + U.esc(ok.numero || '—') + ' · ' + (ok.status === 'autorizado' ? '<span class="badge badge-ok">autorizada</span>' : '<span class="badge badge-warn">processando</span>') + '</span>' +
+              '<div class="flex gap-2 mt-2" style="flex-wrap:wrap">' + (ok.danfeUrl ? '<a class="btn btn-sm" href="' + U.esc(ok.danfeUrl) + '" target="_blank" rel="noopener">' + I('printer', 14) + ' DANFE</a>' : '') +
+              (ok.status === 'processando' ? '<button type="button" class="btn btn-sm" data-fst>' + I('refresh', 14) + ' Atualizar</button>' : '') +
+              (isAdmin && ok.status === 'autorizado' ? '<button type="button" class="btn btn-sm btn-danger-ghost" data-fcan>' + I('x-circle', 14) + ' Cancelar nota</button>' : '') + '</div>';
+          } else {
+            if (last && last.status === 'erro') h += '<p class="small text-danger mt-2">Última tentativa rejeitada: ' + U.esc(last.mensagem) + '</p>';
+            if (last && last.status === 'cancelado') h += '<p class="small muted mt-2">Nota anterior cancelada.</p>';
+            h += '<div class="flex gap-2 mt-2" style="flex-wrap:wrap"><button type="button" class="btn btn-sm btn-primary" data-femit="nfce">' + I('receipt', 14) + ' Emitir NFC-e</button>' +
+              (sale.customerId ? '<button type="button" class="btn btn-sm" data-femit="nfe">' + I('receipt', 14) + ' Emitir NF-e</button>' : '') + '</div>';
+          }
+          el.innerHTML = h + '</div>';
+          el.querySelectorAll('[data-femit]').forEach(function (b) {
+            b.addEventListener('click', function () {
+              UI.busy(b, true);
+              Biz.fiscal.emit(sale.id, b.dataset.femit).then(function (r) {
+                UI.toast((b.dataset.femit === 'nfe' ? 'NF-e' : 'NFC-e') + (r.doc.status === 'autorizado' ? ' autorizada ✔' : ' enviada — em processamento'), { type: 'ok' });
+                if (r.doc.danfeUrl) window.open(r.doc.danfeUrl, '_blank', 'noopener');
+                draw();
+              }).catch(function (e) { UI.busy(b, false); UI.toast(e.message, { type: 'err', timeout: 9000 }); draw(); });
+            });
+          });
+          var st = el.querySelector('[data-fst]'); if (st) st.addEventListener('click', function () { Biz.fiscal.status(ok.id).then(draw); });
+          var cn = el.querySelector('[data-fcan]');
+          if (cn) cn.addEventListener('click', function () {
+            var j = window.prompt('Justificativa do cancelamento (15 a 255 caracteres). A NFC-e só pode ser cancelada até 30 minutos após a emissão:');
+            if (j === null) return;
+            Biz.fiscal.cancel(ok.id, j).then(function () { UI.toast('Nota cancelada na SEFAZ ✔', { type: 'warn' }); draw(); }).catch(function (e) { UI.toast(e.message, { type: 'err', timeout: 9000 }); });
+          });
+        }).catch(function (e) { el.innerHTML = '<p class="small text-danger mt-3">' + U.esc(e.message) + '</p>'; });
+      };
+      draw();
+    }
+  };
+  window.FiscalUI = FiscalUI;
+
+  /* =================== LOJAS (multi-loja) =================== */
+  Pages.lojas = {
+    title: 'Lojas',
+    render: function () { return C.skeleton('table'); },
+    mounted: function (root) { var self = this; this.rerender = function () { self.fill(pageRoot()); }; this.fill(root); },
+    fill: function (root) {
+      var self = this;
+      if (gate(root, 'multiloja', 'Gerencie várias lojas com uma única assinatura: cada loja tem estoque, caixa e equipe próprios, e você acompanha tudo num painel consolidado.')) return;
+      var isAdmin = ['admin', 'dev'].indexOf((Auth.me() || {}).papel) > -1;
+      Promise.all([Biz.stores.list(), Biz.stores.summary(30)]).then(function (d) {
+        var stores = d[0] || [], sum = d[1] || [];
+        var tot = { vendas: U.sum(sum, function (x) { return Number(x.vendas) || 0; }), fat: U.round2(U.sum(sum, function (x) { return Number(x.faturamento) || 0; })), rec: U.round2(U.sum(sum, function (x) { return Number(x.receberAberto) || 0; })) };
+        mount(root, html`
+          ${C.pageHead('Lojas', stores.length + ' loja(s) na sua conta · uma assinatura Premium para todas', isAdmin ? raw('<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Nova loja</button>') : '')}
+          <div class="kpi-grid">
+            ${C.kpi({ lbl: 'Lojas', val: String(stores.length), icon: 'store' })}
+            ${C.kpi({ lbl: 'Vendas (30 dias)', val: String(tot.vendas), icon: 'receipt', sub: 'todas as lojas' })}
+            ${C.kpi({ lbl: 'Faturamento (30 dias)', val: money(tot.fat), icon: 'trending', tone: 'ok', sub: 'consolidado' })}
+            ${C.kpi({ lbl: 'A receber em aberto', val: money(tot.rec), icon: 'dollar', tone: 'warn', sub: 'fiado + contas' })}
+          </div>
+          ${C.panel('Suas lojas', 'Entre em uma loja para operar o PDV, o estoque e a equipe dela', html`<div class="table-wrap" style="border:none"><table class="table">
+            <thead><tr><th>Loja</th><th>Seu papel</th><th class="num">Vendas 30d</th><th class="num">Faturamento 30d</th><th class="num">Abaixo do mínimo</th><th style="width:160px"></th></tr></thead>
+            <tbody>${stores.map(function (s) {
+              var m = sum.filter(function (x) { return x.id === s.id; })[0] || {};
+              return html`<tr><td><span class="strong">${s.nome}</span> ${s.principal ? raw('<span class="badge badge-mut no-dot">principal</span>') : ''} ${s.atual ? raw('<span class="badge badge-ok">você está aqui</span>') : ''}</td>
+                <td class="small">${s.papel}</td><td class="num tabular">${m.vendas != null ? m.vendas : '—'}</td><td class="num tabular">${m.faturamento != null ? money(m.faturamento) : '—'}</td>
+                <td class="num tabular">${m.abaixoMinimo ? html`<span class="badge badge-danger no-dot">${m.abaixoMinimo}</span>` : '0'}</td>
+                <td class="right">${s.atual ? '' : html`<button type="button" class="btn btn-sm btn-primary" data-go="${s.id}">${raw(I('arrow-right', 14))} Entrar nesta loja</button>`}</td></tr>`;
+            })}</tbody></table></div>`)}
+          <p class="small muted mt-3">Cada loja tem produtos, estoque, vendas, caixa e financeiro próprios. Para dar acesso a funcionários, entre na loja e convide em Configurações → Equipe.</p>`);
+        var nb = root.querySelector('[data-new]'); if (nb) nb.addEventListener('click', function () { self.form(); });
+        root.querySelectorAll('[data-go]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            UI.busy(b, true);
+            Biz.stores.switchTo(b.dataset.go).then(function (r) {
+              if (r && r.local) { UI.busy(b, false); UI.toast('Demonstração: troca de loja simulada.', { type: 'info' }); self.fill(root); return; }
+              Store.state.session.tenantId = b.dataset.go; Store.persist();
+              UI.toast('Abrindo a loja…', { type: 'info' });
+              setTimeout(function () { window.location.hash = '#/app/dashboard'; window.location.reload(); }, 300);
+            }).catch(function (e) { UI.busy(b, false); UI.toast(e.message, { type: 'err' }); });
+          });
+        });
+      }).catch(function (e) { errBox(root, e); });
+    },
+    form: function () {
+      var self = this;
+      UI.modal({
+        title: 'Nova loja', sub: 'Ela nasce com o mesmo plano e vencimento da loja principal.',
+        body: html`<div class="field"><label for="lj-nome">Nome da loja <span class="req">*</span></label><input class="input" id="lj-nome" placeholder="Ex.: Depósito São José — Filial Centro" data-autofocus></div>
+          <div class="field-row"><div class="field"><label for="lj-cnpj">CNPJ</label><input class="input mono" id="lj-cnpj" inputmode="numeric"></div>
+          <div class="field"><label for="lj-tel">Telefone</label><input class="input" id="lj-tel"></div></div>
+          <div class="field"><label for="lj-end">Endereço</label><input class="input" id="lj-end"></div>`,
+        foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button><button type="button" class="btn btn-primary" data-save>' + I('store', 15) + ' Criar loja</button>'),
+        onMount: function (panel, close) {
+          panel.querySelector('[data-save]').addEventListener('click', function () {
+            var nome = panel.querySelector('#lj-nome').value.trim(), btn = this;
+            if (nome.length < 2) { UI.toast('Informe o nome da loja.', { type: 'err' }); return; }
+            UI.busy(btn, true);
+            Biz.stores.create({ nome: nome, cnpj: panel.querySelector('#lj-cnpj').value.replace(/\D/g, ''), telefone: panel.querySelector('#lj-tel').value, endereco: panel.querySelector('#lj-end').value })
+              .then(function () { UI.busy(btn, false); close('ok'); UI.toast('Loja "' + nome + '" criada ✔', { type: 'ok' }); self.rerender(); })
+              .catch(function (e) { UI.busy(btn, false); UI.toast(e.message, { type: 'err' }); });
+          });
+        }
+      });
+    }
+  };
+
+  /* =================== Extensões do PDV =================== */
+  function extendPDV() {
+    var P = Pages.pdv;
+    if (!P || P.pickCustomer) return;
+    P.setCustomer = function (id, nome) {
+      this.st.customerId = id || null; this.st.customerNome = nome || '';
+      var l = document.getElementById('pdv-cust-lbl'); if (l) l.textContent = nome || 'Identificar cliente (opcional)';
+      var b = document.getElementById('pdv-cust'); if (b) b.classList.toggle('is-set', !!id);
+    };
+    P.pickCustomer = function () {
+      var self = this;
+      if (!Plans.has('clientes')) { UI.toast('Clientes faz parte do plano Profissional.', { type: 'warn' }); return; }
+      Biz.customers.list().then(function (all) {
+        var list = all.filter(function (c) { return c.ativo; });
+        UI.modal({
+          title: 'Cliente da venda', sub: 'Obrigatório para vender no fiado e para NF-e.',
+          body: html`<div class="flex gap-2"><span class="search-box" style="flex:1">${raw(I('search', 16))}<input class="input" id="pc-q" type="search" placeholder="Nome, CPF/CNPJ ou telefone" data-autofocus></span>
+              <button type="button" class="btn" data-newc>${raw(I('plus', 15))} Novo</button></div>
+            <div id="pc-list" class="pick-list mt-3"></div>`,
+          foot: raw('<button type="button" class="btn btn-ghost" data-none>Venda sem cliente</button><button type="button" class="btn btn-ghost" data-modal-close>Fechar</button>'),
+          onMount: function (panel, close) {
+            var box = panel.querySelector('#pc-list'), q = panel.querySelector('#pc-q');
+            var draw = function () {
+              var t = q.value.toLowerCase().trim();
+              var rows = list.filter(function (c) { return !t || (c.nome + ' ' + c.documento + ' ' + c.telefone).toLowerCase().indexOf(t) > -1; }).slice(0, 40);
+              box.innerHTML = rows.length ? rows.map(function (c) {
+                return '<button type="button" class="pick-item" data-id="' + U.esc(c.id) + '"><span><b>' + U.esc(c.nome) + '</b><br><span class="small muted">' + U.esc(fmtDoc(c.documento) || c.telefone || '') + '</span></span>' +
+                  (c.aberto > 0 ? '<span class="small text-danger">deve ' + U.money(c.aberto) + (c.limite > 0 ? ' / limite ' + U.money(c.limite) : '') + '</span>' : (c.limite > 0 ? '<span class="small muted">limite ' + U.money(c.limite) + '</span>' : '')) + '</button>';
+              }).join('') : '<p class="small muted">Nenhum cliente encontrado. Use “Novo” para cadastrar.</p>';
+              box.querySelectorAll('.pick-item').forEach(function (b) {
+                b.addEventListener('click', function () { var c = list.filter(function (x) { return x.id === b.dataset.id; })[0]; self.setCustomer(c.id, c.nome); close('ok'); });
+              });
+            };
+            q.addEventListener('input', draw); draw();
+            panel.querySelector('[data-none]').addEventListener('click', function () { self.setCustomer(null, ''); close('ok'); });
+            panel.querySelector('[data-newc]').addEventListener('click', function () {
+              close('new'); Pages.clientes.form(null, function (c) { self.setCustomer(c.id, c.nome); });
+            });
+          }
+        });
+      }).catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+    };
+    P.loadQuote = function (q) {
+      if (!q) return;
+      var st = this.freshState();
+      q.itens.forEach(function (i) {
+        var p = Store.state.products.filter(function (x) { return x.id === i.productId; })[0];
+        if (p && p.ativo) st.cart.push({ productId: p.id, nome: p.nome, un: p.un, preco: p.preco, qtd: Number(i.qtd) });
+      });
+      if (!st.cart.length) { UI.toast('Os produtos deste orçamento não estão mais ativos no catálogo.', { type: 'err' }); return; }
+      if (q.desconto > 0) st.disc = { tipo: 'R$', valor: q.desconto };
+      st.quoteId = q.id; st.quoteNumero = q.numero;
+      if (q.customerId) { st.customerId = q.customerId; st.customerNome = q.clienteNome; }
+      this.st = st;
+      UI.toast('Orçamento ' + q.numero + ' carregado no PDV — confira o pagamento e finalize.', { type: 'info', timeout: 5000 });
+      Router.go('/app/pdv');
+    };
+    P.afterSale = function (sale) {
+      if (!Plans.has('fiscal') || sale.pending) return;
+      FiscalUI.config().then(function (cfg) {
+        if (!cfg || !cfg.autoEmitir || !cfg.hasToken) return;
+        UI.toast('Emitindo NFC-e da ' + sale.numero + '…', { type: 'info' });
+        return Biz.fiscal.emit(sale.id, 'nfce').then(function (r) {
+          UI.toast('NFC-e nº ' + (r.doc.numero || '') + ' autorizada ✔', { type: 'ok', timeout: 6000 });
+          if (r.doc.danfeUrl) window.open(r.doc.danfeUrl, '_blank', 'noopener');
+        });
+      }).catch(function (e) { UI.toast('A venda foi salva, mas a NFC-e não saiu: ' + e.message + ' Tente de novo em Vendas.', { type: 'warn', timeout: 10000 }); });
+    };
+    /* o render do PDV recria o rótulo a partir do estado — mantém cliente/orçamento */
+    var origRender = P.render;
+    P.render = function () { var out = origRender.apply(this, arguments); return out; };
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', extendPDV); else extendPDV();
+  setTimeout(extendPDV, 0);
+})();
+</script>
+<script>
+/* ==========================================================================
    LojaCerta · Pages de Autenticação & Conta
    Rotas: /recuperar · /redefinir · /confirmar-email  +  painel Conta/Emails-dev
    Todos os estados: loading, erro (token inválido/expirado/usado, senha fraca,
@@ -8103,6 +9258,11 @@ body.is-app{background:var(--bg)}
     { page: 'estoque', label: 'Estoque', icon: 'layers', sect: 'op' },
     { page: 'vendas', label: 'Vendas', icon: 'receipt', sect: 'op' },
     { page: 'relatorios', label: 'Relatórios', icon: 'reports', sect: 'op' },
+    { page: 'clientes', label: 'Clientes', icon: 'users', sect: 'op', feat: 'clientes' },
+    { page: 'orcamentos', label: 'Orçamentos', icon: 'tag', sect: 'op', feat: 'orcamentos' },
+    { page: 'financeiro', label: 'Financeiro', icon: 'dollar', sect: 'op', feat: 'financeiro' },
+    { page: 'fiscal', label: 'Nota fiscal', icon: 'receipt', sect: 'op', feat: 'fiscal' },
+    { page: 'lojas', label: 'Lojas', icon: 'store', sect: 'conta', feat: 'multiloja' },
     { page: 'suporte', label: 'Suporte', icon: 'headset', sect: 'conta' },
     { page: 'assinatura', label: 'Assinatura', icon: 'billing', sect: 'conta' },
     { page: 'config', label: 'Configurações', icon: 'settings', sect: 'conta' }
@@ -8156,7 +9316,7 @@ body.is-app{background:var(--bg)}
       badge = '<span class="nav-badge" data-nav-badge="suporte" hidden></span>';
     }
     return html`<a class="side-link ${n.page === page ? 'active' : ''}" href="#/app/${n.page}" ${n.page === page ? raw('aria-current="page"') : ''}>
-      ${raw(I(n.icon, 17))} ${n.label}${raw(badge)}<span class="kbd-hint">Alt+${hintIdx + 1}</span></a>`;
+      ${raw(I(n.icon, 17))} ${n.label}${raw(badge)}${n.feat && window.Plans && !Plans.has(n.feat) ? raw('<span class="nav-plan">' + Plans.planName(n.feat).toUpperCase().slice(0, 3) + '</span>') : (hintIdx < 9 ? raw('<span class="kbd-hint">Alt+' + (hintIdx + 1) + '</span>') : '')}</a>`;
   }
   function sidePlan(info) {
     var user = Auth.me();

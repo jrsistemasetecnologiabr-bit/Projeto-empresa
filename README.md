@@ -4,7 +4,7 @@ Produto web completo (landing de marketing + aplicação SaaS multi-vertical) co
 relatórios, central de suporte e multiusuário — **em produção real no Supabase** e publicado
 no GitHub Pages a cada push na `main`.
 
-> Status: **v1.9.4 — produção ativa** (backend Supabase + GitHub Pages + área de suporte).
+> Status: **v2.0.0 — produção ativa** (backend Supabase + GitHub Pages + área de suporte).
 > Site: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa/
 > Suporte dev: `jrsistemasetecnologiabr@gmail.com` (única conta `dev` — ver "Conta dev" abaixo).
 > Segurança e pré-deploy: ver **`SECURITY.md`** (política de segredos, rotação de PIN, checklist de go-live).
@@ -62,6 +62,8 @@ No **Suporte**, o papel define o layout: **usuário** vê os tickets da própria
 - `supabase/migracao-v17-segredos-vault.sql` — chaves do Asaas no Vault (aplicada)
 - `supabase/migracao-v18-limites-plano.sql` — limites de usuários/produtos por plano no banco (aplicada)
 - `supabase/migracao-v19-revoga-rpc-anon.sql` — RPCs de negócio fora do alcance anônimo (aplicada)
+- `supabase/migracao-v20-signup-conta-confirmada.sql` — corrige cadastro de conta já confirmada (aplicada)
+- `supabase/migracao-v21-recursos-planos.sql` — clientes, fiado, financeiro, orçamentos, multi-loja, NFC-e/NF-e e liberação por plano (aplicada)
 - `LEIA-ME-LANCAMENTO.txt` — estado do go-live e o que fazer no dia
 - `tests/mobile.test.js` — E2E mobile (Playwright) que bloqueia o deploy
 - `SECURITY.md` — política de segurança: segredos, rotação de PIN, como reportar vulnerabilidades e checklist de pré-go-live
@@ -274,8 +276,17 @@ Mapeamento: `tenants.stripe_customer_id`/`stripe_subscription_id` guardam os ids
 `cus_…`/`sub_…` do Asaas (colunas reaproveitadas). Faturas em `invoices`
 (upsert por `provider_id`). O provider `infinitepay` continua aceito em modo stub.
 
-## Roadmap do produto
+## Recursos por plano (v2.0 — todos no ar)
 
-1. **Fase 2**: NFC-e/NF-e via API parceira · modo offline do PDV (fila de sincronização) ·
-   clientes/fiado/crediário · orçamentos que viram venda · WhatsApp.
-2. **Fase 3**: multi-loja · app mobile do dono (notificações de venda) · API pública.
+| Recurso | Essencial | Profissional | Premium |
+|---|:-:|:-:|:-:|
+| PDV, estoque, vendas, relatórios, suporte, PDV offline | ✔ | ✔ | ✔ |
+| Clientes, venda no fiado, contas a pagar/receber | — | ✔ | ✔ |
+| Orçamento que vira venda | — | ✔ | ✔ |
+| Multi-loja (painel consolidado) | — | — | ✔ |
+| NFC-e / NF-e (Focus NFe) | — | — | ✔ |
+
+Teste grátis (14 dias) e conta dev: tudo liberado. A regra vive no banco (`plan_has`) e é espelhada no app (`Plans.has`).
+NFC-e/NF-e: cada loja cria a conta no Focus NFe, cadastra certificado A1 + CSC lá e cola o token em **Nota fiscal**.
+
+Próximas ideias (não vendidas nos planos): app mobile do dono, API pública, WhatsApp.

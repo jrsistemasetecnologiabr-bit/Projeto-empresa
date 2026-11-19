@@ -1076,7 +1076,7 @@
             ${Config.integrations.map(function (ig) {
               return html`<div class="int-item"><span class="int-dot ${ig.status === 'ready' ? 'on' : ig.status === 'soon' ? 'soon' : ''}"></span>
                 <span><b>${ig.name}</b><span>${ig.desc}</span>
-                <span class="badge ${ig.status === 'ready' ? 'badge-ok' : 'badge-warn'} no-dot mt-2">${ig.status === 'ready' ? 'pronto p/ conectar' : 'fase 2'}</span></span></div>`;
+                <span class="badge ${ig.status === 'ready' ? 'badge-ok' : 'badge-warn'} no-dot mt-2">${ig.status === 'ready' ? 'ativo' : 'configurar'}</span></span></div>`;
             })}
           </div>
         </div>

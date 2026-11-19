@@ -488,3 +488,26 @@ body.is-app{background:var(--bg)}
 @media (max-width:640px){
   .page-actions .btn{white-space:normal;text-align:center;padding-left:.8em;padding-right:.8em;min-height:44px}
 }
+
+/* ===== v2.0 · recursos dos planos (clientes, fiado, orçamentos, financeiro, fiscal, lojas) ===== */
+.upsell-card{max-width:620px;margin:8px auto;text-align:center;padding:36px 28px}
+.upsell-card h2{font-size:1.25rem;margin:14px 0 8px}
+.upsell-card p{color:var(--ink-2);line-height:1.6;margin-bottom:20px}
+.upsell-ico{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;margin:0 auto;background:var(--brand-50);color:var(--brand-text);border:1px solid var(--brand-100)}
+.nav-plan{margin-left:auto;font-size:.58rem;font-weight:800;letter-spacing:.06em;padding:2px 6px;border-radius:999px;background:var(--brand-50);color:var(--brand-text);border:1px solid var(--brand-100)}
+.pdv-cust{display:flex;align-items:center;gap:8px;width:100%;margin:2px 0 12px;padding:10px 12px;border-radius:10px;border:1px dashed var(--line-strong);background:transparent;color:var(--ink-2);font:inherit;font-size:.85rem;cursor:pointer;text-align:left}
+.pdv-cust:hover{border-color:var(--brand);color:var(--ink)}
+.pdv-cust.is-set{border-style:solid;border-color:var(--brand);color:var(--ink);font-weight:700;background:var(--brand-50)}
+.pdv-quote{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--ok-text,var(--ok));margin:-4px 0 10px}
+.pick-list{display:grid;gap:6px;max-height:52dvh;overflow:auto}
+.pick-item{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.pick-item:hover,.pick-item:focus-visible{border-color:var(--brand);background:var(--brand-50)}
+.fiscal-box{margin-top:6px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--surface-2)}
+.fiscal-box summary{cursor:pointer;padding:4px 0}
+.fiscal-box[open] summary{margin-bottom:10px}
+.fiscal-sale{display:flex;flex-direction:column;gap:2px}
+.steps-list{padding-left:20px;display:grid;gap:8px;line-height:1.55;color:var(--ink-2)}
+.text-danger{color:var(--danger-text,var(--danger))}
+@media (max-width:640px){.upsell-card{padding:28px 18px}.pick-list{max-height:60dvh}}
+.offline-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:900;max-width:calc(100% - 24px);padding:9px 16px;border-radius:999px;background:#7C2D12;color:#FFEDD5;font-size:.8rem;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center}
+@media (max-width:640px){.offline-bar{bottom:calc(76px + env(safe-area-inset-bottom))}}

@@ -11,7 +11,7 @@
   var Config = {
     env: '{{ENV}}',              // demo | production — preenchido pelo build (tokens {{...}})
     appName: 'LojaCerta',
-    version: '1.9.4',
+    version: '2.0.0',
     latency: 110,                // ms — latência simulada do "backend" (0 em testes)
     siteUrl: '{{SITE_URL}}',     // URL pública do site (canonical, e-mails, redirects de auth)
     api: { baseUrl: '{{API_BASE}}', anonKey: '{{SUPABASE_ANON_KEY}}' }, // build injeta do .env
@@ -29,8 +29,8 @@
       { id: 'suporte', name: 'Central de Suporte', status: 'ready', desc: 'Tickets com conversa por mensagem — clientes abrem, a equipe JR Sistemas atende.' },
       { id: 'billing', name: 'Cobrança (Asaas)', status: 'ready', desc: 'Assinatura recorrente via Asaas — Pix, cartão e boleto, com liberação automática por webhook.' },
       { id: 'analytics', name: 'Analytics (GA4/Meta)', status: 'ready', desc: 'Analytics.track() já emite eventos; basta plugar o provider.' },
-      { id: 'fiscal', name: 'Emissor NFC-e/NF-e', status: 'soon', desc: 'Fase 2 — integração via API parceira (Focus NFe/TecnoSpeed).' },
-      { id: 'storage', name: 'Armazenamento (logos/PDF)', status: 'soon', desc: 'Upload de arquivos via Supabase Storage/S3.' }
+      { id: 'fiscal', name: 'Emissor NFC-e/NF-e (Focus NFe)', status: 'ready', desc: 'Plano Premium — configure o token da loja em Nota fiscal.' },
+      { id: 'email', name: 'E-mail transacional (Resend)', status: 'ready', desc: 'Recibos de pagamento, respostas do suporte e avisos de vencimento.' }
     ]
   };
   /* Tokens {{...}} não substituídos (uso do source sem build) viram defaults seguros */
@@ -568,8 +568,8 @@
   var Billing = {
     PLANS: [
       { id: 'essencial', name: 'Essencial', monthly: 59, annual: 49, annualTotal: 588, users: 2, pdvs: 1, products: 3000, for: 'Para começar com 1 caixa', features: ['2 usuários · 1 PDV', 'Até 3.000 produtos', 'Estoque + PDV + comprovante', 'Dashboard e relatórios básicos', 'Central de suporte no app'] },
-      { id: 'profissional', name: 'Profissional', monthly: 129, annual: 107, annualTotal: 1284, users: 6, pdvs: 3, products: 20000, hot: true, for: 'Para loja com 2–3 caixas', features: ['6 usuários · 3 PDVs', 'Até 20.000 produtos', 'Relatórios completos + exportação', 'Clientes, fiado e contas a pagar (em breve)', 'Orçamento que vira venda (em breve)', 'Suporte prioritário'] },
-      { id: 'premium', name: 'Premium', monthly: 249, annual: 207, annualTotal: 2484, users: Infinity, pdvs: Infinity, products: Infinity, for: 'Para quem emite nota e tem 2+ lojas', features: ['Usuários e PDVs ilimitados', 'Produtos ilimitados', 'NFC-e / NF-e (em breve)', 'Multi-loja (em breve)', 'Onboarding ao vivo', 'Suporte prioritário'] }
+      { id: 'profissional', name: 'Profissional', monthly: 129, annual: 107, annualTotal: 1284, users: 6, pdvs: 3, products: 20000, hot: true, for: 'Para loja com 2–3 caixas', features: ['6 usuários · 3 PDVs', 'Até 20.000 produtos', 'Relatórios completos + exportação', 'Clientes, fiado e contas a pagar', 'Orçamento que vira venda', 'Suporte prioritário'] },
+      { id: 'premium', name: 'Premium', monthly: 249, annual: 207, annualTotal: 2484, users: Infinity, pdvs: Infinity, products: Infinity, for: 'Para quem emite nota e tem 2+ lojas', features: ['Usuários e PDVs ilimitados', 'Produtos ilimitados', 'NFC-e / NF-e', 'Multi-loja', 'Onboarding ao vivo', 'Suporte prioritário'] }
     ],
     planById: function (id) { return this.PLANS.filter(function (p) { return p.id === id; })[0] || null; },
     /* Plano pago com prazo vencido? (guarda do front; o servidor confirma via billing.refresh).
@@ -909,7 +909,19 @@
   };
 
   var Sales = {
-    commit: function (d) { return ApiClient.request('sales.commit', d).then(function (r) { Bus.emit('sales:changed'); return r.sale; }); },
+    commit: function (d) {
+      return ApiClient.request('sales.commit', d).then(function (r) { Bus.emit('sales:changed'); return r.sale; }).catch(function (e) {
+        /* PDV offline (produção): conexão caiu → fila local com o mesmo idempotencyId */
+        var fiado = (d.payments || []).some(function (p) { return p.forma === 'fiado' && Number(p.valor) > 0; });
+        if (window.OfflineQueue && Config.env === 'production' && d.idempotencyId && OfflineQueue.isNetErr(e)) {
+          if (fiado) throw ApiError('NETWORK', 'Sem internet: venda no fiado precisa de conexão para conferir o limite do cliente. Use outra forma de pagamento ou aguarde a conexão.');
+          var sale = OfflineQueue.enqueue(d); Bus.emit('sales:changed');
+          try { UI.toast('Sem internet: venda guardada no aparelho e será enviada sozinha quando a conexão voltar.', { type: 'warn', timeout: 7000 }); } catch (x) { }
+          return sale;
+        }
+        throw e;
+      });
+    },
     cancel: function (id, reason) { return ApiClient.request('sales.cancel', { id: id, reason: reason }).then(function () { Bus.emit('sales:changed'); }); },
     get: function (id) { var s = st().sales.filter(function (x) { return x.id === id; })[0]; return s ? U.clone(s) : null; },
     list: function (f) {

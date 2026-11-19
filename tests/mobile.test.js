@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
 
 const URL = 'file://' + path.resolve(__dirname, '../release/demo/index.html');
 const SIZES = [[320, 568], [360, 740], [390, 844], [414, 896], [768, 1024]];
-const PAGES = ['dashboard', 'pdv', 'produtos', 'estoque', 'vendas', 'relatorios', 'suporte', 'assinatura', 'config'];
+const PAGES = ['dashboard', 'pdv', 'produtos', 'estoque', 'vendas', 'relatorios', 'clientes', 'orcamentos', 'financeiro', 'fiscal', 'lojas', 'suporte', 'assinatura', 'config'];
 let fails = 0;
 const check = (ok, msg) => { if (!ok) { fails++; console.log('  ✘ ' + msg); } };
 
