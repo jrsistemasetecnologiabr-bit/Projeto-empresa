@@ -105,17 +105,10 @@ ARQUIVOS NOVOS NO REPOSITÓRIO
  3. O QUE FAZER AMANHÃ (SÓ VOCÊ PODE FAZER) — EM ORDEM
 =====================================================================
 
-[1] PUBLICAR AS CORREÇÕES DO SITE (2 min)
-    Banco, cobrança e e-mail JÁ ESTÃO valendo. Mas as correções de
-    texto do site estão no branch "claude/vibrant-heisenberg-z5f1bt"
-    e o site só atualiza quando entra na "main".
-    -> GitHub -> Pull requests -> New -> base: main, compare: o branch
-       acima -> Create -> Merge. (Ou me peça e eu abro o PR.)
-    -> O GitHub Actions publica sozinho em ~3 min.
-    -> Confira: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa/version.json
-       deve mostrar "1.9.4".
+[JÁ FEITO] Correções do site publicadas na main em 19/11 — deploy
+    automático com todos os testes passando; versão 1.9.4 no ar.
 
-[2] COMPRAR UM DOMÍNIO — O ÚNICO BLOQUEIO REAL (30–60 min)
+[1] COMPRAR UM DOMÍNIO — O ÚNICO BLOQUEIO REAL (30–60 min)
     Por quê: sem domínio próprio,
       a) o Supabase envia no MÁXIMO ~2 e-mails de cadastro POR HORA
          (mesmo no plano pago). O 3º cliente que se cadastrar na mesma
@@ -143,7 +136,7 @@ ARQUIVOS NOVOS NO REPOSITÓRIO
     Enquanto o domínio não sai: se um cliente não receber o código,
     a conta dev pode ativar a loja manualmente pelo Suporte.
 
-[3] PAGAR O SUPABASE PRO E LIGAR 1 OPÇÃO (5 min)
+[2] PAGAR O SUPABASE PRO E LIGAR 1 OPÇÃO (5 min)
     - supabase.com -> Organization -> Billing -> Pro (US$ 25/mês).
       Ganha: sem pausa por inatividade, backup diário de 7 dias, mais
       e-mails e conexões.
@@ -153,6 +146,31 @@ ARQUIVOS NOVOS NO REPOSITÓRIO
     - Resend: o plano grátis (3.000 e-mails/mês, 100/dia) aguenta o
       começo. Pague o Pro (US$ 20) quando passar disso.
 
+
+=====================================================================
+ 3b. VALIDAÇÃO FINAL FEITA (19/11, depois do deploy)
+=====================================================================
+
+  - Deploy na main: build + teste mobile + teste de sessão + smoke de
+    produção + publicação = todos OK.
+  - Smoke contra o backend real: 6/6 (site no ar, API, CORS, RLS,
+    RPC protegida).
+  - Matriz de telas: 15 tamanhos (320px celular pequeno até 3440px
+    ultrawide) + 6 aparelhos emulados (iPhone SE, iPhone 15 Pro Max,
+    Pixel 7, Galaxy S9+, iPad Mini, iPad Pro). Resultado: 452/454 OK,
+    e as 2 "falhas" são a resposta 400 que o próprio teste de senha errada
+    provoca (o app mostrou a mensagem certa) — nenhuma falha real.
+      * Site real: carrega, sem rolagem lateral, tema claro/escuro,
+        telas Entrar/Cadastro, versão 1.9.4, sem textos de demo.
+      * Login real no Supabase com senha errada: mensagem amigável.
+      * App completo (9 telas) em todos os tamanhos + uma VENDA no PDV
+        do início ao fim em cada tamanho: OK, sem erro de JavaScript.
+  - Backend: webhook Asaas (401/200), API ping, recusa sem login,
+    limites de plano, envio real de e-mail — testados.
+  - NÃO testado com login real: não existe usuário de teste cadastrado
+    e a criação direta no banco foi bloqueada pela proteção de
+    permissões desta sessão. Cobertura equivalente: os testes acima +
+    o modo demo usa exatamente o mesmo código de tela. Ver item abaixo.
 
 =====================================================================
  4. RECOMENDADO NO DIA DO LANÇAMENTO
