@@ -130,6 +130,20 @@
           </div>
           <div class="field"><label for="f-forn">Fornecedor <span class="muted" style="font-weight:400">(opcional)</span></label>
             <input class="input" id="f-forn" name="fornecedor" value="${p ? p.fornecedor : ''}"></div>
+          ${window.Plans && Plans.has('fiscal') ? html`<details class="fiscal-box" ${p && p.ncm ? '' : raw('open')}><summary><b>Dados fiscais</b> <span class="muted small">(para emitir NFC-e/NF-e)</span></summary>
+            <div class="field-row-3">
+              <div class="field"><label for="f-ncm">NCM <span class="muted" style="font-weight:400">(8 dígitos)</span></label><input class="input mono" id="f-ncm" name="ncm" inputmode="numeric" maxlength="10" value="${p ? (p.ncm || '') : ''}" placeholder="Ex.: 25232910"></div>
+              <div class="field"><label for="f-cfop">CFOP</label><input class="input mono" id="f-cfop" name="cfop" inputmode="numeric" maxlength="4" value="${p ? (p.cfop || '5102') : '5102'}"></div>
+              <div class="field"><label for="f-csosn">CSOSN / CST</label><select class="select" id="f-csosn" name="csosn">
+                ${['102', '103', '300', '400', '500', '101', '201', '202', '900'].map(function (c) { return html`<option ${(p ? (p.csosn || '102') : '102') === c ? raw('selected') : ''}>${c}</option>`; })}</select></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="f-cest">CEST <span class="muted" style="font-weight:400">(se houver ST)</span></label><input class="input mono" id="f-cest" name="cest" inputmode="numeric" maxlength="9" value="${p ? (p.cest || '') : ''}"></div>
+              <div class="field"><label for="f-orig">Origem da mercadoria</label><select class="select" id="f-orig" name="origem">
+                ${[['0', '0 — Nacional'], ['1', '1 — Estrangeira (importação direta)'], ['2', '2 — Estrangeira (mercado interno)']].map(function (o) { return html`<option value="${o[0]}" ${String(p ? (p.origem || 0) : 0) === o[0] ? raw('selected') : ''}>${o[1]}</option>`; })}</select></div>
+            </div>
+            <p class="field-hint">Dúvidas sobre NCM/CSOSN? Seu contador informa. Padrão para Simples Nacional: CFOP 5102 e CSOSN 102.</p>
+          </details>` : ''}
         </form>`,
         foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button>' +
           '<button type="button" class="btn btn-primary" data-save>' + I('save', 16) + ' ' + (p ? 'Salvar alterações' : 'Cadastrar produto') + '</button>'),
@@ -157,6 +171,11 @@
             data.catId = form.elements.catId.value;
             data.un = form.elements.un.value;
             data.fornecedor = form.elements.fornecedor.value;
+            if (form.elements.ncm) {
+              data.ncm = form.elements.ncm.value.replace(/\D/g, ''); data.cfop = form.elements.cfop.value.replace(/\D/g, '') || '5102';
+              data.cest = form.elements.cest.value.replace(/\D/g, ''); data.csosn = form.elements.csosn.value; data.origem = form.elements.origem.value;
+              if (data.ncm && data.ncm.length !== 8) { UI.busy(btn, false); UI.toast('O NCM deve ter 8 dígitos.', { type: 'err' }); return; }
+            }
             var op = p ? Catalog.update(Object.assign({ id: p.id }, data)) : Catalog.create(data);
             op.then(function () {
               UI.busy(btn, false); close('ok');

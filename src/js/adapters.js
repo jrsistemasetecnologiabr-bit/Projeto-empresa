@@ -473,13 +473,13 @@
             q('categories?select=*&tenant_id=eq.' + s2 + '&order=nome'),
             qAll('products?select=*&tenant_id=eq.' + s2 + '&order=nome,id'),
             q('users?select=*&tenant_id=eq.' + s2 + '&order=nome'),
-            qAll('sales?select=*,users(nome),sale_items(*),sale_payments(*)&tenant_id=eq.' + s2 + '&created_at=gte.' + encodeURIComponent(since) + '&order=created_at.desc,id'),
+            qAll('sales?select=*,users(nome),customers(nome),sale_items(*),sale_payments(*)&tenant_id=eq.' + s2 + '&created_at=gte.' + encodeURIComponent(since) + '&order=created_at.desc,id'),
             qAll('stock_movements?select=*,users(nome)&tenant_id=eq.' + s2 + '&created_at=gte.' + encodeURIComponent(since) + '&order=created_at.desc,id'),
             q('tenants?select=*&id=eq.' + s2)
           ]).then(function (d) {
             Store.update(function (s) {
               s.categories = (d[0] || []).map(function (c) { return { id: c.id, nome: c.nome }; });
-              s.products = (d[1] || []).map(function (x) { return { id: x.id, codigo: x.codigo, nome: x.nome, catId: x.category_id, un: x.unidade, custo: Number(x.preco_custo), preco: Number(x.preco_venda), estoque: Number(x.estoque_atual), min: Number(x.estoque_minimo), fornecedor: x.fornecedor || '', ativo: x.ativo }; });
+              s.products = (d[1] || []).map(function (x) { return { id: x.id, codigo: x.codigo, nome: x.nome, catId: x.category_id, un: x.unidade, custo: Number(x.preco_custo), preco: Number(x.preco_venda), estoque: Number(x.estoque_atual), min: Number(x.estoque_minimo), fornecedor: x.fornecedor || '', ativo: x.ativo, ncm: x.ncm || '', cfop: x.cfop || '5102', cest: x.cest || '', csosn: x.csosn || '102', origem: x.origem || 0 }; });
               s.users = (d[2] || []).map(function (x) { return { id: x.id, nome: x.nome, email: x.email, papel: x.papel, ativo: x.ativo, createdAt: new Date(x.created_at).getTime() }; });
               /* auto-correção de papel/nome do perfil logado (ex.: conta promovida a dev
                  pela equipe JR — sem isso o navegador continuaria com papel antigo) */
@@ -495,7 +495,7 @@
                   itens: (v.sale_items || []).map(function (i) { return { productId: i.product_id, nome: i.nome_snapshot, un: i.unidade, qtd: Number(i.qtd), preco: Number(i.preco_unitario), subtotal: Number(i.subtotal) }; }),
                   subtotal: Number(v.subtotal), desconto: Number(v.desconto), descontoTipo: v.desconto_tipo, total: Number(v.total),
                   pagamentos: (v.sale_payments || []).map(function (x) { return { forma: x.forma, valor: Number(x.valor) }; }),
-                  status: v.status, motivoCancelamento: v.motivo_cancelamento || '' };
+                  status: v.status, motivoCancelamento: v.motivo_cancelamento || '', customerId: v.customer_id || null, customerNome: (v.customers && v.customers.nome) || '' };
               });
               s.movements = (d[4] || []).map(function (m) { return { id: m.id, at: new Date(m.created_at).getTime(), productId: m.product_id, tipo: m.tipo, qtd: Number(m.qtd), userId: m.user_id, userName: (m.users && m.users.nome) || '', origem: m.origem || '', obs: m.obs || '' }; });
               if (d[5] && d[5][0]) {
@@ -522,10 +522,10 @@
           var codigo = String(p.codigo || '').trim() || ('INT-' + String(Date.now()).slice(-6));
           return fetch(B + '/rest/v1/products', { method: 'POST', headers: Object.assign({ Prefer: 'return=representation' }, H),
             body: JSON.stringify({ tenant_id: sid, codigo: codigo, nome: p.nome, category_id: p.catId || null, unidade: p.un || 'un',
-              preco_custo: p.custo || 0, preco_venda: p.preco, estoque_atual: p.estoque || 0, estoque_minimo: p.min || 0, fornecedor: p.fornecedor || '' }) }).then(this.j).then(function (rows) {
+              preco_custo: p.custo || 0, preco_venda: p.preco, estoque_atual: p.estoque || 0, estoque_minimo: p.min || 0, fornecedor: p.fornecedor || '', ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
             var row = rows[0];
             if ((p.estoque || 0) > 0) fetch(B + '/rest/v1/stock_movements', { method: 'POST', headers: H, body: JSON.stringify({ tenant_id: sid, product_id: row.id, tipo: 'entrada', qtd: p.estoque, user_id: (Store.state.session || {}).userId, origem: 'Cadastro inicial' }) });
-            Store.update(function (s) { s.products.push({ id: row.id, codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ativo: row.ativo });
+            Store.update(function (s) { s.products.push({ id: row.id, codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ncm: row.ncm || '', cfop: row.cfop || '5102', cest: row.cest || '', csosn: row.csosn || '102', origem: row.origem || 0, ativo: row.ativo });
               /* mantém o cache local coerente com o banco: a entrada inicial também aparece na lista de movimentos na MESMA sessão */
               if (!s.movements) s.movements = [];
               if ((p.estoque || 0) > 0) s.movements.unshift({ id: 'mv' + Date.now(), at: Date.now(), productId: row.id, tipo: 'entrada', qtd: Number(p.estoque), userId: (Store.state.session || {}).userId, userName: (((Store.state.session || {}).profile) || {}).nome || '', origem: 'Cadastro inicial', obs: (p.nome || '') }); });
@@ -534,9 +534,9 @@
         }
         case 'products.update': {
           return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H),
-            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_atual: p.estoque, estoque_minimo: p.min, fornecedor: p.fornecedor }) }).then(this.j).then(function (rows) {
+            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_atual: p.estoque, estoque_minimo: p.min, fornecedor: p.fornecedor, ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
             var row = rows[0];
-            Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === row.id; })[0]; if (x) Object.assign(x, { codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '' }); });
+            Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === row.id; })[0]; if (x) Object.assign(x, { codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ncm: row.ncm || '', cfop: row.cfop || '5102', cest: row.cest || '', csosn: row.csosn || '102', origem: row.origem || 0 }); });
             return { id: row.id };
           });
         }
@@ -556,10 +556,10 @@
           Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === p.productId; })[0]; if (x) x.estoque = Number(r.estoque); s.movements.unshift({ id: 'mv' + Date.now(), at: Date.now(), productId: p.productId, tipo: 'ajuste', qtd: Number(p.delta), userId: (s.session || {}).userId, userName: ((s.session || {}).profile || {}).nome || '', origem: p.reason, obs: p.note || '' }); });
           return r;
         });
-        case 'sales.commit': return fetch(B + '/rest/v1/rpc/commit_sale', { method: 'POST', headers: H, body: JSON.stringify({ p: { items: p.items, discount: p.discount, payments: p.payments, idempotencyId: p.idempotencyId || null } }) }).then(this.j).then(function (sale) {
+        case 'sales.commit': return fetch(B + '/rest/v1/rpc/commit_sale', { method: 'POST', headers: H, body: JSON.stringify({ p: { items: p.items, discount: p.discount, payments: p.payments, idempotencyId: p.idempotencyId || null, customerId: p.customerId || null, quoteId: p.quoteId || null, fiadoVencimento: p.fiadoVencimento || null } }) }).then(this.j).then(function (sale) {
           Store.update(function (s) {
             sale.itens.forEach(function (it) { var x = s.products.filter(function (y) { return y.id === it.productId; })[0]; if (x) x.estoque = Math.round((x.estoque - it.qtd) * 1000) / 1000; });
-            s.sales.unshift({ id: sale.id, numero: sale.numero, at: new Date(sale.at).getTime(), userId: (s.session || {}).userId, userName: sale.userName || '', itens: sale.itens, subtotal: Number(sale.subtotal), desconto: Number(sale.desconto), descontoTipo: (p.discount || {}).tipo || 'R$', total: Number(sale.total), pagamentos: sale.pagamentos, status: 'concluida' });
+            s.sales.unshift({ id: sale.id, numero: sale.numero, at: new Date(sale.at).getTime(), userId: (s.session || {}).userId, userName: sale.userName || '', itens: sale.itens, subtotal: Number(sale.subtotal), desconto: Number(sale.desconto), descontoTipo: (p.discount || {}).tipo || 'R$', total: Number(sale.total), pagamentos: sale.pagamentos, status: 'concluida', customerId: p.customerId || null, customerNome: p.customerNome || '' });
             sale.itens.forEach(function (it) { s.movements.unshift({ id: 'mv' + Date.now() + it.productId, at: Date.now(), productId: it.productId, tipo: 'saida', qtd: it.qtd, userId: (s.session || {}).userId, userName: sale.userName || '', origem: sale.numero, obs: '' }); });
           });
           return { sale: sale };
@@ -707,7 +707,9 @@
         case 'billing.suspend_tenant':
           return fetch(B + '/functions/v1/api', { method: 'POST', headers: Object.assign({}, H, self.devPinHeader()), body: JSON.stringify({ op: 'billing.suspend_tenant', payload: { tenantId: p.tenantId, reason: p.reason || '' } }) }).then(self.j);
         case 'billing.setPastDue': return Promise.reject(ApiError('NOT_IMPLEMENTED', 'Simulações existem apenas no modo demo.'));
-        default: return Promise.reject(ApiError('NOT_IMPLEMENTED', 'Operação "' + op + '" aguardando integração.'));
+        default:
+          if (window.BizRemote && window.BizRemote[op]) return window.BizRemote[op](p, { B: B, H: H, sid: sid, j: this.j.bind(this) });
+          return Promise.reject(ApiError('NOT_IMPLEMENTED', 'Operação "' + op + '" não existe.'));
       }
     }
   };

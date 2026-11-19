@@ -133,6 +133,71 @@ async function asaas(path: string, init: RequestInit = {}) {
   return body;
 }
 
+/* ---------------- Fiscal: NFC-e / NF-e via Focus NFe (v21, plano Premium) ----------------
+   Token da loja fica em public.fiscal_config (sem select para o navegador).
+   Doc oficial: https://doc.focusnfe.com.br/reference/emitir_nfce (síncrona) e
+   emitir_nfe (assíncrona: 202 + consulta). Autenticação: HTTP Basic "token:". */
+const FOCUS_BASE: Record<string, string> = {
+  producao: "https://api.focusnfe.com.br",
+  homologacao: "https://homologacao.focusnfe.com.br",
+};
+const FOCUS_PAG: Record<string, string> = { dinheiro: "01", credito: "03", debito: "04", fiado: "05", pix: "17" };
+const HOMOLOG_TXT = "NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL";
+function planHasT(t: { status?: string; plan_id?: string | null } | undefined, f: string): boolean {
+  if (!t) return false;
+  if (t.plan_id === "dev" || t.status === "trialing") return true;
+  if (["clientes", "fiado", "financeiro", "orcamentos"].includes(f)) return t.plan_id === "profissional" || t.plan_id === "premium";
+  if (["multiloja", "fiscal"].includes(f)) return t.plan_id === "premium";
+  return false;
+}
+const onlyDigits = (s: unknown) => String(s ?? "").replace(/\D/g, "");
+const r2 = (n: number) => Math.round(n * 100) / 100;
+// deno-lint-ignore no-explicit-any
+type AnyObj = Record<string, any>;
+async function fiscalCtx(tenantId: string): Promise<{ t: AnyObj | undefined; cfg: AnyObj | undefined }> {
+  const [tq, fq] = await Promise.all([
+    sr(`/rest/v1/tenants?select=id,nome,cnpj,status,plan_id&id=eq.${tenantId}`),
+    sr(`/rest/v1/fiscal_config?select=*&tenant_id=eq.${tenantId}`),
+  ]);
+  return { t: ((await tq.json()) as AnyObj[])[0], cfg: ((await fq.json()) as AnyObj[])[0] };
+}
+async function focusCall(cfg: AnyObj, method: string, path: string, body?: unknown) {
+  const base = FOCUS_BASE[cfg.ambiente === "producao" ? "producao" : "homologacao"];
+  const r = await fetch(base + "/v2" + path, {
+    method,
+    headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(String(cfg.token) + ":") },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const txt = await r.text();
+  let j: AnyObj = {};
+  try { j = JSON.parse(txt); } catch (_e) { j = { mensagem: txt.slice(0, 300) }; }
+  return { status: r.status, j, base };
+}
+function focusMsg(j: AnyObj): string {
+  if (Array.isArray(j?.erros) && j.erros.length) return j.erros.map((e: AnyObj) => e.mensagem || e.campo).join("; ");
+  return String(j?.mensagem_sefaz || j?.mensagem || j?.codigo || "Resposta inesperada do emissor fiscal.");
+}
+async function saveFiscalDoc(row: AnyObj) {
+  await sr("/rest/v1/fiscal_docs?on_conflict=ref", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates" },
+    body: JSON.stringify({ ...row, updated_at: new Date().toISOString() }),
+  });
+}
+function docFromFocus(j: AnyObj, base: string): AnyObj {
+  const st = String(j.status || "");
+  return {
+    status: st === "autorizado" ? "autorizado" : st === "cancelado" ? "cancelado"
+      : st.startsWith("processando") ? "processando" : "erro",
+    numero: String(j.numero || ""), serie: String(j.serie || ""),
+    chave: String(j.chave_nfe || "").replace(/^NFe/, ""),
+    danfe_url: j.caminho_danfe ? (String(j.caminho_danfe).startsWith("http") ? j.caminho_danfe : base + j.caminho_danfe) : "",
+    xml_url: j.caminho_xml_nota_fiscal ? (String(j.caminho_xml_nota_fiscal).startsWith("http") ? j.caminho_xml_nota_fiscal : base + j.caminho_xml_nota_fiscal) : "",
+    mensagem: st === "autorizado" ? String(j.mensagem_sefaz || "Autorizado o uso") : focusMsg(j),
+  };
+}
+const UUID_RE_API = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /* IP real do cliente: preferimos o cabeçalho do CDN/gateway; o x-forwarded-for
    pode vir com vários saltos — usamos o ÚLTIMO (adicionado pelo proxy confiável,
    não o primeiro, que pode ser forjado pelo próprio cliente). Sem IP conhecido
@@ -691,6 +756,169 @@ Deno.serve(async (req: Request) => {
         }),
       });
       return json({ ok: true, status: "read_only" });
+    }
+
+    /* ---------- FISCAL (Focus NFe) ---------- */
+    case "fiscal.test": {
+      if (!isAdminRole) return fail("FORBIDDEN", "Somente o administrador configura a nota fiscal.", 403);
+      const { t, cfg } = await fiscalCtx(me.tenant_id);
+      if (!planHasT(t, "fiscal")) return fail("PLAN", "Emissão de NFC-e/NF-e faz parte do plano Premium. Faça upgrade em Assinatura.", 403);
+      if (!cfg?.token) return fail("NOT_CONFIGURED", "Informe o token do Focus NFe e salve antes de testar.", 400);
+      const r = await focusCall(cfg, "GET", "/nfce/lojacerta-teste-conexao");
+      if (r.status === 401 || r.status === 403) return fail("FISCAL_TOKEN", `O Focus NFe recusou o token (ambiente ${cfg.ambiente}). Confira se copiou o token certo do painel do Focus NFe.`, 400);
+      return json({ ok: true, ambiente: cfg.ambiente, message: `Conectado ao Focus NFe (ambiente de ${cfg.ambiente === "producao" ? "produção" : "homologação"}).` });
+    }
+
+    case "fiscal.emit": {
+      const saleId = String(p.saleId || "");
+      const modelo = p.modelo === "nfe" ? "nfe" : "nfce";
+      if (!UUID_RE_API.test(saleId)) return fail("VALIDATION", "Venda inválida.");
+      const { t, cfg } = await fiscalCtx(me.tenant_id);
+      if (!planHasT(t, "fiscal")) return fail("PLAN", "Emissão de NFC-e/NF-e faz parte do plano Premium. Faça upgrade em Assinatura.", 403);
+      if (!cfg?.token) return fail("NOT_CONFIGURED", "Nota fiscal ainda não configurada: o administrador deve informar o token do Focus NFe em Nota fiscal.", 400);
+      const cnpj = onlyDigits(t?.cnpj);
+      if (cnpj.length !== 14) return fail("VALIDATION", "Informe o CNPJ da loja em Configurações → Loja para emitir nota fiscal.");
+
+      const sq = await sr(`/rest/v1/sales?select=*,sale_items(*),sale_payments(*),customers(*)&id=eq.${saleId}&tenant_id=eq.${me.tenant_id}`);
+      const sale = ((await sq.json()) as AnyObj[])[0];
+      if (!sale) return fail("NOT_FOUND", "Venda não encontrada.", 404);
+      if (sale.status !== "concluida") return fail("VALIDATION", "Venda cancelada não pode receber nota fiscal.");
+
+      const dq = await sr(`/rest/v1/fiscal_docs?select=*&sale_id=eq.${saleId}&modelo=eq.${modelo}&order=created_at.desc`);
+      const prev = (await dq.json()) as AnyObj[];
+      const done = prev.find((d) => d.status === "autorizado" || d.status === "processando");
+      if (done) return json({ ok: true, doc: done, existing: true });
+
+      const ids = (sale.sale_items as AnyObj[]).map((i) => i.product_id).filter(Boolean);
+      const pq = await sr(`/rest/v1/products?select=id,codigo,ncm,cfop,cest,csosn,origem&id=in.(${ids.join(",")})`);
+      const prods = new Map(((await pq.json()) as AnyObj[]).map((x) => [x.id, x]));
+      const semNcm = (sale.sale_items as AnyObj[]).filter((i) => onlyDigits(prods.get(i.product_id)?.ncm).length !== 8).map((i) => i.nome_snapshot);
+      if (semNcm.length) return fail("NCM", `Cadastre o NCM (8 dígitos) em Produtos → Editar → Dados fiscais: ${semNcm.slice(0, 5).join(", ")}${semNcm.length > 5 ? "…" : ""}.`);
+
+      const cust = sale.customers as AnyObj | null;
+      const custDoc = onlyDigits(cust?.documento || p.cpf);
+      if (modelo === "nfe") {
+        if (!cust) return fail("VALIDATION", "NF-e exige um cliente identificado na venda (selecione o cliente no PDV).");
+        if (![11, 14].includes(custDoc.length)) return fail("VALIDATION", `Cadastre o CPF/CNPJ de ${cust.nome} em Clientes para emitir NF-e.`);
+        if (!cust.logradouro || !cust.municipio || !cust.uf || onlyDigits(cust.cep).length !== 8)
+          return fail("VALIDATION", `Complete o endereço de ${cust.nome} em Clientes (logradouro, número, bairro, município, UF e CEP) para emitir NF-e.`);
+      }
+
+      const homolog = cfg.ambiente !== "producao";
+      const items = sale.sale_items as AnyObj[];
+      const bruto = items.reduce((a, i) => a + Number(i.subtotal), 0);
+      let descRest = r2(Number(sale.desconto || 0));
+      const fItems = items.map((i, idx) => {
+        const pr = prods.get(i.product_id) || {};
+        const vb = r2(Number(i.subtotal));
+        let vd = idx === items.length - 1 ? descRest : r2(bruto > 0 ? Number(sale.desconto || 0) * vb / bruto : 0);
+        vd = Math.min(vd, vb); descRest = r2(descRest - vd);
+        const un = String(i.unidade || "UN").toUpperCase().slice(0, 6);
+        return {
+          numero_item: String(idx + 1),
+          codigo_produto: String(pr.codigo || i.product_id).slice(0, 60),
+          descricao: homolog && idx === 0 ? HOMOLOG_TXT : String(i.nome_snapshot).slice(0, 120),
+          codigo_ncm: onlyDigits(pr.ncm),
+          ...(onlyDigits(pr.cest).length === 7 ? { cest: onlyDigits(pr.cest) } : {}),
+          cfop: String(pr.cfop || "5102"),
+          unidade_comercial: un, unidade_tributavel: un,
+          quantidade_comercial: Number(i.qtd), quantidade_tributavel: Number(i.qtd),
+          valor_unitario_comercial: Number(i.preco_unitario), valor_unitario_tributavel: Number(i.preco_unitario),
+          valor_bruto: vb, ...(vd > 0 ? { valor_desconto: vd } : {}),
+          icms_origem: String(pr.origem ?? 0),
+          icms_situacao_tributaria: String(pr.csosn || "102"),
+          pis_situacao_tributaria: "49", cofins_situacao_tributaria: "49",
+        };
+      });
+      const pags = (sale.sale_payments as AnyObj[]).map((x) => ({
+        forma_pagamento: FOCUS_PAG[x.forma] || "99",
+        valor_pagamento: Number(x.valor),
+        ...(["credito", "debito", "pix"].includes(x.forma) ? { tipo_integracao: "2" } : {}),
+      }));
+      const agora = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 19) + "-03:00";
+      const dest: AnyObj = {};
+      if (custDoc.length === 11) dest.cpf_destinatario = custDoc;
+      if (custDoc.length === 14) dest.cnpj_destinatario = custDoc;
+      if (cust && (custDoc.length || modelo === "nfe")) dest.nome_destinatario = homolog ? "NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL" : String(cust.nome).slice(0, 60);
+      const ref = `${modelo}-${saleId.slice(0, 8)}-${prev.length + 1}-${Date.now().toString(36)}`;
+      let body: AnyObj;
+      if (modelo === "nfce") {
+        body = {
+          cnpj_emitente: cnpj, data_emissao: agora, natureza_operacao: "VENDA AO CONSUMIDOR",
+          presenca_comprador: "1", modalidade_frete: "9", local_destino: "1", ...dest,
+          items: fItems, formas_pagamento: pags,
+        };
+      } else {
+        const ie = onlyDigits(cust!.ie);
+        body = {
+          cnpj_emitente: cnpj, data_emissao: agora, natureza_operacao: "VENDA DE MERCADORIA",
+          tipo_documento: 1, finalidade_emissao: 1, consumidor_final: ie ? 0 : 1, presenca_comprador: 1,
+          modalidade_frete: 9, local_destino: 1, ...dest,
+          indicador_inscricao_estadual_destinatario: ie ? 1 : 9, ...(ie ? { inscricao_estadual_destinatario: ie } : {}),
+          logradouro_destinatario: cust!.logradouro, numero_destinatario: cust!.numero || "S/N",
+          bairro_destinatario: cust!.bairro || "Centro", municipio_destinatario: cust!.municipio,
+          uf_destinatario: String(cust!.uf).toUpperCase(), cep_destinatario: onlyDigits(cust!.cep), pais_destinatario: "Brasil",
+          ...(cust!.telefone ? { telefone_destinatario: onlyDigits(cust!.telefone) } : {}),
+          items: fItems, formas_pagamento: pags,
+        };
+      }
+      await saveFiscalDoc({ tenant_id: me.tenant_id, sale_id: saleId, modelo, ref, status: "processando", ambiente: cfg.ambiente });
+      let r = await focusCall(cfg, "POST", `/${modelo}?ref=${encodeURIComponent(ref)}`, body);
+      if (r.status === 401 || r.status === 403) {
+        await saveFiscalDoc({ tenant_id: me.tenant_id, sale_id: saleId, modelo, ref, status: "erro", mensagem: "Token recusado pelo Focus NFe", ambiente: cfg.ambiente });
+        return fail("FISCAL_TOKEN", "O Focus NFe recusou o token configurado. Confira em Nota fiscal → Configuração.", 400);
+      }
+      if (r.status >= 400) {
+        const msg = focusMsg(r.j);
+        await saveFiscalDoc({ tenant_id: me.tenant_id, sale_id: saleId, modelo, ref, status: "erro", mensagem: msg, ambiente: cfg.ambiente });
+        return fail("FISCAL", `O emissor recusou a nota: ${msg}`, 422);
+      }
+      if (modelo === "nfe" && String(r.j.status || "").startsWith("processando")) {
+        await new Promise((ok) => setTimeout(ok, 2500));
+        const c = await focusCall(cfg, "GET", `/nfe/${encodeURIComponent(ref)}`);
+        if (c.status < 400) r = c;
+      }
+      const doc: AnyObj = { tenant_id: me.tenant_id, sale_id: saleId, modelo, ref, ambiente: cfg.ambiente, ...docFromFocus(r.j, r.base) };
+      await saveFiscalDoc(doc);
+      await sr("/rest/v1/audit_logs", {
+        method: "POST",
+        body: JSON.stringify({ tenant_id: me.tenant_id, user_id: me.id, user_name: me.nome, acao: `fiscal.${modelo}.${doc.status}`,
+          entidade: "sale", entidade_id: saleId, detalhes: `${sale.numero} · ${doc.mensagem}`.slice(0, 300), ip: clientIp(req), origem: "edge" }),
+      });
+      if (doc.status === "erro") return fail("FISCAL", `A SEFAZ rejeitou a nota: ${doc.mensagem}`, 422);
+      return json({ ok: true, doc });
+    }
+
+    case "fiscal.status": {
+      const dq = await sr(`/rest/v1/fiscal_docs?select=*&id=eq.${String(p.docId || "").replace(/[^0-9a-f-]/gi, "")}&tenant_id=eq.${me.tenant_id}`);
+      const d = ((await dq.json()) as AnyObj[])[0];
+      if (!d) return fail("NOT_FOUND", "Nota não encontrada.", 404);
+      const { cfg } = await fiscalCtx(me.tenant_id);
+      if (!cfg?.token) return json({ ok: true, doc: d });
+      const r = await focusCall({ ...cfg, ambiente: d.ambiente }, "GET", `/${d.modelo}/${encodeURIComponent(d.ref)}`);
+      if (r.status >= 400) return json({ ok: true, doc: d });
+      const upd = { ...d, ...docFromFocus(r.j, r.base) };
+      await saveFiscalDoc(upd);
+      return json({ ok: true, doc: upd });
+    }
+
+    case "fiscal.cancel": {
+      if (!isAdminRole) return fail("FORBIDDEN", "Somente o administrador cancela notas fiscais.", 403);
+      const just = String(p.justificativa || "").trim();
+      if (just.length < 15 || just.length > 255) return fail("VALIDATION", "A justificativa do cancelamento deve ter entre 15 e 255 caracteres.");
+      const dq = await sr(`/rest/v1/fiscal_docs?select=*&id=eq.${String(p.docId || "").replace(/[^0-9a-f-]/gi, "")}&tenant_id=eq.${me.tenant_id}`);
+      const d = ((await dq.json()) as AnyObj[])[0];
+      if (!d) return fail("NOT_FOUND", "Nota não encontrada.", 404);
+      if (d.status !== "autorizado") return fail("VALIDATION", "Só é possível cancelar nota autorizada.");
+      const { cfg } = await fiscalCtx(me.tenant_id);
+      if (!cfg?.token) return fail("NOT_CONFIGURED", "Nota fiscal não configurada.", 400);
+      const r = await focusCall({ ...cfg, ambiente: d.ambiente }, "DELETE", `/${d.modelo}/${encodeURIComponent(d.ref)}`, { justificativa: just });
+      if (r.status >= 400 || r.j.status !== "cancelado") return fail("FISCAL", `Cancelamento recusado: ${focusMsg(r.j)}`, 422);
+      const upd = { ...d, status: "cancelado", mensagem: String(r.j.mensagem_sefaz || "Cancelamento homologado") };
+      await saveFiscalDoc(upd);
+      await sr("/rest/v1/audit_logs", { method: "POST", body: JSON.stringify({ tenant_id: me.tenant_id, user_id: me.id, user_name: me.nome,
+        acao: "fiscal.cancelado", entidade: "sale", entidade_id: d.sale_id, detalhes: just.slice(0, 200), ip: clientIp(req), origem: "edge" }) });
+      return json({ ok: true, doc: upd });
     }
 
     default:

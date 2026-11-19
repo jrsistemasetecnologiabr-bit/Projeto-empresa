@@ -13,6 +13,11 @@
     { page: 'estoque', label: 'Estoque', icon: 'layers', sect: 'op' },
     { page: 'vendas', label: 'Vendas', icon: 'receipt', sect: 'op' },
     { page: 'relatorios', label: 'Relatórios', icon: 'reports', sect: 'op' },
+    { page: 'clientes', label: 'Clientes', icon: 'users', sect: 'op', feat: 'clientes' },
+    { page: 'orcamentos', label: 'Orçamentos', icon: 'tag', sect: 'op', feat: 'orcamentos' },
+    { page: 'financeiro', label: 'Financeiro', icon: 'dollar', sect: 'op', feat: 'financeiro' },
+    { page: 'fiscal', label: 'Nota fiscal', icon: 'receipt', sect: 'op', feat: 'fiscal' },
+    { page: 'lojas', label: 'Lojas', icon: 'store', sect: 'conta', feat: 'multiloja' },
     { page: 'suporte', label: 'Suporte', icon: 'headset', sect: 'conta' },
     { page: 'assinatura', label: 'Assinatura', icon: 'billing', sect: 'conta' },
     { page: 'config', label: 'Configurações', icon: 'settings', sect: 'conta' }
@@ -66,7 +71,7 @@
       badge = '<span class="nav-badge" data-nav-badge="suporte" hidden></span>';
     }
     return html`<a class="side-link ${n.page === page ? 'active' : ''}" href="#/app/${n.page}" ${n.page === page ? raw('aria-current="page"') : ''}>
-      ${raw(I(n.icon, 17))} ${n.label}${raw(badge)}<span class="kbd-hint">Alt+${hintIdx + 1}</span></a>`;
+      ${raw(I(n.icon, 17))} ${n.label}${raw(badge)}${n.feat && window.Plans && !Plans.has(n.feat) ? raw('<span class="nav-plan">' + Plans.planName(n.feat).toUpperCase().slice(0, 3) + '</span>') : (hintIdx < 9 ? raw('<span class="kbd-hint">Alt+' + (hintIdx + 1) + '</span>') : '')}</a>`;
   }
   function sidePlan(info) {
     var user = Auth.me();

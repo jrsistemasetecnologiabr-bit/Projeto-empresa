@@ -525,8 +525,10 @@
   /* ---------------- Permissões (RBAC simples) ---------------- */
   var PERM_MATRIX = {
     admin: '*',
-    gerente: ['dashboard', 'pdv', 'produtos', 'estoque', 'vendas', 'relatorios', 'assinatura', 'suporte', 'custo.view', 'discount.unlimited', 'inventory.manage', 'products.manage'],
-    operador: ['dashboard', 'pdv', 'vendas', 'suporte', 'discount.limited'],
+    gerente: ['dashboard', 'pdv', 'produtos', 'estoque', 'vendas', 'relatorios', 'assinatura', 'suporte', 'clientes', 'orcamentos', 'financeiro', 'fiscal', 'lojas', 'custo.view', 'discount.unlimited', 'inventory.manage', 'products.manage'],
+    operador: ['dashboard', 'pdv', 'vendas', 'suporte', 'clientes', 'orcamentos', 'discount.limited'],
+    /* no banco o papel do operador de caixa se chama "caixa" (users_papel_check) */
+    caixa: ['dashboard', 'pdv', 'vendas', 'suporte', 'clientes', 'orcamentos', 'discount.limited'],
     /* Equipe JR Sistemas: conta interna com TUDO liberado (tempo indeterminado).
        No Suporte vê o painel de atendimento (tickets de todas as empresas). */
     dev: '*'
@@ -539,7 +541,7 @@
     can: function (action) {
       var role = this.role();
       if (!role) return false;
-      var list = PERM_MATRIX[role];
+      var list = PERM_MATRIX[role] || [];
       if (list === '*') return true;
       if (list.indexOf(action) > -1) return true;
       return list.indexOf(action.split('.')[0]) > -1; // "assinatura.view" casa com página "assinatura"? não — páginas listadas explicitamente
@@ -547,7 +549,7 @@
     pageAllowed: function (page) {
       var role = this.role();
       if (!role) return false;
-      var list = PERM_MATRIX[role];
+      var list = PERM_MATRIX[role] || [];
       return list === '*' || list.indexOf(page) > -1;
     }
   };

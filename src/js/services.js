@@ -77,7 +77,7 @@
         if (Config.simulateFailures || (Config.failOps && Config.failOps[op])) {
           throw ApiError('NETWORK', 'Falha de conexão ao executar "' + op + '". Verifique sua internet e tente novamente.');
         }
-        if (!OPS[op]) throw ApiError('NOT_FOUND', 'Operação desconhecida: ' + op);
+        if (!OPS[op] && !(window.BizLocal && window.BizLocal[op])) throw ApiError('NOT_FOUND', 'Operação desconhecida: ' + op);
 
         /* ---- Test mode: simulate session refresh (for session.test.js) ---- */
         if (forceMock) {
@@ -152,7 +152,7 @@
 
         /* Toda operação do mock é uma mutação: persiste e notifica ao final.
            (Em produção, o adapter remoto persiste no servidor e re-sincroniza o store local.) */
-        return Promise.resolve(OPS[op](payload || {})).then(function (res) {
+        return Promise.resolve((OPS[op] || window.BizLocal[op])(payload || {})).then(function (res) {
           if (Store.state) { Store.persist(); Bus.emit('store:changed', Store.state); }
           return res;
         });
@@ -203,7 +203,8 @@
         id: 'p' + s.seq.prod++, codigo: codigo, nome: String(d.nome).trim(), catId: d.catId, un: d.un || 'un',
         custo: U.round2(U.parseNum(d.custo) || 0), preco: U.round2(U.parseNum(d.preco) || 0),
         estoque: U.parseNum(d.estoque) || 0, min: U.parseNum(d.min) || 0,
-        fornecedor: String(d.fornecedor || '').trim(), ativo: true, createdAt: Date.now()
+        fornecedor: String(d.fornecedor || '').trim(), ativo: true, createdAt: Date.now(),
+        ncm: String(d.ncm || '').replace(/\D/g, ''), cfop: d.cfop || '5102', cest: String(d.cest || '').replace(/\D/g, ''), csosn: d.csosn || '102', origem: Number(d.origem) || 0
       };
       if (!(p.preco > 0)) throw ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.');
       s.products.push(p);
@@ -218,7 +219,7 @@
       if (d.codigo && String(d.codigo).trim() && String(d.codigo).trim().toLowerCase() !== p.codigo.toLowerCase() &&
         s.products.some(function (x) { return x.codigo.toLowerCase() === String(d.codigo).trim().toLowerCase(); }))
         throw ApiError('DUP_CODE', 'Código já usado por outro produto.');
-      ['nome', 'catId', 'un', 'fornecedor'].forEach(function (k) { if (d[k] !== undefined) p[k] = d[k]; });
+      ['nome', 'catId', 'un', 'fornecedor', 'ncm', 'cfop', 'cest', 'csosn', 'origem'].forEach(function (k) { if (d[k] !== undefined) p[k] = d[k]; });
       ['custo', 'preco'].forEach(function (k) { if (d[k] !== undefined) p[k] = U.round2(U.parseNum(d[k]) || 0); });
       ['estoque', 'min'].forEach(function (k) { if (d[k] !== undefined) p[k] = U.parseNum(d[k]) || 0; });
       if (p.preco <= 0) throw ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.');
@@ -295,6 +296,7 @@
       var pago = U.round2(U.sum(pays, function (p) { return p.valor; }));
       if (Math.abs(pago - total) > 0.011) throw ApiError('PAY_MISMATCH', 'A soma dos pagamentos (' + U.money(pago) + ') não fecha com o total (' + U.money(total) + ').');
       var troco = 0;
+      var fiadoVal = window.BizLocal ? BizLocal._beforeSale(d, total) : 0;
       pays.forEach(function (p) { if (p.forma === 'dinheiro') { /* troco exibido no front; gravado aqui p/ relatório */ } });
       var sale = {
         id: 's' + s.seq.sale, numero: 'VENDA-' + U.pad(s.seq.sale++), at: Date.now(),
@@ -311,6 +313,7 @@
         p.estoque = U.round2((p.estoque - it.qtd) * 1000) / 1000;
         s.movements.unshift({ id: 'm' + s.seq.mov++, at: sale.at, productId: p.id, tipo: 'saida', qtd: it.qtd, userId: sale.userId, origem: sale.numero, obs: '' });
       });
+      if (window.BizLocal) BizLocal._afterSale(sale, d, fiadoVal);
       s.sales.unshift(sale);
       pushAudit('venda.concluida', 'sale', sale.id, sale.numero + ' · ' + U.money(sale.total));
       Analytics.track('sale_commit', { total: sale.total, itens: sale.itens.length });
@@ -325,6 +328,7 @@
       if (sale.status === 'cancelada') throw ApiError('ALREADY', 'Venda já cancelada.');
       if (!d.reason) throw ApiError('VALIDATION', 'Informe o motivo do cancelamento.');
       sale.status = 'cancelada'; sale.motivoCancelamento = d.reason; sale.canceledAt = Date.now();
+      if (window.BizLocal) BizLocal._afterCancel(sale.id);
       sale.itens.forEach(function (it) {
         var p = findProduct(it.productId);
         if (p) {

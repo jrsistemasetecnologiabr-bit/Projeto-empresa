@@ -7,8 +7,10 @@
   window.Pages = window.Pages || {};
 
   /* =================== COMPONENTES COMPARTILHADOS =================== */
-  var PAY_COLORS = { pix: '#0D9488', credito: '#6366F1', debito: '#F59E0B', dinheiro: '#22C55E' };
-  var PAY_LABEL = { pix: 'Pix', credito: 'Crédito', debito: 'Débito', dinheiro: 'Dinheiro' };
+  var PAY_COLORS = { pix: '#0D9488', credito: '#6366F1', debito: '#F59E0B', dinheiro: '#22C55E', fiado: '#E11D48' };
+  var PAY_LABEL = { pix: 'Pix', credito: 'Crédito', debito: 'Débito', dinheiro: 'Dinheiro', fiado: 'Fiado' };
+  /* formas exibidas no PDV: fiado só nos planos que o incluem (Profissional+) */
+  function PAY_FORMS() { return ['pix', 'credito', 'debito', 'dinheiro'].concat(window.Plans && Plans.has('fiado') ? ['fiado'] : []); }
 
   var C = {
     payColors: PAY_COLORS, payLabel: PAY_LABEL,
@@ -213,7 +215,7 @@
     title: 'PDV — Vender',
     st: null,
     freshState: function () {
-      return { cart: [], disc: { tipo: 'R$', valor: 0 }, pays: { pix: 0, debito: 0, credito: 0, dinheiro: 0 }, ac: [], acSel: -1, discApproved: false };
+      return { cart: [], disc: { tipo: 'R$', valor: 0 }, pays: { pix: 0, debito: 0, credito: 0, dinheiro: 0, fiado: 0 }, ac: [], acSel: -1, discApproved: false, customerId: null, customerNome: '', quoteId: null, quoteNumero: '' };
     },
     render: function () {
       this.st = this.st || this.freshState();
@@ -268,6 +270,8 @@
         </div>
         <aside class="pay-panel" aria-label="Pagamento e totais">
           <h3>${raw(I('billing', 16))} Pagamento</h3>
+          ${window.Plans && Plans.has('clientes') ? html`<button type="button" class="pdv-cust" id="pdv-cust">${raw(I('users', 15))} <span id="pdv-cust-lbl">${this.st.customerNome || 'Identificar cliente (opcional)'}</span></button>` : ''}
+          ${this.st.quoteId ? html`<div class="pdv-quote">${raw(I('receipt', 14))} Orçamento <b>${this.st.quoteNumero}</b> carregado</div>` : ''}
           <div class="pay-rows">
             <div class="prow"><span>Subtotal</span><b id="t-sub">R$ 0,00</b></div>
             <div class="disc-row">
@@ -282,9 +286,10 @@
             <button type="button" data-pay="debito">Débito total</button>
             <button type="button" data-pay="credito">Crédito total</button>
             <button type="button" data-pay="dinheiro">Dinheiro total</button>
+            ${PAY_FORMS().indexOf('fiado') > -1 ? raw('<button type="button" data-pay="fiado">Fiado total</button>') : ''}
           </div>
           <div class="pay-methods">
-            ${['pix', 'credito', 'debito', 'dinheiro'].map(function (f) {
+            ${PAY_FORMS().map(function (f) {
               return html`<div class="pay-cell"><label for="pay-${f}">${f === 'pix' ? raw(I('pix', 12)) : raw(I('billing', 12))} ${PAY_LABEL[f]}</label>
                 <input id="pay-${f}" type="text" inputmode="decimal" value="0" data-payf="${f}" aria-label="Valor pago em ${PAY_LABEL[f]}"></div>`;
             })}
@@ -312,7 +317,7 @@
         err: root.querySelector('#pay-error'), fin: root.querySelector('#btn-fin'), finM: root.querySelector('#btn-fin-m'),
         pays: {}
       };
-      ['pix', 'credito', 'debito', 'dinheiro'].forEach(function (f) { self.el.pays[f] = root.querySelector('#pay-' + f); });
+      PAY_FORMS().forEach(function (f) { self.el.pays[f] = root.querySelector('#pay-' + f); });
       if (!this.el.form) return; // tela bloqueada
 
       this.el.form.addEventListener('submit', function (e) { e.preventDefault(); self.addByQuery(self.el.code.value); });
@@ -352,6 +357,7 @@
       });
       this.el.discTipo.addEventListener('change', function () { self.st.disc.tipo = self.el.discTipo.value; self.updateTotals(); });
       this.el.discVal.addEventListener('input', function () { self.st.disc.valor = Math.max(0, U.parseNum(self.el.discVal.value) || 0); self.updateTotals(); });
+      var cb = root.querySelector('#pdv-cust'); if (cb) cb.addEventListener('click', function () { self.pickCustomer(); });
       this.el.fin.addEventListener('click', function () { self.finalize(this); });
       if (this.el.finM) this.el.finM.addEventListener('click', function () { self.finalize(self.el.fin); });
 
@@ -473,7 +479,7 @@
     },
     payAll: function (forma) {
       var c = this.calc(), self = this;
-      Object.keys(this.st.pays).forEach(function (f) { self.st.pays[f] = f === forma ? c.total : 0; self.el.pays[f].value = f === forma ? c.total.toFixed(2) : '0'; });
+      Object.keys(this.st.pays).forEach(function (f) { self.st.pays[f] = f === forma ? c.total : 0; if (self.el.pays[f]) self.el.pays[f].value = f === forma ? c.total.toFixed(2) : '0'; });
       this.updateTotals();
     },
     approveDiscount: function () {
@@ -504,6 +510,7 @@
       /* v13 · id de idempotência: gerado UMA vez por ciclo do carrinho e
          reenviado em todas as tentativas da mesma venda — duplo clique ou
          retry de rede nunca grava duas vendas (o banco devolve a primeira). */
+      if ((this.st.pays.fiado || 0) > 0.009 && !this.st.customerId) { UI.toast('Venda no fiado: identifique o cliente primeiro.', { type: 'warn' }); this.pickCustomer(); return; }
       if (!this.st.idem) this.st.idem = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
       var pays = Object.keys(this.st.pays).filter(function (f) { return self.st.pays[f] > 0.009; }).map(function (f) { return { forma: f, valor: self.st.pays[f] }; });
       UI.modal({
@@ -517,6 +524,8 @@
           ${c.discVal > 0 ? html`<li class="mini-row"><span>Desconto (${this.st.disc.tipo === '%' ? U.num(this.st.disc.valor) + '%' : U.money(this.st.disc.valor)})</span><b class="tabular text-ok">− ${U.money(c.discVal)}</b></li>` : ''}
           <li class="mini-row" style="font-size:1.05rem"><span><b>Total</b></span><b class="tabular">${U.money(c.total)}</b></li>
           <li class="mini-row"><span>Pagamento</span><span>${C.payBadges(pays)}</span></li>
+          ${this.st.customerNome ? html`<li class="mini-row"><span>Cliente</span><b>${this.st.customerNome}</b></li>` : ''}
+          ${(this.st.pays.fiado || 0) > 0.009 ? html`<li class="mini-row"><span>Fiado vence em</span><span><input class="input input-sm" type="date" id="fiado-venc" value="${Biz.addDays(Biz.today(), 30)}" style="max-width:170px"></span></li>` : ''}
           ${c.troco > 0 ? html`<li class="mini-row"><span>Troco</span><b class="tabular text-ok">${U.money(c.troco)}</b></li>` : ''}
         </ul>`,
         foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Voltar (Esc)</button><button type="button" class="btn btn-primary" data-ok>' + I('check', 16) + ' Confirmar e gravar</button>'),
@@ -524,14 +533,17 @@
           panel.querySelector('[data-ok]').addEventListener('click', function () {
             var okBtn = this;
             UI.busy(okBtn, true);
-            Sales.commit({ items: self.st.cart, discount: { tipo: self.st.disc.tipo, valor: self.st.disc.valor }, payments: pays, idempotencyId: self.st.idem })
+            var fv = panel.querySelector('#fiado-venc');
+            Sales.commit({ items: self.st.cart, discount: { tipo: self.st.disc.tipo, valor: self.st.disc.valor }, payments: pays, idempotencyId: self.st.idem,
+              customerId: self.st.customerId, customerNome: self.st.customerNome, quoteId: self.st.quoteId, fiadoVencimento: fv ? fv.value : null })
               .then(function (sale) {
                 UI.busy(okBtn, false); close('ok');
                 self.st = self.freshState();
                 self.renderCart();
-                ['pix', 'credito', 'debito', 'dinheiro'].forEach(function (f) { self.el.pays[f].value = '0'; });
+                Object.keys(self.el.pays).forEach(function (f) { self.el.pays[f].value = '0'; });
                 self.el.discVal.value = '0'; self.el.discTipo.value = 'R$';
                 C.receiptModal(sale);
+                if (self.afterSale) self.afterSale(sale);
                 UI.toast('Venda ' + sale.numero + ' registrada: ' + U.money(sale.total), { type: 'ok' });
                 try { self.el.code.focus(); } catch (e) { }
               })
@@ -605,12 +617,15 @@
           <li class="mini-row" style="font-size:1.05rem"><span><b>Total</b></span><b class="tabular">${U.money(s.total)}</b></li>
           ${s.pagamentos.map(function (p) { return html`<li class="mini-row"><span>${C.payLabel[p.forma] || p.forma}</span><b class="tabular">${U.money(p.valor)}</b></li>`; })}
           ${s.troco > 0 ? html`<li class="mini-row"><span>Troco</span><b class="tabular">${U.money(s.troco)}</b></li>` : ''}
-        </ul>`,
+          ${s.customerNome ? html`<li class="mini-row"><span>Cliente</span><b>${s.customerNome}</b></li>` : ''}
+        </ul>
+        <div id="fiscal-box"></div>`,
         foot: raw('<button type="button" class="btn btn-ghost" data-modal-close>Fechar</button>' +
           '<button type="button" class="btn" data-receipt>' + I('printer', 15) + ' Comprovante</button>' +
           (canCancel ? '<button type="button" class="btn btn-danger" data-cancel>' + I('x-circle', 15) + ' Cancelar venda</button>' : '')),
         onMount: function (panel, close) {
           panel.querySelector('[data-receipt]').addEventListener('click', function () { close('r'); C.receiptModal(s); });
+          if (window.FiscalUI) FiscalUI.saleBox(panel.querySelector('#fiscal-box'), s);
           var cb = panel.querySelector('[data-cancel]');
           if (cb) cb.addEventListener('click', function () { close('c'); self.askCancel(s); });
         }
