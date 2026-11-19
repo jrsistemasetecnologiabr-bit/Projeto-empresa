@@ -1,0 +1,123 @@
+=====================================================================
+ CONTEXTO PARA CONTINUAR O PROJETO LOJACERTA EM OUTRO CHAT
+ (cole este arquivo inteiro no início da nova conversa)
+ Gerado em 19/11/2026 — estado: v2.0.0 em produção
+=====================================================================
+
+INSTRUÇÕES PARA O CLAUDE
+- Responda em português, de forma objetiva; o usuário prefere economia de
+  tokens sem perder qualidade.
+- Antes de agir, leia: README.md, CHANGELOG.md (topo), LEIA-ME-LANCAMENTO.txt
+  e este arquivo. Não refaça o que já está feito.
+- Trabalhe num branch e publique na main só depois de testar (a main publica
+  sozinha no GitHub Pages e na Vercel).
+- NUNCA coloque chaves/segredos no repositório. Segredos ficam no Vault do
+  Supabase ou em Edge Function Secrets.
+- A conta "dev" (equipe JR) tem acesso ilimitado — não alterar.
+
+---------------------------------------------------------------------
+1. O PRODUTO
+---------------------------------------------------------------------
+LojaCerta — SaaS multi-empresa de gestão para varejo (PDV, estoque, vendas,
+relatórios, suporte), da JR Sistemas e Tecnologia. Front single-file (HTML +
+JS puro, sem framework) + backend Supabase. Planos: Essencial R$59,
+Profissional R$129, Premium R$249 (anual com desconto). Teste grátis 14 dias.
+
+---------------------------------------------------------------------
+2. ONDE ESTÁ CADA COISA (contas no e-mail da JR Sistemas)
+---------------------------------------------------------------------
+- GitHub: jrsistemasetecnologiabr-bit/Projeto-empresa (branch main = produção)
+- Site oficial (Vercel): https://alojacerta.vercel.app
+  Projeto Vercel "projeto-empresa", equipe "projeto-83b1"
+  (team_iHJXSowVWmsKA8j4k1EYHAeY). Build: tools/build-vercel.sh + vercel.json.
+- Espelho: https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa
+  (workflow .github/workflows/deploy-pages.yml com testes que bloqueiam deploy)
+- Supabase: projeto qmqllssextbxwwphawod ("Projeto site vendas", sa-east-1),
+  plano FREE (pagar Pro). Edge Functions: "api" (v33) e "billing-webhook" (v14).
+- Asaas (cobrança): chave de PRODUÇÃO no Vault (asaas_api_key), token do
+  webhook no Vault (asaas_webhook_token). Webhook "LojaCerta producao"
+  cadastrado no Asaas apontando para /functions/v1/billing-webhook.
+- Resend: chave de envio no Vault (resend_api_key). SEM DOMÍNIO ainda.
+- Focus NFe (nota fiscal): cada loja Premium usa o próprio token, salvo em
+  public.fiscal_config (sem acesso do navegador).
+
+---------------------------------------------------------------------
+3. ESTRUTURA DO CÓDIGO
+---------------------------------------------------------------------
+src/index.html            landing + carrega os scripts
+src/css/                  design-system.css (tokens/temas), landing.css, app.css
+src/js/core.js            utils, Store, Router, UI, Perms (PERM_MATRIX)
+src/js/services.js        Config (versão), MockAdapter/OPS (modo demo), Billing...
+src/js/adapters.js        SupabaseDataAdapter (produção) — gancho BizRemote no default
+src/js/business.js        Plans.has, Biz (serviços), BizLocal/BizRemote, OfflineQueue
+src/js/pages-*.js         telas (pages-biz.js = clientes, orçamentos, financeiro,
+                          nota fiscal, lojas + extensões do PDV)
+supabase/functions/api    Edge principal (signup, convites, billing Asaas, fiscal Focus)
+supabase/migracao-vNN     migrações (v17 a v21 desta etapa, todas APLICADAS)
+tools/build.js            gera release/ (demo | production) ; tests/ (mobile, session, smoke)
+
+Comandos:
+  node tools/build.js --env=demo && node tests/mobile.test.js
+  node tools/build.js --env=production && node tests/session.test.js
+  (produção exige .env com ENV, SITE_URL, API_BASE, SUPABASE_ANON_KEY —
+   a anon key pública está em .github/workflows/deploy-pages.yml)
+
+---------------------------------------------------------------------
+4. O QUE FOI FEITO (v1.9.4 → v2.0.0)
+---------------------------------------------------------------------
+- Asaas produção ligado via Vault (v17); limites de usuários/produtos por
+  plano no banco (v18); RPCs fora do anônimo (v19); fix cadastro de conta já
+  confirmada (v20).
+- v21: clientes, fiado (limite de crédito no commit_sale via sale_post_hook),
+  contas a pagar/receber (fin_settle), orçamentos (quotes), multi-loja
+  (tenants.group_id, store_members, store_create/switch/list, group_summary),
+  fiscal (fiscal_config, fiscal_docs, campos NCM/CFOP/CSOSN em products),
+  liberação por plano plan_has(). Trial e dev = tudo liberado.
+- PDV offline (fila no localStorage com idempotencyId).
+- Temas claro/escuro corrigidos; textos de demo removidos; nada "em breve".
+- Papel "caixa" adicionado às permissões do front (antes ficava sem acesso).
+- Vercel passou a publicar a versão de PRODUÇÃO (antes era modo local!).
+- Testes: smoke autenticado 15/15, E2E real dos recursos 23/23 (com loja
+  QA temporária, apagada), mobile 14 telas × 5 larguras, ao vivo 8/8.
+
+---------------------------------------------------------------------
+5. PENDÊNCIAS (em ordem)
+---------------------------------------------------------------------
+[ ] DOMÍNIO PRÓPRIO — bloqueio dos e-mails. Opção: comprar pela Vercel
+    (DNS automático; Vercel normalmente não vende .com.br) ou registro.br.
+    Depois: Resend create-domain + registros DNS + verify;
+    select vault.create_secret('LojaCerta <nao-responda@DOMINIO>','email_from');
+    Supabase → Auth → SMTP: smtp.resend.com, 465, usuário "resend",
+    senha = API key do Resend. Ligar o domínio ao projeto Vercel.
+    Atualizar SITE_URL (edge api constante SITE_URL e tools/build-vercel.sh)
+    e Redirect URLs do Supabase Auth para o novo domínio.
+[ ] Pagar Supabase Pro e ligar "Leaked password protection".
+[ ] Conferir secrets DEV_PIN (12+ chars) e PURGE_SECRET (Edge) e GitHub
+    secrets SMOKE_TEST_EMAIL/SMOKE_TEST_PASSWORD (smoke autenticado no CI).
+[ ] Trocar a chave do Asaas (circulou em conversa):
+    select vault.update_secret((select id from vault.secrets where name='asaas_api_key'),'NOVA');
+[ ] Teste real de pagamento (Pix R$59 numa loja de teste, depois estornar).
+[ ] Focus NFe: testar emissão real em homologação com uma conta da empresa.
+[ ] Opcional: invites/confirm redirect apontam para GitHub Pages
+    (SITE_URL na edge api) — trocar para o domínio oficial quando houver.
+[ ] Ideias futuras (não vendidas): app mobile do dono, API pública, WhatsApp.
+
+---------------------------------------------------------------------
+6. COMO TESTAR COM CONTA REAL (sem sujar produção)
+---------------------------------------------------------------------
+Criar usuário confirmado via SQL (auth.users + auth.identities com
+email_confirmed_at = now(), e-mail qa-lojacerta@example.com) — o gatilho
+handle_new_user cria loja em teste grátis. Rodar os testes e APAGAR no fim:
+  delete tenants (filiais com group_id e a principal) e auth.users do QA.
+Sempre pedir autorização ao usuário antes de criar/apagar dados em produção.
+
+---------------------------------------------------------------------
+7. CUIDADOS CONHECIDOS
+---------------------------------------------------------------------
+- tools/build.js reprova o build se achar href="${...}" literal em template;
+  use raw('<a href="' + U.esc(url) + '">').
+- PL/pgSQL não faz curto-circuito em AND: use IF aninhado (bugs v18/v20).
+- Edge Functions são publicadas pelo MCP do Supabase (conteúdo completo).
+- Ambiente de nuvem "Projeto-empresa" já libera: github.io, supabase.co,
+  alojacerta.vercel.app e focusnfe.com.br.
+=====================================================================
