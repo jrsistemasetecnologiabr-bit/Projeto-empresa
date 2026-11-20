@@ -26,11 +26,12 @@
       var list = Catalog.list(this.filter);
       var cats = Catalog.categories();
       var total = Store.state.products.length;
+      var inativos = Store.state.products.filter(function (p) { return !p.ativo; }).length;
       var canManage = Perms.can('products.manage');
       var canCost = Perms.can('custo.view');
 
       mount(root, html`
-        ${C.pageHead('Produtos', list.length + ' exibidos · ' + total + ' cadastrados', canManage ? raw(
+        ${C.pageHead('Produtos', list.length + ' exibidos · ' + total + ' cadastrados' + (inativos ? ' · ' + inativos + ' inativo' + (inativos > 1 ? 's' : '') : ''), canManage ? raw(
           '<button type="button" class="btn" data-imp>' + I('import', 15) + ' Importar CSV</button>' +
           '<button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Novo produto</button>') : '')}
         <div class="toolbar">
@@ -69,6 +70,8 @@
           })}</tbody></table></div>`
         : (total === 0
           ? C.empty('package', 'Nenhum produto cadastrado', 'Cadastre o primeiro produto ou importe sua planilha — a migração é grátis.', raw('<div class="flex gap-2"><button type="button" class="btn" data-imp>' + I('import', 15) + ' Importar CSV</button><button type="button" class="btn btn-primary" data-new>' + I('plus', 15) + ' Novo produto</button></div>'))
+          : (!this.filter.inactive && inativos === total)
+          ? C.empty('package', 'Todos os produtos estão inativos', inativos + ' produto' + (inativos > 1 ? 's inativados' : ' inativado') + '. Inativos não aparecem na lista nem no PDV — reative para voltar a vender.', raw('<button type="button" class="btn btn-primary" data-show-off>Mostrar inativos</button>'))
           : C.empty('search', 'Nenhum produto encontrado', 'Ajuste a busca ou os filtros para ver resultados.', raw('<button type="button" class="btn" data-clear>Limpar filtros</button>')))}
       `);
 
@@ -88,10 +91,32 @@
             function (e) { UI.toast(e.message, { type: 'err' }); });
         });
       });
+      var so = root.querySelector('[data-show-off]'); if (so) so.addEventListener('click', function () { self.filter.inactive = true; self.fill(root); });
+      /* v2.0.1 — antes o cadeado inativava SEM confirmação: a linha sumia e a de
+         baixo subia para o mesmo lugar, então toques seguidos inativaram todos os
+         produtos da loja ("bloqueio fez todos sumirem do estoque"). Agora inativar
+         pede confirmação, cliques durante a gravação são ignorados e reativar
+         continua direto (não é destrutivo). */
+      var toggling = false;
       root.querySelectorAll('[data-tog]').forEach(function (b) {
         b.addEventListener('click', function () {
-          Catalog.toggle(b.dataset.tog).then(function (r) { UI.toast(r.ativo ? 'Produto reativado ✔' : 'Produto inativado — histórico preservado.', { type: r.ativo ? 'ok' : 'warn' }); self.rerender(); },
-            function (e) { UI.toast(e.message, { type: 'err' }); });
+          if (toggling) return;
+          var id = b.dataset.tog;
+          var p = Catalog.get(id);
+          if (!p) return;
+          var run = function () {
+            toggling = true;
+            Catalog.toggle(id).then(function (r) {
+              toggling = false;
+              if (r.ativo) UI.toast('"' + p.nome + '" reativado ✔', { type: 'ok' });
+              else UI.toast('"' + p.nome + '" inativado — marque "Incluir inativos" para ver ou reativar.', { type: 'warn', timeout: 6000 });
+              self.rerender();
+            }, function (e) { toggling = false; UI.toast(e.message, { type: 'err' }); });
+          };
+          if (!p.ativo) { run(); return; }
+          toggling = true;
+          UI.confirm({ title: 'Inativar "' + p.nome + '"?', text: 'Ele some da lista de produtos e do PDV (não pode ser vendido). O histórico é preservado e você pode reativar quando quiser em "Incluir inativos".', danger: true, okText: 'Inativar' })
+            .then(function (ok) { toggling = false; if (ok) run(); });
         });
       });
       root.querySelectorAll('[data-sell]').forEach(function (b) {

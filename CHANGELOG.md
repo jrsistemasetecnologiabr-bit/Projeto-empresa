@@ -2,6 +2,13 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1./) · versionamento semântico.
 
+## [2.0.1] — 2026-11-20 — Inativar produto não "some com o estoque"
+
+### Corrigido
+- **Produtos sumiam do estoque**: o cadeado em Produtos inativava sem confirmação; a linha sumia e a de baixo subia para o mesmo lugar, então toques seguidos inativavam todos os produtos da loja. Agora inativar pede confirmação (reativar continua direto) e cliques durante a gravação são ignorados; o aviso diz o nome do produto e onde reativá-lo.
+- O subtítulo de Produtos mostra quantos estão inativos; se todos estiverem inativos, a tela explica isso e oferece o botão "Mostrar inativos" (antes aparecia só "Nenhum produto encontrado").
+- Teste novo `tests/produtos-inativar.test.js` (confirmação, cancelamento, 1 linha por vez, "Mostrar inativos", reativação), incluído no CI e no `npm test`.
+
 ## [2.0.0] — 2026-11-19 — Todos os recursos dos planos funcionando (nada "em breve")
 
 ### Adicionado (migração v21, aplicada)
