@@ -11,6 +11,9 @@
    ========================================================================== */
 ;(function () {
   'use strict';
+  /* número no formato brasileiro ("6,5", "R$ 1.234,50") ou number */
+  function numBR(v, d) { var n = U.parseNum(v); return isFinite(n) ? n : d; }
+
 
   function cfgError(what) {
     return ApiError('NOT_CONFIGURED',
@@ -519,6 +522,11 @@
           });
         }
         case 'products.create': {
+          /* v2.0.2 · o CSV chega como texto ("6,5", "1.234,50"): sem converter, o
+             Postgres recusava (invalid input syntax for type numeric) e a linha
+             era descartada na importação — só funcionava com ponto decimal. */
+          p = Object.assign({}, p, { custo: numBR(p.custo, 0), preco: numBR(p.preco, NaN), estoque: numBR(p.estoque, 0), min: numBR(p.min, 0) });
+          if (!(p.preco > 0)) return Promise.reject(ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.'));
           var codigo = String(p.codigo || '').trim() || ('INT-' + String(Date.now()).slice(-6));
           return fetch(B + '/rest/v1/products', { method: 'POST', headers: Object.assign({ Prefer: 'return=representation' }, H),
             body: JSON.stringify({ tenant_id: sid, codigo: codigo, nome: p.nome, category_id: p.catId || null, unidade: p.un || 'un',
@@ -538,6 +546,9 @@
              meio-tempo era "desfeita" no estoque, sem movimento nem auditoria.
              Agora a diferença digitada vira um ajuste (stock_adjust: movimento +
              audit_logs) aplicado sobre o saldo REAL do banco. */
+          p = Object.assign({}, p, { custo: numBR(p.custo, 0), preco: numBR(p.preco, NaN), min: numBR(p.min, 0), estoque: (p.estoque === undefined || p.estoque === null || p.estoque === '') ? p.estoque : numBR(p.estoque, NaN) });
+          if (!(p.preco > 0)) return Promise.reject(ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.'));
+          if (p.estoque !== undefined && p.estoque !== null && p.estoque !== '' && !isFinite(p.estoque)) return Promise.reject(ApiError('VALIDATION', 'Estoque inválido.'));
           var curP = Store.state.products.filter(function (x) { return x.id === p.id; })[0];
           var deltaEst = (curP && p.estoque !== undefined && p.estoque !== null && p.estoque !== '') ? Math.round((Number(p.estoque) - Number(curP.estoque)) * 1000) / 1000 : 0;
           var jj = this.j;
