@@ -906,10 +906,13 @@
             </div>`);
           invList.querySelectorAll('[data-uninvite]').forEach(function (b) {
             b.addEventListener('click', function () {
-              ApiClient.request('users.uninvite', { id: b.dataset.uninvite }).then(function () {
-                UI.toast('Convite cancelado.', { type: 'warn' });
-                self.rerender();
-              }).catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+              UI.confirm({ title: 'Cancelar este convite?', text: 'O link enviado por e-mail deixa de funcionar. Você pode convidar a pessoa de novo depois.', danger: true, okText: 'Cancelar convite' }).then(function (ok) {
+                if (!ok) return;
+                ApiClient.request('users.uninvite', { id: b.dataset.uninvite }).then(function () {
+                  UI.toast('Convite cancelado.', { type: 'warn' });
+                  self.rerender();
+                }).catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+              });
             });
           });
         }).catch(function () { if (invList) invList.remove(); });
@@ -924,9 +927,16 @@
       root.querySelectorAll('[data-act-user]').forEach(function (b) {
         b.addEventListener('click', function () {
           var u = Store.state.users.filter(function (x) { return x.id === b.dataset.actUser; })[0];
-          ApiClient.request('users.update', { id: u.id, ativo: !u.ativo })
-            .then(function () { Store.update(function () { }); UI.toast(u.ativo ? 'Usuário reativado ✔' : 'Usuário desativado.', { type: u.ativo ? 'ok' : 'warn' }); self.rerender(); })
-            .catch(function (e) { UI.toast(e.message, { type: 'err' }); self.rerender(); });
+          if (!u) return;
+          var go = function () {
+            ApiClient.request('users.update', { id: u.id, ativo: !u.ativo })
+              .then(function () { Store.update(function () { }); UI.toast(u.ativo ? 'Usuário reativado ✔' : 'Usuário desativado.', { type: u.ativo ? 'ok' : 'warn' }); self.rerender(); })
+              .catch(function (e) { UI.toast(e.message, { type: 'err' }); self.rerender(); });
+          };
+          if (!u.ativo) { go(); return; }
+          /* v2.0.2: desativar tira o acesso da pessoa na hora — pede confirmação */
+          UI.confirm({ title: 'Desativar ' + u.nome + '?', text: 'A pessoa perde o acesso à loja imediatamente. O histórico de vendas dela é preservado e você pode reativar depois.', danger: true, okText: 'Desativar' })
+            .then(function (ok) { if (ok) go(); });
         });
       });
     },

@@ -76,8 +76,15 @@
         root.querySelectorAll('[data-tog]').forEach(function (b) {
           b.addEventListener('click', function () {
             var c = self.list.filter(function (x) { return x.id === b.dataset.tog; })[0];
-            Biz.customers.toggle(c.id, !c.ativo).then(function () { UI.toast(c.ativo ? 'Cliente inativado.' : 'Cliente reativado ✔', { type: 'ok' }); self.fill(root); })
-              .catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+            if (!c) return;
+            /* v2.0.2: inativar pede confirmação (a linha some da lista, igual ao bug de Produtos) */
+            var go = function () {
+              Biz.customers.toggle(c.id, !c.ativo).then(function () { UI.toast(c.ativo ? '"' + c.nome + '" inativado — marque "Incluir inativos" para ver ou reativar.' : '"' + c.nome + '" reativado ✔', { type: c.ativo ? 'warn' : 'ok', timeout: c.ativo ? 6000 : undefined }); self.fill(root); })
+                .catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+            };
+            if (!c.ativo) { go(); return; }
+            UI.confirm({ title: 'Inativar "' + c.nome + '"?', text: 'Ele some da lista e não pode ser escolhido em novas vendas. O histórico e o saldo em aberto são preservados; você pode reativar depois.', danger: true, okText: 'Inativar' })
+              .then(function (ok) { if (ok) go(); });
           });
         });
         try { if (document.activeElement !== qi && self.q) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); } } catch (e) { }
