@@ -511,7 +511,7 @@
          reenviado em todas as tentativas da mesma venda — duplo clique ou
          retry de rede nunca grava duas vendas (o banco devolve a primeira). */
       if ((this.st.pays.fiado || 0) > 0.009 && !this.st.customerId) { UI.toast('Venda no fiado: identifique o cliente primeiro.', { type: 'warn' }); this.pickCustomer(); return; }
-      if (!this.st.idem) this.st.idem = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+      if (!this.st.idem) this.st.idem = U.uuid();
       var pays = Object.keys(this.st.pays).filter(function (f) { return self.st.pays[f] > 0.009; }).map(function (f) { return { forma: f, valor: self.st.pays[f] }; });
       UI.modal({
         title: 'Confirmar venda', sub: 'Confira os itens antes de gravar — a baixa no estoque é imediata.',

@@ -17,6 +17,16 @@
     /* Identificador persistente do navegador (cookie de 1 ano) — camada
        complementar ao IP na guarda anti-abuso do teste grátis. O usuário
        pode limpá-lo; por isso é sempre combinado com o limite por IP. */
+    /* UUID v4 — a venda usa como chave de idempotência (commit_sale só deduplica
+       quando o id é um UUID válido; texto qualquer criava venda em dobro no reenvio) */
+    uuid: function () {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      var b = new Uint8Array(16);
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(b); else for (var i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+      b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+      var h = Array.prototype.map.call(b, function (x) { return (x + 256).toString(16).slice(1); }).join('');
+      return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+    },
     deviceId: function () {
       try {
         var m = document.cookie.match(/(?:^|;\s*)lc_did=([^;]+)/);
