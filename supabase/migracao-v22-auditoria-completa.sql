@@ -1,4 +1,5 @@
--- LojaCerta · migração v22 — auditoria completa no servidor (v2.0.2)
+-- LojaCerta · migração v22 — auditoria completa no servidor (v2.0.2) — APLICADA
+--   (v22 + v22b no histórico do Supabase; este arquivo já contém as duas)
 -- Antes: o modo demo gravava "produto.inativado/editado/criado", mas em
 -- produção o app altera products/customers/quotes/tenants direto via REST e
 -- nada ia para audit_logs. Agora gatilhos no banco registram toda ação
@@ -15,6 +16,9 @@ returns void language plpgsql security definer set search_path = 'public' as $$
 declare u uuid := coalesce(p_user, auth.uid()); who text;
 begin
   if p_tenant is null then return; end if;
+  -- exclusão da loja (cascade/LGPD): a loja já não existe, não há onde auditar
+  -- (sem isto, apagar uma loja falhava na FK de audit_logs — corrigido em v22b)
+  if not exists (select 1 from public.tenants where id = p_tenant) then return; end if;
   select nome into who from public.users where id = u;
   insert into public.audit_logs (tenant_id, user_id, user_name, acao, entidade, entidade_id, detalhes, origem)
   values (p_tenant, u, coalesce(who, case when u is null then 'servidor (service role)' end, ''),

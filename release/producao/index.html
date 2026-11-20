@@ -12,9 +12,9 @@
      em JS logo abaixo; nonce/subresource-integrity exigem header (ver README). -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://qmqllssextbxwwphawod.supabase.co wss://qmqllssextbxwwphawod.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<!-- versão canônica do app (build injeta 2.0.1; conferir com:
+<!-- versão canônica do app (build injeta 2.0.2; conferir com:
      curl -s <site>/version.json ) — evita a ambiguidade de grep em comentários -->
-<meta name="app-version" content="2.0.1">
+<meta name="app-version" content="2.0.2">
 <script>/* anti-clickjacking: sem X-Frame-Options/frame-ancestors no GH Pages, o bloqueio disponível é em JS — se não conseguir sair do frame, não renderiza */try{if(top!==self){top.location.replace(self.location.href);}}catch(e){document.documentElement.style.display='none';}</script>
 <title>LojaCerta — Gestão comercial para qualquer varejo: PDV, estoque e assinaturas</title>
 <meta name="description" content="PDV com código de barras, estoque em tempo real, relatórios e assinatura mensal para depósitos, supermercados, varejo, pubs e clínicas. Teste 14 dias grátis, sem cartão. A partir de R$ 59/mês.">
@@ -1033,7 +1033,7 @@ body.is-app{background:var(--bg)}
 .offline-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:900;max-width:calc(100% - 24px);padding:9px 16px;border-radius:999px;background:#7C2D12;color:#FFEDD5;font-size:.8rem;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center}
 @media (max-width:640px){.offline-bar{bottom:calc(76px + env(safe-area-inset-bottom))}}
 </style>
-<!-- built: 2026-11-20T18:04:41.541Z · mode: production · single-file bundle · src/ → release/ -->
+<!-- built: 2026-11-20T18:27:26.389Z · mode: production · single-file bundle · src/ → release/ -->
 </head>
 <body>
 <a class="skip-link" href="#main">Pular para o conteúdo principal</a>
@@ -1356,6 +1356,16 @@ body.is-app{background:var(--bg)}
     /* Identificador persistente do navegador (cookie de 1 ano) — camada
        complementar ao IP na guarda anti-abuso do teste grátis. O usuário
        pode limpá-lo; por isso é sempre combinado com o limite por IP. */
+    /* UUID v4 — a venda usa como chave de idempotência (commit_sale só deduplica
+       quando o id é um UUID válido; texto qualquer criava venda em dobro no reenvio) */
+    uuid: function () {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      var b = new Uint8Array(16);
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(b); else for (var i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+      b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+      var h = Array.prototype.map.call(b, function (x) { return (x + 256).toString(16).slice(1); }).join('');
+      return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+    },
     deviceId: function () {
       try {
         var m = document.cookie.match(/(?:^|;\s*)lc_did=([^;]+)/);
@@ -2001,7 +2011,7 @@ body.is-app{background:var(--bg)}
   var Config = {
     env: 'production',              // demo | production — preenchido pelo build (tokens {{...}})
     appName: 'LojaCerta',
-    version: '2.0.1',
+    version: '2.0.2',
     latency: 110,                // ms — latência simulada do "backend" (0 em testes)
     siteUrl: 'https://jrsistemasetecnologiabr-bit.github.io/Projeto-empresa',     // URL pública do site (canonical, e-mails, redirects de auth)
     api: { baseUrl: 'https://qmqllssextbxwwphawod.supabase.co', anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtcWxsc3NleHRieHd3cGhhd29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMTUwMTIsImV4cCI6MjEwNTY5MTAxMn0.0nTDez1iojZS1ojccTFU-v8afATIhcgvqHn-l8pzldg' }, // build injeta do .env
@@ -3290,6 +3300,9 @@ body.is-app{background:var(--bg)}
    ========================================================================== */
 ;(function () {
   'use strict';
+  /* número no formato brasileiro ("6,5", "R$ 1.234,50") ou number */
+  function numBR(v, d) { var n = U.parseNum(v); return isFinite(n) ? n : d; }
+
 
   function cfgError(what) {
     return ApiError('NOT_CONFIGURED',
@@ -3798,6 +3811,11 @@ body.is-app{background:var(--bg)}
           });
         }
         case 'products.create': {
+          /* v2.0.2 · o CSV chega como texto ("6,5", "1.234,50"): sem converter, o
+             Postgres recusava (invalid input syntax for type numeric) e a linha
+             era descartada na importação — só funcionava com ponto decimal. */
+          p = Object.assign({}, p, { custo: numBR(p.custo, 0), preco: numBR(p.preco, NaN), estoque: numBR(p.estoque, 0), min: numBR(p.min, 0) });
+          if (!(p.preco > 0)) return Promise.reject(ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.'));
           var codigo = String(p.codigo || '').trim() || ('INT-' + String(Date.now()).slice(-6));
           return fetch(B + '/rest/v1/products', { method: 'POST', headers: Object.assign({ Prefer: 'return=representation' }, H),
             body: JSON.stringify({ tenant_id: sid, codigo: codigo, nome: p.nome, category_id: p.catId || null, unidade: p.un || 'un',
@@ -3812,8 +3830,28 @@ body.is-app{background:var(--bg)}
           });
         }
         case 'products.update': {
+          /* v2.0.2 · o estoque NÃO é mais sobrescrito pelo PATCH: antes, salvar o
+             cadastro gravava o saldo que estava na tela — uma venda feita nesse
+             meio-tempo era "desfeita" no estoque, sem movimento nem auditoria.
+             Agora a diferença digitada vira um ajuste (stock_adjust: movimento +
+             audit_logs) aplicado sobre o saldo REAL do banco. */
+          p = Object.assign({}, p, { custo: numBR(p.custo, 0), preco: numBR(p.preco, NaN), min: numBR(p.min, 0), estoque: (p.estoque === undefined || p.estoque === null || p.estoque === '') ? p.estoque : numBR(p.estoque, NaN) });
+          if (!(p.preco > 0)) return Promise.reject(ApiError('VALIDATION', 'Preço de venda deve ser maior que zero.'));
+          if (p.estoque !== undefined && p.estoque !== null && p.estoque !== '' && !isFinite(p.estoque)) return Promise.reject(ApiError('VALIDATION', 'Estoque inválido.'));
+          var curP = Store.state.products.filter(function (x) { return x.id === p.id; })[0];
+          var deltaEst = (curP && p.estoque !== undefined && p.estoque !== null && p.estoque !== '') ? Math.round((Number(p.estoque) - Number(curP.estoque)) * 1000) / 1000 : 0;
+          var jj = this.j;
           return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H),
-            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_atual: p.estoque, estoque_minimo: p.min, fornecedor: p.fornecedor, ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
+            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_minimo: p.min, fornecedor: p.fornecedor, ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
+            /* RLS sem permissão devolve [] com HTTP 200 — não pode virar "salvo" falso */
+            if (!rows || !rows[0]) throw ApiError('FORBIDDEN', 'Sem permissão para editar este produto (papel ou assinatura).');
+            if (!deltaEst) return rows;
+            return fetch(B + '/rest/v1/rpc/stock_adjust', { method: 'POST', headers: H, body: JSON.stringify({ p: { productId: p.id, delta: deltaEst, reason: 'Correção no cadastro do produto', note: '' } }) }).then(jj).then(function (r) {
+              rows[0].estoque_atual = r.estoque;
+              Store.update(function (s) { if (!s.movements) s.movements = []; s.movements.unshift({ id: 'mv' + Date.now(), at: Date.now(), productId: p.id, tipo: 'ajuste', qtd: deltaEst, userId: (s.session || {}).userId, userName: ((s.session || {}).profile || {}).nome || '', origem: 'Correção no cadastro do produto', obs: '' }); });
+              return rows;
+            });
+          }).then(function (rows) {
             var row = rows[0];
             Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === row.id; })[0]; if (x) Object.assign(x, { codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ncm: row.ncm || '', cfop: row.cfop || '5102', cest: row.cest || '', csosn: row.csosn || '102', origem: row.origem || 0 }); });
             return { id: row.id };
@@ -3822,7 +3860,11 @@ body.is-app{background:var(--bg)}
         case 'products.toggle': {
           var cur = Store.state.products.filter(function (x) { return x.id === p.id; })[0];
           var novo = cur ? !cur.ativo : true;
-          return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H), body: JSON.stringify({ ativo: novo }) }).then(this.j).then(function () {
+          /* auditoria: gatilho trg_audit_products (migração v22) grava
+             produto.inativado/reativado em audit_logs, igual ao modo demo */
+          return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H), body: JSON.stringify({ ativo: novo }) }).then(this.j).then(function (rows) {
+            if (!rows || !rows[0]) throw ApiError('FORBIDDEN', 'Sem permissão para alterar este produto (papel ou assinatura).');
+            novo = !!rows[0].ativo;
             Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === p.id; })[0]; if (x) x.ativo = novo; });
             return { ativo: novo };
           });
@@ -3861,6 +3903,7 @@ body.is-app{background:var(--bg)}
             body.config = cfg;
           }
           return fetch(B + '/rest/v1/tenants?id=eq.' + sid, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H), body: JSON.stringify(body) }).then(this.j).then(function (rows) {
+            if (!rows || !rows[0]) throw ApiError('FORBIDDEN', 'Somente administradores alteram os dados da loja.');
             Store.update(function (s) { if (rows[0]) { var t = rows[0]; Object.assign(s.tenant, { nome: t.nome, cnpj: t.cnpj || '', endereco: t.endereco || '', telefone: t.telefone || '', config: t.config || s.tenant.config }); } });
             return { ok: true };
           });
@@ -5694,7 +5737,7 @@ body.is-app{background:var(--bg)}
          reenviado em todas as tentativas da mesma venda — duplo clique ou
          retry de rede nunca grava duas vendas (o banco devolve a primeira). */
       if ((this.st.pays.fiado || 0) > 0.009 && !this.st.customerId) { UI.toast('Venda no fiado: identifique o cliente primeiro.', { type: 'warn' }); this.pickCustomer(); return; }
-      if (!this.st.idem) this.st.idem = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+      if (!this.st.idem) this.st.idem = U.uuid();
       var pays = Object.keys(this.st.pays).filter(function (f) { return self.st.pays[f] > 0.009; }).map(function (f) { return { forma: f, valor: self.st.pays[f] }; });
       UI.modal({
         title: 'Confirmar venda', sub: 'Confira os itens antes de gravar — a baixa no estoque é imediata.',
@@ -6745,10 +6788,13 @@ body.is-app{background:var(--bg)}
             </div>`);
           invList.querySelectorAll('[data-uninvite]').forEach(function (b) {
             b.addEventListener('click', function () {
-              ApiClient.request('users.uninvite', { id: b.dataset.uninvite }).then(function () {
-                UI.toast('Convite cancelado.', { type: 'warn' });
-                self.rerender();
-              }).catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+              UI.confirm({ title: 'Cancelar este convite?', text: 'O link enviado por e-mail deixa de funcionar. Você pode convidar a pessoa de novo depois.', danger: true, okText: 'Cancelar convite' }).then(function (ok) {
+                if (!ok) return;
+                ApiClient.request('users.uninvite', { id: b.dataset.uninvite }).then(function () {
+                  UI.toast('Convite cancelado.', { type: 'warn' });
+                  self.rerender();
+                }).catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+              });
             });
           });
         }).catch(function () { if (invList) invList.remove(); });
@@ -6763,9 +6809,16 @@ body.is-app{background:var(--bg)}
       root.querySelectorAll('[data-act-user]').forEach(function (b) {
         b.addEventListener('click', function () {
           var u = Store.state.users.filter(function (x) { return x.id === b.dataset.actUser; })[0];
-          ApiClient.request('users.update', { id: u.id, ativo: !u.ativo })
-            .then(function () { Store.update(function () { }); UI.toast(u.ativo ? 'Usuário reativado ✔' : 'Usuário desativado.', { type: u.ativo ? 'ok' : 'warn' }); self.rerender(); })
-            .catch(function (e) { UI.toast(e.message, { type: 'err' }); self.rerender(); });
+          if (!u) return;
+          var go = function () {
+            ApiClient.request('users.update', { id: u.id, ativo: !u.ativo })
+              .then(function () { Store.update(function () { }); UI.toast(u.ativo ? 'Usuário reativado ✔' : 'Usuário desativado.', { type: u.ativo ? 'ok' : 'warn' }); self.rerender(); })
+              .catch(function (e) { UI.toast(e.message, { type: 'err' }); self.rerender(); });
+          };
+          if (!u.ativo) { go(); return; }
+          /* v2.0.2: desativar tira o acesso da pessoa na hora — pede confirmação */
+          UI.confirm({ title: 'Desativar ' + u.nome + '?', text: 'A pessoa perde o acesso à loja imediatamente. O histórico de vendas dela é preservado e você pode reativar depois.', danger: true, okText: 'Desativar' })
+            .then(function (ok) { if (ok) go(); });
         });
       });
     },
@@ -8286,8 +8339,15 @@ body.is-app{background:var(--bg)}
         root.querySelectorAll('[data-tog]').forEach(function (b) {
           b.addEventListener('click', function () {
             var c = self.list.filter(function (x) { return x.id === b.dataset.tog; })[0];
-            Biz.customers.toggle(c.id, !c.ativo).then(function () { UI.toast(c.ativo ? 'Cliente inativado.' : 'Cliente reativado ✔', { type: 'ok' }); self.fill(root); })
-              .catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+            if (!c) return;
+            /* v2.0.2: inativar pede confirmação (a linha some da lista, igual ao bug de Produtos) */
+            var go = function () {
+              Biz.customers.toggle(c.id, !c.ativo).then(function () { UI.toast(c.ativo ? '"' + c.nome + '" inativado — marque "Incluir inativos" para ver ou reativar.' : '"' + c.nome + '" reativado ✔', { type: c.ativo ? 'warn' : 'ok', timeout: c.ativo ? 6000 : undefined }); self.fill(root); })
+                .catch(function (e) { UI.toast(e.message, { type: 'err' }); });
+            };
+            if (!c.ativo) { go(); return; }
+            UI.confirm({ title: 'Inativar "' + c.nome + '"?', text: 'Ele some da lista e não pode ser escolhido em novas vendas. O histórico e o saldo em aberto são preservados; você pode reativar depois.', danger: true, okText: 'Inativar' })
+              .then(function (ok) { if (ok) go(); });
           });
         });
         try { if (document.activeElement !== qi && self.q) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); } } catch (e) { }

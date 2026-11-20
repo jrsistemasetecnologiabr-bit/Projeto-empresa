@@ -2,6 +2,20 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1./) · versionamento semântico.
 
+## [2.0.2] — 2026-11-20 — Revisão completa em produção: auditoria, CSV, idempotência, confirmações
+
+### Corrigido
+- **Auditoria em produção** (migração v22, aplicada): o modo demo registrava produto criado/editado/inativado, mas no Supabase essas ações (e clientes, orçamentos, contas a pagar/receber, dados/regras da loja, convites) não iam para `audit_logs`. Agora gatilhos no banco registram tudo, com "antes→depois", seja a ação feita pelo app, pela Edge ou por SQL. Movimento de estoque continua auditado pelas RPCs.
+- **Editar produto sobrescrevia o estoque**: salvar o cadastro gravava o saldo que estava na tela; uma venda feita nesse meio-tempo era "desfeita" no estoque, sem movimento nem auditoria. Agora a diferença digitada vira um ajuste (`stock_adjust`) sobre o saldo real do banco.
+- **Importar CSV em produção** recusava preço/custo com vírgula ("6,5", "1.234,50") — o formato brasileiro; só funcionava no demo.
+- **PDV offline**: a chave de idempotência agora é sempre UUID (o fallback de navegadores antigos gerava texto, e o banco só deduplica UUID — reenviar a venda podia duplicá-la).
+- Inativar **cliente**, desativar **usuário** e cancelar **convite** agora pedem confirmação (mesmo problema do cadeado de Produtos).
+- Gravações que o RLS recusa em silêncio (HTTP 200 com lista vazia) em produto e dados da loja agora mostram "sem permissão" em vez de "salvo".
+
+### Testes
+- `tests/confirmacoes.test.js` (CI e `npm test`).
+- `tests/prod-e2e.test.js` (cerca de 80 verificações reais no Supabase: PDV, estoque, CSV, vendas/cancelamento, clientes, fiado e limite, financeiro, orçamentos→venda, regras, fiscal sem token, relatórios/CSV, suporte, PDV offline + idempotência, multi-loja, auditoria e todas as telas) e `tests/prod-permissoes.test.js` (papel caixa) — rodam com conta QA temporária, fora do CI.
+
 ## [2.0.1] — 2026-11-20 — Inativar produto não "some com o estoque"
 
 ### Corrigido

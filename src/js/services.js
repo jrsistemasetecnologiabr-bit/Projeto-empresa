@@ -11,7 +11,7 @@
   var Config = {
     env: '{{ENV}}',              // demo | production — preenchido pelo build (tokens {{...}})
     appName: 'LojaCerta',
-    version: '2.0.1',
+    version: '2.0.2',
     latency: 110,                // ms — latência simulada do "backend" (0 em testes)
     siteUrl: '{{SITE_URL}}',     // URL pública do site (canonical, e-mails, redirects de auth)
     api: { baseUrl: '{{API_BASE}}', anonKey: '{{SUPABASE_ANON_KEY}}' }, // build injeta do .env

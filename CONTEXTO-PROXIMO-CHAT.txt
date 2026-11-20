@@ -1,7 +1,7 @@
 =====================================================================
  CONTEXTO PARA CONTINUAR O PROJETO LOJACERTA EM OUTRO CHAT
  (cole este arquivo inteiro no início da nova conversa)
- Gerado em 19/11/2026 — estado: v2.0.0 em produção
+ Atualizado em 20/11/2026 — estado: v2.0.2 em produção
 =====================================================================
 
 INSTRUÇÕES PARA O CLAUDE
@@ -53,8 +53,10 @@ src/js/business.js        Plans.has, Biz (serviços), BizLocal/BizRemote, Offlin
 src/js/pages-*.js         telas (pages-biz.js = clientes, orçamentos, financeiro,
                           nota fiscal, lojas + extensões do PDV)
 supabase/functions/api    Edge principal (signup, convites, billing Asaas, fiscal Focus)
-supabase/migracao-vNN     migrações (v17 a v21 desta etapa, todas APLICADAS)
-tools/build.js            gera release/ (demo | production) ; tests/ (mobile, session, smoke)
+supabase/migracao-vNN     migrações (v17 a v22, todas APLICADAS; v22 = auditoria)
+tools/build.js            gera release/ (demo | production)
+tests/                    CI: mobile, produtos-inativar, confirmacoes, session, smoke
+                          manuais c/ conta QA: prod-e2e (todos os recursos), prod-permissoes (caixa)
 
 Comandos:
   node tools/build.js --env=demo && node tests/mobile.test.js
@@ -80,6 +82,20 @@ Comandos:
 - Testes: smoke autenticado 15/15, E2E real dos recursos 23/23 (com loja
   QA temporária, apagada), mobile 14 telas × 5 larguras, ao vivo 8/8.
 
+- v2.0.1 (20/11): cadeado de Produtos inativava sem confirmação → toques
+  seguidos inativaram os 6 produtos da loja JR (já reativados). Agora pede
+  confirmação; subtítulo mostra inativos; "Mostrar inativos".
+- v2.0.2 (20/11) revisão completa em produção (conta QA temporária, apagada):
+  * v22: gatilhos de auditoria no banco (produtos, categorias, clientes,
+    contas, orçamentos, dados da loja, convites) — antes só o demo auditava.
+    v22b: audit_put ignora loja inexistente (senão apagar loja/LGPD falhava).
+  * editar produto não sobrescreve mais o estoque (diferença vira stock_adjust)
+  * CSV em produção aceita vírgula decimal (antes recusava "6,5")
+  * PDV: idempotencyId sempre UUID (U.uuid); commit_sale só deduplica UUID
+  * confirmação ao inativar cliente, desativar usuário, cancelar convite
+  * resultados: smoke 15/15, prod-e2e ~80/80, permissões caixa 11/11,
+    bloqueio por plano Essencial/Profissional/Premium conferido no banco e na UI.
+
 ---------------------------------------------------------------------
 5. PENDÊNCIAS (em ordem)
 ---------------------------------------------------------------------
@@ -98,6 +114,9 @@ Comandos:
     select vault.update_secret((select id from vault.secrets where name='asaas_api_key'),'NOVA');
 [ ] Teste real de pagamento (Pix R$59 numa loja de teste, depois estornar).
 [ ] Focus NFe: testar emissão real em homologação com uma conta da empresa.
+    (sem token, testar/emitir já dão mensagem clara — verificado na v2.0.2)
+[ ] Não testados de propósito na v2.0.2 (criam coisa real fora do app):
+    checkout Asaas (cobrança real) e e-mail de convite (sem domínio/SMTP).
 [ ] Opcional: invites/confirm redirect apontam para GitHub Pages
     (SITE_URL na edge api) — trocar para o domínio oficial quando houver.
 [ ] Ideias futuras (não vendidas): app mobile do dono, API pública, WhatsApp.
@@ -110,6 +129,17 @@ email_confirmed_at = now(), e-mail qa-lojacerta@example.com) — o gatilho
 handle_new_user cria loja em teste grátis. Rodar os testes e APAGAR no fim:
   delete tenants (filiais com group_id e a principal) e auth.users do QA.
 Sempre pedir autorização ao usuário antes de criar/apagar dados em produção.
+Atalhos da v2.0.2:
+  - caixa QA: inserir user_invites (papel caixa, token) na loja QA e criar o
+    auth.user com raw_user_meta_data.invite_token = token (gatilho faz o resto)
+  - prod: node tools/build.js --env=production;
+    (cd release/producao && python3 -m http.server 8765) &
+    APP_URL=http://localhost:8765/ QA_EMAIL=.. QA_PASSWORD=.. node tests/prod-e2e.test.js
+    NODE_USE_ENV_PROXY=1 CAIXA_EMAIL=.. CAIXA_PASSWORD=.. node tests/prod-permissoes.test.js
+  - smoke: NODE_USE_ENV_PROXY=1 TEST_EMAIL=.. TEST_PASSWORD=.. node tests/smoke.test.js
+  - sessão de nuvem: usar o ambiente "Projeto-empresa" (o "Default" bloqueia
+    supabase.co, vercel.app e github.io); Node precisa NODE_USE_ENV_PROXY=1.
+  - apagar: filiais (group_id = loja QA) ANTES da loja principal, depois auth.users.
 
 ---------------------------------------------------------------------
 7. CUIDADOS CONHECIDOS
@@ -120,4 +150,9 @@ Sempre pedir autorização ao usuário antes de criar/apagar dados em produção
 - Edge Functions são publicadas pelo MCP do Supabase (conteúdo completo).
 - Ambiente de nuvem "Projeto-empresa" já libera: github.io, supabase.co,
   alojacerta.vercel.app e focusnfe.com.br.
+- A loja "QA Validação — LojaCerta" (plano profissional) é a conta PERMANENTE
+  do smoke no CI (secrets SMOKE_TEST_*). Não apagar.
+- Ação que some com a linha da lista (inativar/desativar) SEMPRE com
+  UI.confirm — foi a causa do bug da v2.0.1.
+- Gravação via REST: RLS recusado = HTTP 200 com []; sempre checar rows[0].
 =====================================================================

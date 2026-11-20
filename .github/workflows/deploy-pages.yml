@@ -58,6 +58,7 @@ jobs:
           node tools/build.js --env=demo
           node tests/mobile.test.js
           node tests/produtos-inativar.test.js
+          node tests/confirmacoes.test.js
 
       - name: Teste de renovação de sessão (rede simulada, bundle de produção)
         run: node tests/session.test.js

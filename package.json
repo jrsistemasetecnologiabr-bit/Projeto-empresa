@@ -11,7 +11,7 @@
     "build:prod": "node tools/optimize-images.js && node tools/build.js --env=production",
     "build:demo": "node tools/build.js --env=demo",
     "hero": "node tools/shoot.js --hero",
-    "test": "node tests/mobile.test.js && node tests/produtos-inativar.test.js && node tests/session.test.js",
+    "test": "node tests/mobile.test.js && node tests/produtos-inativar.test.js && node tests/confirmacoes.test.js && node tests/session.test.js",
     "test:smoke": "node tests/smoke.test.js",
     "run-tests": "bash tools/run-tests.sh",
     "check": "node tools/build.js --env=demo && node tools/build.js --env=production && npm test"
