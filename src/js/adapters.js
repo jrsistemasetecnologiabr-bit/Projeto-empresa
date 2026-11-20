@@ -533,8 +533,25 @@
           });
         }
         case 'products.update': {
+          /* v2.0.2 · o estoque NÃO é mais sobrescrito pelo PATCH: antes, salvar o
+             cadastro gravava o saldo que estava na tela — uma venda feita nesse
+             meio-tempo era "desfeita" no estoque, sem movimento nem auditoria.
+             Agora a diferença digitada vira um ajuste (stock_adjust: movimento +
+             audit_logs) aplicado sobre o saldo REAL do banco. */
+          var curP = Store.state.products.filter(function (x) { return x.id === p.id; })[0];
+          var deltaEst = (curP && p.estoque !== undefined && p.estoque !== null && p.estoque !== '') ? Math.round((Number(p.estoque) - Number(curP.estoque)) * 1000) / 1000 : 0;
+          var jj = this.j;
           return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H),
-            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_atual: p.estoque, estoque_minimo: p.min, fornecedor: p.fornecedor, ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
+            body: JSON.stringify({ nome: p.nome, category_id: p.catId, unidade: p.un, preco_custo: p.custo, preco_venda: p.preco, estoque_minimo: p.min, fornecedor: p.fornecedor, ncm: p.ncm || '', cfop: p.cfop || '5102', cest: p.cest || '', csosn: p.csosn || '102', origem: Number(p.origem) || 0 }) }).then(this.j).then(function (rows) {
+            /* RLS sem permissão devolve [] com HTTP 200 — não pode virar "salvo" falso */
+            if (!rows || !rows[0]) throw ApiError('FORBIDDEN', 'Sem permissão para editar este produto (papel ou assinatura).');
+            if (!deltaEst) return rows;
+            return fetch(B + '/rest/v1/rpc/stock_adjust', { method: 'POST', headers: H, body: JSON.stringify({ p: { productId: p.id, delta: deltaEst, reason: 'Correção no cadastro do produto', note: '' } }) }).then(jj).then(function (r) {
+              rows[0].estoque_atual = r.estoque;
+              Store.update(function (s) { if (!s.movements) s.movements = []; s.movements.unshift({ id: 'mv' + Date.now(), at: Date.now(), productId: p.id, tipo: 'ajuste', qtd: deltaEst, userId: (s.session || {}).userId, userName: ((s.session || {}).profile || {}).nome || '', origem: 'Correção no cadastro do produto', obs: '' }); });
+              return rows;
+            });
+          }).then(function (rows) {
             var row = rows[0];
             Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === row.id; })[0]; if (x) Object.assign(x, { codigo: row.codigo, nome: row.nome, catId: row.category_id, un: row.unidade, custo: Number(row.preco_custo), preco: Number(row.preco_venda), estoque: Number(row.estoque_atual), min: Number(row.estoque_minimo), fornecedor: row.fornecedor || '', ncm: row.ncm || '', cfop: row.cfop || '5102', cest: row.cest || '', csosn: row.csosn || '102', origem: row.origem || 0 }); });
             return { id: row.id };
@@ -543,7 +560,11 @@
         case 'products.toggle': {
           var cur = Store.state.products.filter(function (x) { return x.id === p.id; })[0];
           var novo = cur ? !cur.ativo : true;
-          return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H), body: JSON.stringify({ ativo: novo }) }).then(this.j).then(function () {
+          /* auditoria: gatilho trg_audit_products (migração v22) grava
+             produto.inativado/reativado em audit_logs, igual ao modo demo */
+          return fetch(B + '/rest/v1/products?id=eq.' + p.id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H), body: JSON.stringify({ ativo: novo }) }).then(this.j).then(function (rows) {
+            if (!rows || !rows[0]) throw ApiError('FORBIDDEN', 'Sem permissão para alterar este produto (papel ou assinatura).');
+            novo = !!rows[0].ativo;
             Store.update(function (s) { var x = s.products.filter(function (y) { return y.id === p.id; })[0]; if (x) x.ativo = novo; });
             return { ativo: novo };
           });
@@ -582,6 +603,7 @@
             body.config = cfg;
           }
           return fetch(B + '/rest/v1/tenants?id=eq.' + sid, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=representation' }, H), body: JSON.stringify(body) }).then(this.j).then(function (rows) {
+            if (!rows || !rows[0]) throw ApiError('FORBIDDEN', 'Somente administradores alteram os dados da loja.');
             Store.update(function (s) { if (rows[0]) { var t = rows[0]; Object.assign(s.tenant, { nome: t.nome, cnpj: t.cnpj || '', endereco: t.endereco || '', telefone: t.telefone || '', config: t.config || s.tenant.config }); } });
             return { ok: true };
           });
